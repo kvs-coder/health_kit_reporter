@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:health_kit_reporter/health_kit_reporter.dart';
 
@@ -27,7 +27,11 @@ class _MyAppState extends State<MyApp> {
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      platformVersion = await HealthKitReporter.platformVersion;
+      platformVersion = await HealthKitReporter.quantityQuery(
+          'HKQuantityTypeIdentifierStepCount',
+          'count',
+          DateTime(2020, 11, 11),
+          DateTime(2020, 11, 12));
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
