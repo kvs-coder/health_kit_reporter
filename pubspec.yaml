@@ -1,8 +1,8 @@
 name: health_kit_reporter
-description: A new Flutter project.
-version: 0.0.1
-author:
-homepage:
+description: Helps to write or read data from Apple Health via HealthKit framework.
+version: 1.1.1+1
+author: Victor Kachalov
+homepage: https://github.com/VictorKachalov/health_kit_reporter
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
