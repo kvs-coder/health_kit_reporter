@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - health_kit_reporter (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - health_kit_reporter (from `.symlinks/plugins/health_kit_reporter/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  health_kit_reporter:
+    :path: ".symlinks/plugins/health_kit_reporter/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  health_kit_reporter: 87bdd92fac00859c1cc6cdfd3a37784e9bb8b201
+
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+
+COCOAPODS: 1.9.3
