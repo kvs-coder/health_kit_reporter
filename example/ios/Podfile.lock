@@ -1,9 +1,9 @@
 PODS:
   - Flutter (1.0.0)
-  - health_kit_reporter (1.1.1):
+  - health_kit_reporter (1.2.0):
     - Flutter
     - HealthKitReporter
-  - HealthKitReporter (1.1.2)
+  - HealthKitReporter (1.2.0)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -21,9 +21,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
-  health_kit_reporter: 359e269588a30c7955f15f001c6bb8113dbe3773
-  HealthKitReporter: ca7f82d7da15e6a105de85e103f1af81e93b84aa
+  health_kit_reporter: 4af0290c9c7a978872b3eda6f8462ccec4bedc22
+  HealthKitReporter: b5c8017ce1c05627c6c8f75acf7cfea149ea3d0b
 
-PODFILE CHECKSUM: c4c93c5f6502fe2754f48404d3594bf779584011
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 
 COCOAPODS: 1.9.3
