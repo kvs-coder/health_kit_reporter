@@ -2,12 +2,6 @@ import Flutter
 import UIKit
 import HealthKitReporter
 
-extension Data {
-    var string: String? {
-        return String(data: self, encoding: .utf8)
-    }
-}
-
 public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
     private enum Method: String {
         case requestAuthorization
@@ -63,19 +57,21 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
             let reporter = try HealthKitReporter()
             switch method {
             case .requestAuthorization:
-
-            case .preferredUnits:
                 guard let arguments = call.arguments as? [String: [String]] else {
-                    result(
-                        FlutterError(
-                            code: #function,
-                            message: "Error call arguments",
-                            details: "No arguments"
-                        )
-                    )
+                    throwNoArgumentsError(result: result)
                     return
                 }
                 requestAuthorization(
+                    reporter: reporter,
+                    arguments: arguments,
+                    result: result
+                )
+            case .preferredUnits:
+                guard let arguments = call.arguments as? [String] else {
+                    throwNoArgumentsError(result: result)
+                    return
+                }
+                preferredUnits(
                     reporter: reporter,
                     arguments: arguments,
                     result: result
@@ -84,13 +80,7 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
                 characteristicsQuery(reporter: reporter, result: result)
             case .quantityQuery:
                 guard let arguments = call.arguments as? [String: String] else {
-                    result(
-                        FlutterError(
-                            code: #function,
-                            message: "Error call arguments",
-                            details: "No arguments"
-                        )
-                    )
+                    throwNoArgumentsError(result: result)
                     return
                 }
                 quantityQuery(
@@ -151,101 +141,37 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
             )
         }
     }
-
+}
+// MARK: - Method Call methods
+extension SwiftHealthKitReporterPlugin {
     private func requestAuthorization(
         reporter: HealthKitReporter,
         arguments: [String: [String]],
         result: @escaping FlutterResult
     ) {
         guard let toReadArguments = arguments["toRead"] else {
-            result(
-                FlutterError(
-                    code: #function,
-                    message: "Error in read types",
-                    details: "No read types"
-                )
-            )
+            throwParsingArgumentsError(result: result, arguments: arguments)
             return
-        }
-        var readTypes: [ObjectType] = []
-        for argument in toReadArguments {
-            if let type = try? QuantityType.make(from: argument) {
-                readTypes.append(type)
-            }
-            if let type = try? CategoryType.make(from: argument) {
-                readTypes.append(type)
-            }
-            if let type = try? CharacteristicType.make(from: argument) {
-                readTypes.append(type)
-            }
-            if let type = try? SeriesType.make(from: argument) {
-                readTypes.append(type)
-            }
-            if let type = try? CorrelationType.make(from: argument) {
-                readTypes.append(type)
-            }
-            if let type = try? DocumentType.make(from: argument) {
-                readTypes.append(type)
-            }
-            if let type = try? ActivitySummaryType.make(from: argument) {
-                readTypes.append(type)
-            }
-            if let type = try? WorkoutType.make(from: argument) {
-                readTypes.append(type)
-            }
-            if #available(iOS 14.0, *) {
-                if let type = try? ElectrocardiogramType.make(from: argument) {
-                    readTypes.append(type)
-                }
-            }
         }
         guard let toWriteArguments = arguments["toWrite"] else {
-            result(
-                FlutterError(
-                    code: #function,
-                    message: "Error in write types",
-                    details: "No write types"
-                )
-            )
+            throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
-        var writeTypes: [ObjectType] = []
-        for argument in toWriteArguments {
-            if let type = try? QuantityType.make(from: argument) {
-                writeTypes.append(type)
-            }
-            if let type = try? CategoryType.make(from: argument) {
-                writeTypes.append(type)
-            }
-            if let type = try? CharacteristicType.make(from: argument) {
-                writeTypes.append(type)
-            }
-            if let type = try? SeriesType.make(from: argument) {
-                writeTypes.append(type)
-            }
-            if let type = try? CorrelationType.make(from: argument) {
-                writeTypes.append(type)
-            }
-            if let type = try? DocumentType.make(from: argument) {
-                writeTypes.append(type)
-            }
-            if let type = try? ActivitySummaryType.make(from: argument) {
-                writeTypes.append(type)
-            }
-            if let type = try? WorkoutType.make(from: argument) {
-                writeTypes.append(type)
-            }
-            if #available(iOS 14.0, *) {
-                if let type = try? ElectrocardiogramType.make(from: argument) {
-                    writeTypes.append(type)
-                }
-            }
-        }
         reporter.manager.requestAuthorization(
-            toRead: readTypes,
-            toWrite:writeTypes
+            toRead: parse(arguments: toReadArguments),
+            toWrite: parse(arguments: toWriteArguments)
         ) { (success, error) in
-
+            guard error == nil else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "Error in displaying Apple Health permission screen",
+                        details: "\(error!)"
+                    )
+                )
+                return
+            }
+            result(success)
         }
     }
     private func characteristicsQuery(
@@ -327,6 +253,99 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
                 )
             )
         }
-
+    }
+    private func preferredUnits(
+        reporter: HealthKitReporter,
+        arguments: [String],
+        result: @escaping FlutterResult
+    ) {
+        var quantityTypes: [QuantityType] = []
+        for argument in arguments {
+            guard let quantityType = try? QuantityType.make(from: argument) else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "Error in parsing quantitiy type",
+                        details: "Identifier unknown: \(argument)"
+                    )
+                )
+                return
+            }
+            quantityTypes.append(quantityType)
+        }
+        reporter.manager.preferredUnits(
+            for: quantityTypes
+        ) { (dictionary, error) in
+            guard error == nil else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "Error in getting preffered units",
+                        details: "\(error!)"
+                    )
+                )
+                return
+            }
+            result(dictionary)
+        }
+    }
+}
+// MARK: - Helper functions
+extension SwiftHealthKitReporterPlugin {
+    private func parse(arguments: [String]) -> [ObjectType] {
+        var types: [ObjectType] = []
+        for argument in arguments {
+            if let type = try? QuantityType.make(from: argument) {
+                types.append(type)
+            }
+            if let type = try? CategoryType.make(from: argument) {
+                types.append(type)
+            }
+            if let type = try? CharacteristicType.make(from: argument) {
+                types.append(type)
+            }
+            if let type = try? SeriesType.make(from: argument) {
+                types.append(type)
+            }
+            if let type = try? CorrelationType.make(from: argument) {
+                types.append(type)
+            }
+            if let type = try? DocumentType.make(from: argument) {
+                types.append(type)
+            }
+            if let type = try? ActivitySummaryType.make(from: argument) {
+                types.append(type)
+            }
+            if let type = try? WorkoutType.make(from: argument) {
+                types.append(type)
+            }
+            if #available(iOS 14.0, *) {
+                if let type = try? ElectrocardiogramType.make(from: argument) {
+                    types.append(type)
+                }
+            }
+        }
+        return types
+    }
+    private func throwParsingArgumentsError(
+        result: FlutterResult,
+        arguments: Any
+    ) {
+        result(
+            FlutterError(
+                code: #function,
+                message: "Error in parsing arguments",
+                details: "Arguments: \(String(describing: arguments))"
+            )
+        )
+    }
+    private func throwNoArgumentsError(result: FlutterResult) {
+        result(
+            FlutterError(
+                code: #function,
+                message: "Error call arguments",
+                details: "No arguments"
+            )
+        )
     }
 }
