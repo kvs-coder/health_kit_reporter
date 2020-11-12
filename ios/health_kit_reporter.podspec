@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'health_kit_reporter'
-  s.version          = '1.1.1'
+  s.version          = '1.2.0'
   s.summary          = 'A new Flutter project.'
   s.swift_versions   = '5.3'
   s.description      = <<-DESC

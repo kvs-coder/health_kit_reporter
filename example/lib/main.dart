@@ -30,8 +30,8 @@ class _MyAppState extends State<MyApp> {
       platformVersion = await HealthKitReporter.quantityQuery(
           'HKQuantityTypeIdentifierStepCount',
           'count',
-          DateTime(2020, 11, 11),
-          DateTime(2020, 11, 12));
+          DateTime.utc(2020, 11, 11),
+          DateTime.utc(2020, 11, 12));
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
