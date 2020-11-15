@@ -1,5 +1,4 @@
 import Flutter
-import UIKit
 import HealthKitReporter
 
 public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
@@ -28,18 +27,17 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
         case addCategory
         case addQuantitiy
         case delete
+        case deleteObjects
         case save
     }
 
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "health_kit_reporter", binaryMessenger: registrar.messenger())
+        let channel = FlutterMethodChannel(
+            name: "health_kit_reporter",
+            binaryMessenger: registrar.messenger()
+        )
         let instance = SwiftHealthKitReporterPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
-
-        try! HealthKitReporter().manager.requestAuthorization(toRead: [QuantityType.stepCount
-        ], toWrite: [], completion: { (success, error) in
-
-        })
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -139,7 +137,7 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
                     result: result
                 )
             case .statisticsCollectionQuery:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Any] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -189,7 +187,7 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
                     result: result
                 )
             case .correlationQuery:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Any] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -219,13 +217,8 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
                     result: result
                 )
             case .disableAllBackgroundDelivery:
-                guard let arguments = call.arguments as? [String: String] else {
-                    throwNoArgumentsError(result: result)
-                    return
-                }
                 disableAllBackgroundDelivery(
                     reporter: reporter,
-                    arguments: arguments,
                     result: result
                 )
             case .disableBackgroundDelivery:
@@ -239,7 +232,7 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
                     result: result
                 )
             case .startWatchApp:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Any] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -269,7 +262,7 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
                     result: result
                 )
             case .addQuantitiy:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Any] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -279,7 +272,7 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
                     result: result
                 )
             case .delete:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Any] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -288,8 +281,18 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
                     arguments: arguments,
                     result: result
                 )
+            case .deleteObjects:
+                guard let arguments = call.arguments as? [String: Any] else {
+                    throwNoArgumentsError(result: result)
+                    return
+                }
+                deleteObjects(
+                    reporter: reporter,
+                    arguments: arguments,
+                    result: result
+                )
             case .save:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Any] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -412,24 +415,24 @@ extension SwiftHealthKitReporterPlugin {
                 type: type,
                 unit: unit,
                 predicate: predicate
-            ) { (samples, error) in
+            ) { (quantities, error) in
                 guard error == nil else {
                     result(
                         FlutterError(
                             code: #function,
                             message: "\(#line). Error in quantityQuery for identifier: \(identifier)",
-                            details: "Arguments: \(String(describing: arguments))"
+                            details: "Arguments: \(String(describing: arguments)). \(error!)"
                         )
                     )
                     return
                 }
                 do {
-                    result(try samples.encoded())
+                    result(try quantities.encoded())
                 } catch {
                     result(
                         FlutterError(
                             code: #function,
-                            message: "Error in json encoding of samples: \(samples)",
+                            message: "Error in json encoding of quantities: \(quantities)",
                             details: "\(error)"
                         )
                     )
@@ -461,24 +464,24 @@ extension SwiftHealthKitReporterPlugin {
             reporter.reader.categoryQuery(
                 type: type,
                 predicate: predicate
-            ) { (samples, error) in
+            ) { (categories, error) in
                 guard error == nil else {
                     result(
                         FlutterError(
                             code: #function,
                             message: "\(#line). Error in categoryQuery for identifier: \(identifier)",
-                            details: "Arguments: \(String(describing: arguments))"
+                            details: "Arguments: \(String(describing: arguments)). \(error!)"
                         )
                     )
                     return
                 }
                 do {
-                    result(try samples.encoded())
+                    result(try categories.encoded())
                 } catch {
                     result(
                         FlutterError(
                             code: #function,
-                            message: "Error in json encoding of samples: \(samples)",
+                            message: "Error in json encoding of categories: \(categories)",
                             details: "\(error)"
                         )
                     )
@@ -506,24 +509,24 @@ extension SwiftHealthKitReporterPlugin {
         )
         reporter.reader.workoutQuery(
             predicate: predicate
-        ) { (samples, error) in
+        ) { (workouts, error) in
             guard error == nil else {
                 result(
                     FlutterError(
                         code: #function,
                         message: "\(#line). Error in workoutQuery",
-                        details: "Arguments: \(String(describing: arguments))"
+                        details: "Arguments: \(String(describing: arguments)). \(error!)"
                     )
                 )
                 return
             }
             do {
-                result(try samples.encoded())
+                result(try workouts.encoded())
             } catch {
                 result(
                     FlutterError(
                         code: #function,
-                        message: "Error in json encoding of samples: \(samples)",
+                        message: "Error in json encoding of workouts: \(workouts)",
                         details: "\(error)"
                     )
                 )
@@ -549,24 +552,24 @@ extension SwiftHealthKitReporterPlugin {
         if #available(iOS 14.0, *) {
             reporter.reader.electrocardiogramQuery(
                 predicate: predicate
-            ) { (samples, error) in
+            ) { (electrocardiograms, error) in
                 guard error == nil else {
                     result(
                         FlutterError(
                             code: #function,
                             message: "\(#line). Error in electrocardiogramQuery",
-                            details: "Arguments: \(String(describing: arguments))"
+                            details: "Arguments: \(String(describing: arguments)). \(error!)"
                         )
                     )
                     return
                 }
                 do {
-                    result(try samples.encoded())
+                    result(try electrocardiograms.encoded())
                 } catch {
                     result(
                         FlutterError(
                             code: #function,
-                            message: "Error in json encoding of samples: \(samples)",
+                            message: "Error in json encoding of electrocardiograms: \(electrocardiograms)",
                             details: "\(error)"
                         )
                     )
@@ -595,7 +598,7 @@ extension SwiftHealthKitReporterPlugin {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
-        guard let type = parse(argument: identifier) else {
+        guard let type = identifier.objectType else {
             result(
                 FlutterError(
                     code: #function,
@@ -618,7 +621,7 @@ extension SwiftHealthKitReporterPlugin {
                     FlutterError(
                         code: #function,
                         message: "\(#line). Error in sampleQuery",
-                        details: "Arguments: \(String(describing: arguments))"
+                        details: "Arguments: \(String(describing: arguments)). \(error!)"
                     )
                 )
                 return
@@ -632,7 +635,7 @@ extension SwiftHealthKitReporterPlugin {
                     result(
                         FlutterError(
                             code: #function,
-                            message: "Error in json encoding of samples: \(samples)",
+                            message: "Error in json encoding of sample: \(sample). Continue",
                             details: "\(error)"
                         )
                     )
@@ -656,7 +659,7 @@ extension SwiftHealthKitReporterPlugin {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
-        guard let type = parse(argument: identifier) as? QuantityType else {
+        guard let type = identifier.objectType as? QuantityType else {
             result(
                 FlutterError(
                     code: #function,
@@ -680,13 +683,23 @@ extension SwiftHealthKitReporterPlugin {
                     FlutterError(
                         code: #function,
                         message: "\(#line). Error in statisticsQuery",
-                        details: "Arguments: \(String(describing: arguments))"
+                        details: "Arguments: \(String(describing: arguments)). \(error!)"
                     )
                 )
                 return
             }
             do {
-                result(try statistics?.encoded())
+                guard let statistics = statistics else {
+                    result(
+                        FlutterError(
+                            code: #function,
+                            message: "Statistics samples was null",
+                            details: nil
+                        )
+                    )
+                    return
+                }
+                result(try statistics.encoded())
             } catch {
                 result(
                     FlutterError(
@@ -700,27 +713,32 @@ extension SwiftHealthKitReporterPlugin {
     }
     private func statisticsCollectionQuery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         result: @escaping FlutterResult
     ) {
         guard
-            let identifier = arguments["identifier"],
-            let unit = arguments["unit"],
-            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601),
-            let anchorDate = arguments["anchorDate"]?.asDate(format: Date.iso8601),
-            let enumerateFrom = arguments["enumerateFrom"]?.asDate(format: Date.iso8601),
-            let enumerateTo = arguments["enumerateTo"]?.asDate(format: Date.iso8601)
+            let identifier = arguments["identifier"] as? String,
+            let unit = arguments["unit"] as? String,
+            let startDate = (arguments["startDate"] as? String)?
+                .asDate(format: Date.iso8601),
+            let endDate = (arguments["endDate"] as? String)?
+                .asDate(format: Date.iso8601),
+            let anchorDate = (arguments["anchorDate"] as? String)?
+                .asDate(format: Date.iso8601),
+            let enumerateFrom = (arguments["enumerateFrom"] as? String)?
+                .asDate(format: Date.iso8601),
+            let enumerateTo = (arguments["enumerateTo"] as? String)?
+                .asDate(format: Date.iso8601)
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
-        guard let type = parse(argument: identifier) as? QuantityType else {
+        guard let type = identifier.objectType as? QuantityType else {
             result(
                 FlutterError(
                     code: #function,
                     message: "Error in parsing identifier: \(identifier)",
-                    details: "Invalid identifier for any existing ObjectType"
+                    details: "Invalid identifier for any existing QuantityType"
                 )
             )
             return
@@ -729,24 +747,8 @@ extension SwiftHealthKitReporterPlugin {
             startDate: startDate,
             endDate: endDate
         )
-        let dateComponents = DateComponents(
-            calendar: Calendar.current,
-            timeZone: TimeZone.current,
-            era: arguments["era"]?.integer,
-            year: arguments["year"]?.integer,
-            month: arguments["month"]?.integer,
-            day: arguments["day"]?.integer,
-            hour: arguments["hour"]?.integer,
-            minute: arguments["minute"]?.integer,
-            second: arguments["second"]?.integer,
-            nanosecond: arguments["nanosecond"]?.integer,
-            weekday: arguments["weekday"]?.integer,
-            weekdayOrdinal: arguments["weekdayOrdinal"]?.integer,
-            quarter: arguments["quarter"]?.integer,
-            weekOfMonth: arguments["weekOfMonth"]?.integer,
-            weekOfYear: arguments["weekOfYear"]?.integer,
-            yearForWeekOfYear: arguments["yearForWeekOfYear"]?.integer
-        )
+        let intervalComponents = DateComponents.make(from: arguments)
+        let monitorUpdates = (arguments["monitorUpdates"] as? String)?.boolean ?? false
         reporter.reader.statisticsCollectionQuery(
             type: type,
             unit: unit,
@@ -754,21 +756,31 @@ extension SwiftHealthKitReporterPlugin {
             anchorDate: anchorDate,
             enumerateFrom: enumerateFrom,
             enumerateTo: enumerateTo,
-            intervalComponents: dateComponents,
-            monitorUpdates: arguments["monitorUpdates"]?.boolean ?? false
+            intervalComponents: intervalComponents,
+            monitorUpdates: monitorUpdates
         ) { (statistics, error) in
             guard error == nil else {
                 result(
                     FlutterError(
                         code: #function,
                         message: "\(#line). Error in statisticsCollectionQuery",
-                        details: "Arguments: \(String(describing: arguments))"
+                        details: "Arguments: \(String(describing: arguments)). \(error!)"
                     )
                 )
                 return
             }
             do {
-                result(try statistics?.encoded())
+                guard let statistics = statistics else {
+                    result(
+                        FlutterError(
+                            code: #function,
+                            message: "Statistics samples was null",
+                            details: nil
+                        )
+                    )
+                    return
+                }
+                result(try statistics.encoded())
             } catch {
                 result(
                     FlutterError(
@@ -784,120 +796,704 @@ extension SwiftHealthKitReporterPlugin {
         reporter: HealthKitReporter,
         arguments: [String: String],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        guard
+            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
+            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+        else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        let predicate = NSPredicate.samplesPredicate(
+            startDate: startDate,
+            endDate: endDate
+        )
+        if #available(iOS 13.0, *) {
+            reporter.reader.heartbeatSeriesQuery(
+                predicate: predicate
+            ) { (serie, error) in
+                guard error == nil else {
+                    result(
+                        FlutterError(
+                            code: #function,
+                            message: "\(#line). Error in heartbeatSeriesQuery",
+                            details: "Arguments: \(String(describing: arguments)). \(error!)"
+                        )
+                    )
+                    return
+                }
+                do {
+                    guard let serie = serie else {
+                        result(
+                            FlutterError(
+                                code: #function,
+                                message: "Series samples was null",
+                                details: nil
+                            )
+                        )
+                        return
+                    }
+                    result(try serie.encoded())
+                } catch {
+                    result(
+                        FlutterError(
+                            code: #function,
+                            message: "Error in json encoding of serie: \(String(describing: serie))",
+                            details: "\(error)"
+                        )
+                    )
+                }
+            }
+        } else {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "Error in platform version.",
+                    details: "HeartbeatSeries query is available for iOS 13."
+                )
+            )
+        }
+    }
     private func queryActivitySummary(
         reporter: HealthKitReporter,
         arguments: [String: String],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        guard
+            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
+            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+        else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        let predicate = NSPredicate.samplesPredicate(
+            startDate: startDate,
+            endDate: endDate
+        )
+        reporter.reader.queryActivitySummary(
+            predicate: predicate,
+            monitorUpdates: arguments["monitorUpdates"]?.boolean ?? false
+        ) { (activitySummaries, error) in
+            guard error == nil else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "\(#line). Error in queryActivitySummary",
+                        details: "Arguments: \(String(describing: arguments)). \(error!)"
+                    )
+                )
+                return
+            }
+            do {
+                result(try activitySummaries.encoded())
+            } catch {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "Error in json encoding of activitySummaries: \(activitySummaries)",
+                        details: "\(error)"
+                    )
+                )
+            }
+        }
+    }
     private func anchoredObjectQuery(
         reporter: HealthKitReporter,
         arguments: [String: String],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        guard
+            let identifier = arguments["identifier"],
+            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
+            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+        else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        guard let type = identifier.objectType else {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "Error in parsing identifier: \(identifier)",
+                    details: "Invalid identifier for any existing ObjectType"
+                )
+            )
+            return
+        }
+        let predicate = NSPredicate.samplesPredicate(
+            startDate: startDate,
+            endDate: endDate
+        )
+        reporter.reader.anchoredObjectQuery(
+            type: type,
+            predicate: predicate,
+            monitorUpdates: arguments["monitorUpdates"]?.boolean ?? false
+        ) { (samples, error) in
+            guard error == nil else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "\(#line). Error in queryActivitySummary",
+                        details: "Arguments: \(String(describing: arguments)). \(error!)"
+                    )
+                )
+                return
+            }
+            var jsonArray: [String] = []
+            for sample in samples {
+                do {
+                    let encoded = try sample.encoded()
+                    jsonArray.append(encoded)
+                } catch {
+                    result(
+                        FlutterError(
+                            code: #function,
+                            message: "Error in json encoding of sample: \(sample). Continue",
+                            details: "\(error)"
+                        )
+                    )
+                    continue
+                }
+            }
+            result(jsonArray)
+        }
+    }
     private func sourceQuery(
         reporter: HealthKitReporter,
         arguments: [String: String],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        guard
+            let identifier = arguments["identifier"],
+            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
+            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+        else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        guard let type = identifier.objectType else {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "Error in parsing identifier: \(identifier)",
+                    details: "Invalid identifier for any existing ObjectType"
+                )
+            )
+            return
+        }
+        let predicate = NSPredicate.samplesPredicate(
+            startDate: startDate,
+            endDate: endDate
+        )
+        reporter.reader.sourceQuery(
+            type: type,
+            predicate: predicate
+        ) { (sources, error) in
+            guard error == nil else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "\(#line). Error in sourceQuery",
+                        details: "Arguments: \(String(describing: arguments)). \(error!)"
+                    )
+                )
+                return
+            }
+            do {
+                result(try sources.encoded())
+            } catch {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "Error in json encoding of sources: \(sources)",
+                        details: "\(error)"
+                    )
+                )
+            }
+        }
+    }
     private func correlationQuery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        guard
+            let identifier = arguments["identifier"] as? String,
+            let startDate = (arguments["startDate"] as? String)?.asDate(format: Date.iso8601),
+            let endDate = (arguments["endDate"] as? String)?.asDate(format: Date.iso8601)
+        else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        guard let type = identifier.objectType as? CorrelationType else {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "Error in parsing identifier: \(identifier)",
+                    details: "Invalid identifier for any existing CorrelationType"
+                )
+            )
+            return
+        }
+        let predicate = NSPredicate.samplesPredicate(
+            startDate: startDate,
+            endDate: endDate
+        )
+        var typePredicates: [String: NSPredicate] = [:]
+        if let typePredicatesArgument = arguments["typePredicates"] as? [String: [String: String]] {
+            for (key, value) in typePredicatesArgument {
+                guard
+                    let startDate = value["startDate"]?.asDate(format: Date.iso8601),
+                    let endDate = value["endDate"]?.asDate(format: Date.iso8601)
+                else {
+                    continue
+                }
+                let typePredicate = NSPredicate.samplesPredicate(
+                    startDate: startDate,
+                    endDate: endDate
+                )
+                typePredicates[key] = typePredicate
+            }
+        }
+        reporter.reader.correlationQuery(
+            type: type,
+            predicate: predicate,
+            typePredicates: typePredicates
+        ) { (correlations, error) in
+            guard error == nil else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "\(#line). Error in correlationQuery",
+                        details: "Arguments: \(String(describing: arguments)). \(error!)"
+                    )
+                )
+                return
+            }
+            do {
+                result(try correlations.encoded())
+            } catch {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "Error in json encoding of correlations: \(correlations)",
+                        details: "\(error)"
+                    )
+                )
+            }
+        }
+    }
     private func observerQuery(
         reporter: HealthKitReporter,
         arguments: [String: String],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        guard
+            let identifier = arguments["identifier"],
+            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
+            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+        else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        guard let type = identifier.objectType else {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "Error in parsing identifier: \(identifier)",
+                    details: "Invalid identifier for any existing ObjectType"
+                )
+            )
+            return
+        }
+        let predicate = NSPredicate.samplesPredicate(
+            startDate: startDate,
+            endDate: endDate
+        )
+        reporter.observer.observerQuery(
+            type: type,
+            predicate: predicate
+        ) { (identifier, error) in
+            guard error == nil else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "\(#line). Error in observerQuery",
+                        details: "Arguments: \(String(describing: arguments)). \(error!)"
+                    )
+                )
+                return
+            }
+            guard let identifier = identifier else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "Identifier was null",
+                        details: nil
+                    )
+                )
+                return
+            }
+            result(identifier)
+        }
+    }
     private func enableBackgroundDelivery(
         reporter: HealthKitReporter,
         arguments: [String: String],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        guard
+            let identifier = arguments["identifier"],
+            let frequency = arguments["frequency"]?.integer
+        else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        guard let type = identifier.objectType else {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "Error in parsing identifier: \(identifier)",
+                    details: "Invalid identifier for any existing ObjectType"
+                )
+            )
+            return
+        }
+        do {
+            let updateFrequency = try UpdateFrequency.make(from: frequency)
+            reporter.observer.enableBackgroundDelivery(
+                type: type,
+                frequency: updateFrequency
+            ) { (success, error) in
+                guard error == nil else {
+                    result(
+                        FlutterError(
+                            code: #function,
+                            message: "\(#line). Error in enableBackgroundDelivery",
+                            details: "Arguments: \(String(describing: arguments)). \(error!)"
+                        )
+                    )
+                    return
+                }
+                result(success)
+            }
+        } catch {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "Error in parsing frequency: \(frequency)",
+                    details: "\(error)"
+                )
+            )
+        }
+    }
     private func disableAllBackgroundDelivery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        reporter.observer.disableAllBackgroundDelivery { (success, error) in
+            guard error == nil else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "\(#line). Error in disableAllBackgroundDelivery",
+                        details: "\(error!)"
+                    )
+                )
+                return
+            }
+            result(success)
+        }
+    }
     private func disableBackgroundDelivery(
         reporter: HealthKitReporter,
         arguments: [String: String],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        guard let identifier = arguments["identifier"] else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        guard let type = identifier.objectType else {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "Error in parsing identifier: \(identifier)",
+                    details: "Invalid identifier for any existing ObjectType"
+                )
+            )
+            return
+        }
+        reporter.observer.disableBackgroundDelivery(type: type) { (success, error) in
+            guard error == nil else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "\(#line). Error in disableBackgroundDelivery",
+                        details: "Arguments: \(String(describing: arguments)). \(error!)"
+                    )
+                )
+                return
+            }
+            result(success)
+        }
+    }
     private func startWatchApp(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        do {
+            let workoutConfiguration = try WorkoutConfiguration.make(from: arguments)
+            reporter.manager.startWatchApp(with: workoutConfiguration) { (success, error) in
+                guard error == nil else {
+                    result(
+                        FlutterError(
+                            code: #function,
+                            message: "\(#line). Error in startWatchApp",
+                            details: "Arguments: \(String(describing: arguments)). \(error!)"
+                        )
+                    )
+                    return
+                }
+                result(success)
+            }
+        } catch {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "\(#line). Error in creating WorkoutConfiguration",
+                    details: "Arguments: \(String(describing: arguments)). \(error)"
+                )
+            )
+        }
+    }
     private func isAuthorizedToWrite(
         reporter: HealthKitReporter,
         arguments: [String: String],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        guard let identifier = arguments["identifier"] else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        guard let type = identifier.objectType else {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "Error in parsing identifier: \(identifier)",
+                    details: "Invalid identifier for any existing ObjectType"
+                )
+            )
+            return
+        }
+        do {
+            let isAuthorizedToWrite = try reporter.writer.isAuthorizedToWrite(type: type)
+            result(isAuthorizedToWrite)
+        } catch {
+            let message = "Error in writing authorization status for identifier: \(identifier)"
+            result(
+                FlutterError(
+                    code: #function,
+                    message: message,
+                    details: "\(error)"
+                )
+            )
+        }
+    }
     private func addCategory(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        guard
+            let category = arguments["category"] as? [[String: Any]],
+            let device = arguments["device"] as? [String: Any],
+            let workout = arguments["workout"] as? [String: Any]
+        else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        do {
+            reporter.writer.addCategory(
+                try category.map {
+                    try Category.make(from: $0)
+                },
+                from: try Device.make(from: device),
+                to: try Workout.make(from: workout)
+            ) { (success, error) in
+                guard error == nil else {
+                    result(
+                        FlutterError(
+                            code: #function,
+                            message: "\(#line). Error in addCategory",
+                            details: "Arguments: \(String(describing: arguments)). \(error!)"
+                        )
+                    )
+                    return
+                }
+                result(success)
+            }
+        } catch {
+            throwPlatformError(result: result, error: error)
+        }
+    }
     private func addQuantitiy(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        guard
+            let quantity = arguments["quantity"] as? [[String: Any]],
+            let device = arguments["device"] as? [String: Any],
+            let workout = arguments["workout"] as? [String: Any]
+        else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        do {
+            reporter.writer.addQuantitiy(try quantity.map {
+                try Quantity.make(from: $0)
+            },
+            from: try Device.make(from: device),
+            to: try Workout.make(from: workout)) { (success, error) in
+                guard error == nil else {
+                    result(
+                        FlutterError(
+                            code: #function,
+                            message: "\(#line). Error in addQuantitiy",
+                            details: "Arguments: \(String(describing: arguments)). \(error!)"
+                        )
+                    )
+                    return
+                }
+                result(success)
+            }
+        } catch {
+            throwPlatformError(result: result, error: error)
+        }
+    }
     private func delete(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        do {
+            let sample = try parse(arguments: arguments)
+            reporter.writer.delete(sample: sample) { (success, error) in
+                guard error == nil else {
+                    result(
+                        FlutterError(
+                            code: #function,
+                            message: "\(#line). Error in delete",
+                            details: "Arguments: \(String(describing: arguments)). \(error!)"
+                        )
+                    )
+                    return
+                }
+                result(success)
+            }
+        } catch {
+            throwPlatformError(result: result, error: error)
+        }
+    }
+    private func deleteObjects(
+        reporter: HealthKitReporter,
+        arguments: [String: Any],
+        result: @escaping FlutterResult
+    ) {
+        guard
+            let identifier = arguments["identifier"] as? String,
+            let startDate = (arguments["startDate"] as? String)?
+                .asDate(format: Date.iso8601),
+            let endDate = (arguments["endDate"] as? String)?
+                .asDate(format: Date.iso8601)
+        else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        guard let type = identifier.objectType else {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "Error in parsing identifier: \(identifier)",
+                    details: "Invalid identifier for any existing ObjectType"
+                )
+            )
+            return
+        }
+        let predicate = NSPredicate.samplesPredicate(
+            startDate: startDate,
+            endDate: endDate
+        )
+        reporter.writer.deleteObjects(
+            of: type,
+            predicate: predicate
+        ) { (success, id, error) in
+            guard error == nil else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "\(#line). Error in delete",
+                        details: "Arguments: \(String(describing: arguments)). \(error!)"
+                    )
+                )
+                return
+            }
+            let resultDictionary: [String: Any] = [
+                "status": success,
+                "id": id
+            ]
+            result(resultDictionary)
+        }
+    }
     private func save(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         result: @escaping FlutterResult
-    ) {}
+    ) {
+        do {
+            let sample = try parse(arguments: arguments)
+            reporter.writer.save(sample: sample) { (success, error) in
+                guard error == nil else {
+                    result(
+                        FlutterError(
+                            code: #function,
+                            message: "\(#line). Error in save",
+                            details: "Arguments: \(String(describing: arguments)). \(error!)"
+                        )
+                    )
+                    return
+                }
+                result(success)
+            }
+        } catch {
+            throwPlatformError(result: result, error: error)
+        }
+    }
 }
 // MARK: - Helper functions
 extension SwiftHealthKitReporterPlugin {
-    private func parse(argument: String) -> ObjectType? {
-        if let type = try? QuantityType.make(from: argument) {
-            return type
-        }
-        if let type = try? CategoryType.make(from: argument) {
-            return type
-        }
-        if let type = try? CharacteristicType.make(from: argument) {
-            return type
-        }
-        if let type = try? SeriesType.make(from: argument) {
-            return type
-        }
-        if let type = try? CorrelationType.make(from: argument) {
-            return type
-        }
-        if let type = try? DocumentType.make(from: argument) {
-            return type
-        }
-        if let type = try? ActivitySummaryType.make(from: argument) {
-            return type
-        }
-        if let type = try? WorkoutType.make(from: argument) {
-            return type
-        }
-        if #available(iOS 14.0, *) {
-            if let type = try? ElectrocardiogramType.make(from: argument) {
-                return type
-            }
-        }
-        return nil
-    }
     private func parse(arguments: [String]) -> [ObjectType] {
         var types: [ObjectType] = []
         for argument in arguments {
-            if let type = parse(argument: argument) {
+            if let type = argument.objectType {
                 types.append(type)
             }
         }
         return types
+    }
+    private func parse(arguments: [String: Any]) throws -> Sample {
+        if let quantity = arguments["quantity"] as? [String: Any] {
+            return try Quantity.make(from: quantity)
+        }
+        if let category = arguments["category"] as? [String: Any] {
+            return try Category.make(from: category)
+        }
+        if let workout = arguments["workout"] as? [String: Any] {
+            return try Workout.make(from: workout)
+        }
+        throw HealthKitError.invalidValue("Invalid arguments: \(arguments)")
     }
     private func throwParsingArgumentsError(
         line: Int = #line,
