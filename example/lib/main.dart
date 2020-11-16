@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:health_kit_reporter/health_kit_reporter.dart';
+import 'package:health_kit_reporter/model/predicate.dart';
+import 'package:health_kit_reporter/model/type/quantity_type.dart';
 
 void main() {
   runApp(MyApp());
@@ -27,11 +29,19 @@ class _MyAppState extends State<MyApp> {
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      platformVersion = await HealthKitReporter.quantityQuery(
-          'HKQuantityTypeIdentifierStepCount',
-          'count',
-          DateTime.utc(2020, 11, 11),
-          DateTime.utc(2020, 11, 12));
+      final types = [QuantityType.stepCount];
+      final isRequested =
+          await HealthKitReporter.requestAuthorization(types, types);
+      final map = await HealthKitReporter.preferredUnits(types);
+      map.entries.forEach((element) async {
+        final predicate = Predicate(
+          DateTime.utc(1990, 1, 1, 12, 30, 30),
+          DateTime.utc(2020, 12, 31, 12, 30, 30),
+        );
+        final quantityResponse = await HealthKitReporter.quantityQuery(
+            element.key, element.value, predicate);
+        print(quantityResponse);
+      });
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }

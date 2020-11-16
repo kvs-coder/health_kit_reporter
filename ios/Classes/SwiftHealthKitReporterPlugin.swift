@@ -25,7 +25,7 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
         case startWatchApp
         case isAuthorizedToWrite
         case addCategory
-        case addQuantitiy
+        case addQuantity
         case delete
         case deleteObjects
         case save
@@ -261,12 +261,12 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
                     arguments: arguments,
                     result: result
                 )
-            case .addQuantitiy:
+            case .addQuantity:
                 guard let arguments = call.arguments as? [String: Any] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
-                addQuantitiy(
+                addQuantity(
                     reporter: reporter,
                     arguments: arguments,
                     result: result
@@ -377,7 +377,14 @@ extension SwiftHealthKitReporterPlugin {
                 )
                 return
             }
-            result(dictionary)
+            var resultDictionary: [String: String] = [:]
+            for (key, value) in dictionary {
+                guard let identifier = key.identifier else {
+                    continue
+                }
+                resultDictionary[identifier] = value
+            }
+            result(resultDictionary)
         }
     }
     private func characteristicsQuery(
@@ -866,13 +873,14 @@ extension SwiftHealthKitReporterPlugin {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
+        let monitorUpdates = arguments["monitorUpdates"]?.boolean ?? false
         let predicate = NSPredicate.samplesPredicate(
             startDate: startDate,
             endDate: endDate
         )
         reporter.reader.queryActivitySummary(
             predicate: predicate,
-            monitorUpdates: arguments["monitorUpdates"]?.boolean ?? false
+            monitorUpdates: monitorUpdates
         ) { (activitySummaries, error) in
             guard error == nil else {
                 result(
@@ -920,6 +928,7 @@ extension SwiftHealthKitReporterPlugin {
             )
             return
         }
+        let monitorUpdates = arguments["monitorUpdates"]?.boolean ?? false
         let predicate = NSPredicate.samplesPredicate(
             startDate: startDate,
             endDate: endDate
@@ -927,7 +936,7 @@ extension SwiftHealthKitReporterPlugin {
         reporter.reader.anchoredObjectQuery(
             type: type,
             predicate: predicate,
-            monitorUpdates: arguments["monitorUpdates"]?.boolean ?? false
+            monitorUpdates: monitorUpdates
         ) { (samples, error) in
             guard error == nil else {
                 result(
@@ -1307,7 +1316,7 @@ extension SwiftHealthKitReporterPlugin {
         result: @escaping FlutterResult
     ) {
         guard
-            let category = arguments["category"] as? [[String: Any]],
+            let category = arguments["categories"] as? [[String: Any]],
             let device = arguments["device"] as? [String: Any],
             let workout = arguments["workout"] as? [String: Any]
         else {
@@ -1338,13 +1347,13 @@ extension SwiftHealthKitReporterPlugin {
             throwPlatformError(result: result, error: error)
         }
     }
-    private func addQuantitiy(
+    private func addQuantity(
         reporter: HealthKitReporter,
         arguments: [String: Any],
         result: @escaping FlutterResult
     ) {
         guard
-            let quantity = arguments["quantity"] as? [[String: Any]],
+            let quantity = arguments["quantities"] as? [[String: Any]],
             let device = arguments["device"] as? [String: Any],
             let workout = arguments["workout"] as? [String: Any]
         else {
@@ -1505,7 +1514,7 @@ extension SwiftHealthKitReporterPlugin {
             FlutterError(
                 code: #function,
                 message: "\(line):\(function). Error in parsing arguments.",
-                details: "Arguments: \(String(describing: arguments))"
+                details: "Arguments: \(String(describing: arguments))."
             )
         )
     }

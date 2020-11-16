@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:health_kit_reporter/health_kit_reporter.dart';
 
 void main() {
   const MethodChannel channel = MethodChannel('health_kit_reporter');
@@ -15,9 +14,5 @@ void main() {
 
   tearDown(() {
     channel.setMockMethodCallHandler(null);
-  });
-
-  test('getPlatformVersion', () async {
-    expect(await HealthKitReporter.platformVersion, '42');
   });
 }
