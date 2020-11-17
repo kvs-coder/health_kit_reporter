@@ -32,15 +32,21 @@ class _MyAppState extends State<MyApp> {
       final types = [QuantityType.stepCount];
       final isRequested =
           await HealthKitReporter.requestAuthorization(types, types);
-      final map = await HealthKitReporter.preferredUnits(types);
-      map.entries.forEach((element) async {
+      print('IsRequested: $isRequested');
+      final preferredUnits = await HealthKitReporter.preferredUnits(types);
+      preferredUnits.forEach((element) async {
         final predicate = Predicate(
           DateTime.utc(1990, 1, 1, 12, 30, 30),
           DateTime.utc(2020, 12, 31, 12, 30, 30),
         );
-        final quantityResponse = await HealthKitReporter.quantityQuery(
-            element.key, element.value, predicate);
-        print(quantityResponse);
+        try {
+          final type = QuantityTypeFactory.from(element.identifier);
+          final quantityResponse = await HealthKitReporter.quantityQuery(
+              type, element.unit, predicate);
+          print(quantityResponse);
+        } catch (exception) {
+          print(exception);
+        }
       });
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';

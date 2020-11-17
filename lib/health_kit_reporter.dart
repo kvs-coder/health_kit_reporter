@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:collection';
+import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:health_kit_reporter/model/type/category_type.dart';
@@ -7,6 +7,7 @@ import 'package:health_kit_reporter/model/type/quantity_type.dart';
 
 import 'model/payload/category.dart';
 import 'model/payload/device.dart';
+import 'model/payload/preferred_unit.dart';
 import 'model/payload/quantity.dart';
 import 'model/payload/sample.dart';
 import 'model/payload/workout.dart';
@@ -15,8 +16,7 @@ import 'model/predicate.dart';
 import 'model/update_frequency.dart';
 
 class HealthKitReporter {
-  static const MethodChannel _channel =
-      const MethodChannel('health_kit_reporter');
+  static const MethodChannel _channel = MethodChannel('health_kit_reporter');
 
   static Future<bool> requestAuthorization(
       List<QuantityType> toRead, List<QuantityType> toWrite) async {
@@ -27,13 +27,17 @@ class HealthKitReporter {
     return await _channel.invokeMethod('requestAuthorization', arguments);
   }
 
-  static Future<Map<QuantityType, String>> preferredUnits(
+  static Future<List<PreferredUnit>> preferredUnits(
       List<QuantityType> types) async {
     final arguments = types.map((e) => e.identifier).toList();
-    final LinkedHashMap<dynamic, dynamic> result =
-        await _channel.invokeMethod('preferredUnits', arguments);
-    return result.map((key, value) =>
-        MapEntry(QuantityTypeFactory.from(key as String), value as String));
+    final result = await _channel.invokeMethod('preferredUnits', arguments);
+    final List<dynamic> list = jsonDecode(result);
+    final preferredUnits = <PreferredUnit>[];
+    for (final Map<String, dynamic> map in list) {
+      final preferredUnit = PreferredUnit.fromJson(map);
+      preferredUnits.add(preferredUnit);
+    }
+    return preferredUnits;
   }
 
   static Future<String> characteristicsQuery() async =>
@@ -46,7 +50,6 @@ class HealthKitReporter {
       'unit': unit,
     };
     arguments.addAll(predicate.map);
-    print(arguments);
     return await _channel.invokeMethod('quantityQuery', arguments);
   }
 
@@ -107,7 +110,7 @@ class HealthKitReporter {
 
   static Future<String> queryActivitySummary(Predicate predicate,
       {bool monitorUpdates = false}) async {
-    final arguments = Map<String, dynamic>();
+    final arguments = <String, dynamic>{};
     arguments.addAll(predicate.map);
     arguments['monitorUpdates'] = monitorUpdates;
     return await _channel.invokeMethod('queryActivitySummary', arguments);

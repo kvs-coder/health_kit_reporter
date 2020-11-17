@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const MethodChannel channel = MethodChannel('health_kit_reporter');
+  const channel = MethodChannel('health_kit_reporter');
 
   TestWidgetsFlutterBinding.ensureInitialized();
 

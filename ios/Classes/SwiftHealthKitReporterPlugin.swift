@@ -366,7 +366,7 @@ extension SwiftHealthKitReporterPlugin {
         }
         reporter.manager.preferredUnits(
             for: quantityTypes
-        ) { (dictionary, error) in
+        ) { (preferredUnits, error) in
             guard error == nil else {
                 result(
                     FlutterError(
@@ -377,14 +377,17 @@ extension SwiftHealthKitReporterPlugin {
                 )
                 return
             }
-            var resultDictionary: [String: String] = [:]
-            for (key, value) in dictionary {
-                guard let identifier = key.identifier else {
-                    continue
-                }
-                resultDictionary[identifier] = value
+            do {
+                result(try preferredUnits.encoded())
+            } catch {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "Error in json encoding of preffered units: \(preferredUnits)",
+                        details: "\(error)"
+                    )
+                )
             }
-            result(resultDictionary)
         }
     }
     private func characteristicsQuery(
