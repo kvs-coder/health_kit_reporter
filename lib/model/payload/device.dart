@@ -29,4 +29,14 @@ class Device {
         'localIdentifier': localIdentifier,
         'udiDeviceIdentifier': udiDeviceIdentifier,
       };
+
+  Device.fromJson(Map<String, dynamic> json)
+      : name = json['name'],
+        manufacturer = json['manufacturer'],
+        model = json['model'],
+        hardwareVersion = json['hardwareVersion'],
+        firmwareVersion = json['firmwareVersion'],
+        softwareVersion = json['softwareVersion'],
+        localIdentifier = json['localIdentifier'],
+        udiDeviceIdentifier = json['udiDeviceIdentifier'];
 }

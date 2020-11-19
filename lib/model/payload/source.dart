@@ -11,4 +11,8 @@ class Source {
         'name': name,
         'bundleIdentifier': bundleIdentifier,
       };
+
+  Source.fromJson(Map<String, dynamic> json)
+      : name = json['name'],
+        bundleIdentifier = json['bundleIdentifier'];
 }

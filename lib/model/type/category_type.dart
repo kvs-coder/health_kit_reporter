@@ -34,3 +34,22 @@ extension Identifier on CategoryType {
     throw InvalidValueException('Unknown case: $this');
   }
 }
+
+extension CategoryTypeFactory on CategoryType {
+  static CategoryType from(String identifier) {
+    for (final type in CategoryType.values) {
+      if (type.identifier == identifier) {
+        return type;
+      }
+    }
+    throw InvalidValueException('Unknown identifier: $identifier');
+  }
+
+  static CategoryType tryFrom(String identifier) {
+    try {
+      return from(identifier);
+    } on InvalidValueException {
+      return null;
+    }
+  }
+}

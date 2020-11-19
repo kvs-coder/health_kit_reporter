@@ -2,11 +2,11 @@ import 'device.dart';
 import 'sample.dart';
 import 'source_revision.dart';
 
-class Category extends Sample {
+class Category extends Sample<Harmonized> {
   const Category(
     String identifier,
-    double startTimestamp,
-    double endTimestamp,
+    int startTimestamp,
+    int endTimestamp,
     Device device,
     SourceRevision sourceRevision,
     Harmonized harmonized,
@@ -28,6 +28,10 @@ class Category extends Sample {
         'sourceRevision': sourceRevision.map,
         'harmonized': harmonized.map,
       };
+
+  Category.fromJson(Map<String, dynamic> json)
+      : super.fromJson(json,
+            harmonized: Harmonized.fromJson(json['harmonized']));
 }
 
 class Harmonized {
@@ -39,11 +43,16 @@ class Harmonized {
 
   final int value;
   final String description;
-  final Map<String, String> metadata;
+  final Map<String, dynamic> metadata;
 
   Map<String, dynamic> get map => {
         'value': value,
         'description': description,
         'metadata': metadata,
       };
+
+  Harmonized.fromJson(Map<String, dynamic> json)
+      : value = json['value'],
+        description = json['description'],
+        metadata = json['metadata'];
 }

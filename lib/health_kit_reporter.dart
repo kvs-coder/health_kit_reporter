@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:health_kit_reporter/model/payload/characteristic/characteristic.dart';
 import 'package:health_kit_reporter/model/type/category_type.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
 
@@ -19,10 +20,10 @@ class HealthKitReporter {
   static const MethodChannel _channel = MethodChannel('health_kit_reporter');
 
   static Future<bool> requestAuthorization(
-      List<QuantityType> toRead, List<QuantityType> toWrite) async {
+      List<String> toRead, List<String> toWrite) async {
     final arguments = {
-      'toRead': toRead.map((e) => e.identifier).toList(),
-      'toWrite': toWrite.map((e) => e.identifier).toList(),
+      'toRead': toRead,
+      'toWrite': toWrite,
     };
     return await _channel.invokeMethod('requestAuthorization', arguments);
   }
@@ -40,41 +41,75 @@ class HealthKitReporter {
     return preferredUnits;
   }
 
-  static Future<String> characteristicsQuery() async =>
-      await _channel.invokeMethod('characteristicsQuery');
+  static Future<Characteristic> characteristicsQuery() async {
+    final result = await _channel.invokeMethod('characteristicsQuery');
+    final Map<String, dynamic> map = jsonDecode(result);
+    return Characteristic.fromJson(map);
+  }
 
-  static Future<String> quantityQuery(
+  static Future<List<Quantity>> quantityQuery(
       QuantityType type, String unit, Predicate predicate) async {
     final arguments = {
       'identifier': type.identifier,
       'unit': unit,
     };
     arguments.addAll(predicate.map);
-    return await _channel.invokeMethod('quantityQuery', arguments);
+    final result = await _channel.invokeMethod('quantityQuery', arguments);
+    final List<dynamic> list = jsonDecode(result);
+    final quantities = <Quantity>[];
+    for (final Map<String, dynamic> map in list) {
+      final quantity = Quantity.fromJson(map);
+      quantities.add(quantity);
+    }
+    return quantities;
   }
 
-  static Future<String> categoryQuery(
+  static Future<List<Category>> categoryQuery(
       CategoryType type, Predicate predicate) async {
     final arguments = {
       'identifier': type.identifier,
     };
     arguments.addAll(predicate.map);
-    return await _channel.invokeMethod('categoryQuery', arguments);
+    final result = await _channel.invokeMethod('categoryQuery', arguments);
+    final List<dynamic> list = jsonDecode(result);
+    final categories = <Category>[];
+    for (final Map<String, dynamic> map in list) {
+      final category = Category.fromJson(map);
+      categories.add(category);
+    }
+    return categories;
   }
 
-  static Future<String> workoutQuery(Predicate predicate) async =>
-      await _channel.invokeMethod('workoutQuery', predicate.map);
+  static Future<List<Workout>> workoutQuery(Predicate predicate) async {
+    final result = await _channel.invokeMethod('workoutQuery', predicate.map);
+    final List<dynamic> list = jsonDecode(result);
+    final workouts = <Workout>[];
+    for (final Map<String, dynamic> map in list) {
+      final workout = Workout.fromJson(map);
+      workouts.add(workout);
+    }
+    return workouts;
+  }
 
-  static Future<String> electrocardiogramQuery(Predicate predicate) async =>
-      await _channel.invokeMethod('electrocardiogramQuery', predicate.map);
+  static Future<String> electrocardiogramQuery(Predicate predicate) async {
+    final result =
+        await _channel.invokeMethod('electrocardiogramQuery', predicate.map);
+  }
 
-  static Future<List<String>> sampleQuery(
+  static Future<List<Sample>> sampleQuery(
       String identifier, Predicate predicate) async {
     final arguments = {
       'identifier': identifier,
     };
     arguments.addAll(predicate.map);
-    return await _channel.invokeMethod('sampleQuery', arguments);
+    final result = await _channel.invokeMethod('sampleQuery', arguments);
+    final List<dynamic> list = jsonDecode(result);
+    final samples = <Sample>[];
+    for (final Map<String, dynamic> map in list) {
+      final sample = Sample.factory(map);
+      samples.add(sample);
+    }
+    return samples;
   }
 
   static Future<String> statisticsQuery(

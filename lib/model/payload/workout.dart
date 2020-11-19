@@ -1,13 +1,14 @@
+import '../decorator/extensions.dart';
 import 'device.dart';
 import 'sample.dart';
 import 'source_revision.dart';
 import 'workout_event.dart';
 
-class Workout extends Sample {
+class Workout extends Sample<Harmonized> {
   const Workout(
     String identifier,
-    double startTimestamp,
-    double endTimestamp,
+    int startTimestamp,
+    int endTimestamp,
     Device device,
     SourceRevision sourceRevision,
     Harmonized harmonized,
@@ -39,6 +40,13 @@ class Workout extends Sample {
         'workoutEvents': workoutEvents.map((e) => e.map),
         'harmonized': harmonized.map,
       };
+
+  Workout.fromJson(Map<String, dynamic> json)
+      : workoutName = json['workoutName'],
+        duration = json['duration'],
+        workoutEvents = WorkoutEvent.collect(json['workoutEvents']),
+        super.fromJson(json,
+            harmonized: Harmonized.fromJson(json['harmonized']));
 }
 
 class Harmonized {
@@ -64,7 +72,7 @@ class Harmonized {
   final String totalSwimmingStrokeCountUnit;
   final double totalFlightsClimbed;
   final String totalFlightsClimbedUnit;
-  final Map<String, String> metadata;
+  final Map<String, dynamic> metadata;
 
   Map<String, dynamic> get map => {
         'value': value,
@@ -73,8 +81,24 @@ class Harmonized {
         'totalDistance': totalDistance,
         'totalDistanceUnit': totalDistanceUnit,
         'totalSwimmingStrokeCount': totalSwimmingStrokeCount,
+        'totalSwimmingStrokeCountUnit': totalSwimmingStrokeCountUnit,
         'totalFlightsClimbed': totalFlightsClimbed,
         'totalFlightsClimbedUnit': totalFlightsClimbedUnit,
         'metadata': metadata
       };
+
+  Harmonized.fromJson(Map<String, dynamic> json)
+      : value = json['value'].toString().integer,
+        totalEnergyBurned =
+            json['totalEnergyBurned']?.toString()?.integer?.toDouble(),
+        totalEnergyBurnedUnit = json['totalEnergyBurnedUnit'],
+        totalDistance = json['totalDistance']?.toString()?.integer?.toDouble(),
+        totalDistanceUnit = json['totalDistanceUnit'],
+        totalSwimmingStrokeCount =
+            json['totalSwimmingStrokeCount']?.toString()?.integer?.toDouble(),
+        totalSwimmingStrokeCountUnit = json['totalSwimmingStrokeCountUnit'],
+        totalFlightsClimbed =
+            json['totalFlightsClimbed']?.toString()?.integer?.toDouble(),
+        totalFlightsClimbedUnit = json['totalFlightsClimbedUnit'],
+        metadata = json['metadata'];
 }

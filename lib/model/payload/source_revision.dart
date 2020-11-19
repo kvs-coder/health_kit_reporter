@@ -22,6 +22,13 @@ class SourceRevision {
         'systemVersion': systemVersion,
         'patchVersion': operatingSystem.map,
       };
+
+  SourceRevision.fromJson(Map<String, dynamic> json)
+      : source = Source.fromJson(json['source']),
+        version = json['version'],
+        productType = json['productType'],
+        systemVersion = json['systemVersion'],
+        operatingSystem = OperatingSystem.fromJson(json['operatingSystem']);
 }
 
 class OperatingSystem {
@@ -40,4 +47,9 @@ class OperatingSystem {
         'minorVersion': minorVersion,
         'patchVersion': patchVersion,
       };
+
+  OperatingSystem.fromJson(Map<String, dynamic> json)
+      : majorVersion = json['majorVersion'],
+        minorVersion = json['minorVersion'],
+        patchVersion = json['patchVersion'];
 }

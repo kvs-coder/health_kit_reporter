@@ -13,3 +13,22 @@ extension Identifier on WorkoutType {
     throw InvalidValueException('Unknown case: $this');
   }
 }
+
+extension WorkoutTypeFactory on WorkoutType {
+  static WorkoutType from(String identifier) {
+    for (final type in WorkoutType.values) {
+      if (type.identifier == identifier) {
+        return type;
+      }
+    }
+    throw InvalidValueException('Unknown identifier: $identifier');
+  }
+
+  static WorkoutType tryFrom(String identifier) {
+    try {
+      return from(identifier);
+    } on InvalidValueException {
+      return null;
+    }
+  }
+}
