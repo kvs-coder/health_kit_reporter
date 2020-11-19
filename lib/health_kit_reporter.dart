@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:health_kit_reporter/model/payload/characteristic/characteristic.dart';
 import 'package:health_kit_reporter/model/payload/electrocardiogram.dart';
+import 'package:health_kit_reporter/model/payload/heartbeat_serie.dart';
 import 'package:health_kit_reporter/model/payload/statistics.dart';
 import 'package:health_kit_reporter/model/type/category_type.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
@@ -50,10 +51,10 @@ class HealthKitReporter {
   }
 
   static Future<List<Quantity>> quantityQuery(
-      QuantityType type, String unit, Predicate predicate) async {
+      QuantityType type, PreferredUnit unit, Predicate predicate) async {
     final arguments = {
       'identifier': type.identifier,
-      'unit': unit,
+      'unit': unit.unit,
     };
     arguments.addAll(predicate.map);
     final result = await _channel.invokeMethod('quantityQuery', arguments);
@@ -123,38 +124,48 @@ class HealthKitReporter {
   }
 
   static Future<Statistics> statisticsQuery(
-      String identifier, String unit, Predicate predicate) async {
+      QuantityType type, PreferredUnit unit, Predicate predicate) async {
     final arguments = {
-      'identifier': identifier,
-      'unit': unit,
+      'identifier': type.identifier,
+      'unit': unit.unit,
     };
     arguments.addAll(predicate.map);
-    final result = await _channel.invokeMethod('sampleQuery', arguments);
+    final result = await _channel.invokeMethod('statisticsQuery', arguments);
     final Map<String, dynamic> map = jsonDecode(result);
     final statistics = Statistics.fromJson(map);
     return statistics;
   }
 
-  static Future<String> statisticsCollectionQuery(
-      String identifier,
-      String unit,
+  static Stream<Statistics> statisticsCollectionQuery(
+      QuantityType type,
+      PreferredUnit unit,
       Predicate predicate,
       DateTime anchorDate,
       DateTime enumerateFrom,
-      DateTime enumerateTo) async {
+      DateTime enumerateTo) async* {
     final arguments = {
-      'identifier': identifier,
-      'unit': unit,
+      'identifier': type.identifier,
+      'unit': unit.unit,
       'anchorDate': anchorDate.toIso8601String(),
       'enumerateFrom': enumerateFrom.toIso8601String(),
       'enumerateTo': enumerateTo.toIso8601String()
     };
     arguments.addAll(predicate.map);
-    return await _channel.invokeMethod('statisticsCollectionQuery', arguments);
+    final result =
+        await _channel.invokeMethod('statisticsCollectionQuery', arguments);
+    final Map<String, dynamic> map = jsonDecode(result);
+    final statistics = Statistics.fromJson(map);
+    yield statistics;
   }
 
-  static Future<String> heartbeatSeriesQuery(Predicate predicate) async =>
-      await _channel.invokeMethod('heartbeatSeriesQuery', predicate.map);
+  static Future<HeartbeatSerie> heartbeatSeriesQuery(
+      Predicate predicate) async {
+    final result =
+        await _channel.invokeMethod('heartbeatSeriesQuery', predicate.map);
+    final Map<String, dynamic> map = jsonDecode(result);
+    final heartbeatSerie = HeartbeatSerie.fromJson(map);
+    return heartbeatSerie;
+  }
 
   static Future<String> queryActivitySummary(Predicate predicate,
       {bool monitorUpdates = false}) async {
