@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:health_kit_reporter/model/payload/characteristic/characteristic.dart';
+import 'package:health_kit_reporter/model/payload/electrocardiogram.dart';
+import 'package:health_kit_reporter/model/payload/statistics.dart';
 import 'package:health_kit_reporter/model/type/category_type.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
 
@@ -91,9 +93,17 @@ class HealthKitReporter {
     return workouts;
   }
 
-  static Future<String> electrocardiogramQuery(Predicate predicate) async {
+  static Future<List<Electrocardiogram>> electrocardiogramQuery(
+      Predicate predicate) async {
     final result =
         await _channel.invokeMethod('electrocardiogramQuery', predicate.map);
+    final List<dynamic> list = jsonDecode(result);
+    final electrocardiograms = <Electrocardiogram>[];
+    for (final Map<String, dynamic> map in list) {
+      final electrocardiogram = Electrocardiogram.fromJson(map);
+      electrocardiograms.add(electrocardiogram);
+    }
+    return electrocardiograms;
   }
 
   static Future<List<Sample>> sampleQuery(
@@ -112,14 +122,17 @@ class HealthKitReporter {
     return samples;
   }
 
-  static Future<String> statisticsQuery(
+  static Future<Statistics> statisticsQuery(
       String identifier, String unit, Predicate predicate) async {
     final arguments = {
       'identifier': identifier,
       'unit': unit,
     };
     arguments.addAll(predicate.map);
-    return await _channel.invokeMethod('sampleQuery', arguments);
+    final result = await _channel.invokeMethod('sampleQuery', arguments);
+    final Map<String, dynamic> map = jsonDecode(result);
+    final statistics = Statistics.fromJson(map);
+    return statistics;
   }
 
   static Future<String> statisticsCollectionQuery(

@@ -1,11 +1,15 @@
 import 'package:health_kit_reporter/model/payload/category.dart';
+import 'package:health_kit_reporter/model/payload/electrocardiogram.dart';
 import 'package:health_kit_reporter/model/payload/quantity.dart';
 import 'package:health_kit_reporter/model/payload/workout.dart';
 import 'package:health_kit_reporter/model/type/category_type.dart';
+import 'package:health_kit_reporter/model/type/correlation_type.dart';
+import 'package:health_kit_reporter/model/type/electrocardiogram_type.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
 import 'package:health_kit_reporter/model/type/workout_type.dart';
 
 import '../decorator/extensions.dart';
+import 'correlation.dart';
 import 'device.dart';
 import 'source_revision.dart';
 
@@ -50,6 +54,15 @@ abstract class Sample<Harmonized> {
     final workoutType = WorkoutTypeFactory.tryFrom(identifier);
     if (workoutType != null) {
       return Workout.fromJson(json);
+    }
+    final correlationType = CorrelationTypeFactory.tryFrom(identifier);
+    if (correlationType != null) {
+      return Correlation.fromJson(json);
+    }
+    final electrocardiogramType =
+        ElectrocardiogramTypeFactory.tryFrom(identifier);
+    if (electrocardiogramType != null) {
+      return Electrocardiogram.fromJson(json);
     }
     return null;
   }

@@ -31,12 +31,12 @@ class WorkoutEvent {
         harmonized = Harmonized.fromJson(json['harmonized']);
 
   static List<WorkoutEvent> collect(List<dynamic> list) {
-    final workoutEvents = <WorkoutEvent>[];
+    final samples = <WorkoutEvent>[];
     for (final Map<String, dynamic> map in list) {
-      final workoutEvent = WorkoutEvent.fromJson(map);
-      workoutEvents.add(workoutEvent);
+      final sample = WorkoutEvent.fromJson(map);
+      samples.add(sample);
     }
-    return workoutEvents;
+    return samples;
   }
 }
 

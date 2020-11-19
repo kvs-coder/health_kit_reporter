@@ -33,6 +33,15 @@ class Quantity extends Sample<Harmonized> {
   Quantity.fromJson(Map<String, dynamic> json)
       : super.fromJson(json,
             harmonized: Harmonized.fromJson(json['harmonized']));
+
+  static List<Quantity> collect(List<dynamic> list) {
+    final samples = <Quantity>[];
+    for (final Map<String, dynamic> map in list) {
+      final sample = Quantity.fromJson(map);
+      samples.add(sample);
+    }
+    return samples;
+  }
 }
 
 class Harmonized {
