@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:health_kit_reporter/model/payload/activity_summary.dart';
 import 'package:health_kit_reporter/model/payload/characteristic/characteristic.dart';
 import 'package:health_kit_reporter/model/payload/electrocardiogram.dart';
 import 'package:health_kit_reporter/model/payload/heartbeat_serie.dart';
@@ -136,19 +137,22 @@ class HealthKitReporter {
     return statistics;
   }
 
+  // TODO: set event channel
   static Stream<Statistics> statisticsCollectionQuery(
       QuantityType type,
       PreferredUnit unit,
       Predicate predicate,
       DateTime anchorDate,
       DateTime enumerateFrom,
-      DateTime enumerateTo) async* {
+      DateTime enumerateTo,
+      {bool monitorUpdates = false}) async* {
     final arguments = {
       'identifier': type.identifier,
       'unit': unit.unit,
       'anchorDate': anchorDate.toIso8601String(),
       'enumerateFrom': enumerateFrom.toIso8601String(),
-      'enumerateTo': enumerateTo.toIso8601String()
+      'enumerateTo': enumerateTo.toIso8601String(),
+      'monitorUpdates': monitorUpdates,
     };
     arguments.addAll(predicate.map);
     final result =
@@ -167,23 +171,37 @@ class HealthKitReporter {
     return heartbeatSerie;
   }
 
-  static Future<String> queryActivitySummary(Predicate predicate,
-      {bool monitorUpdates = false}) async {
+  // TODO: set event channel
+  static Stream<ActivitySummary> queryActivitySummary(Predicate predicate,
+      {bool monitorUpdates = false}) async* {
     final arguments = <String, dynamic>{};
     arguments.addAll(predicate.map);
     arguments['monitorUpdates'] = monitorUpdates;
-    return await _channel.invokeMethod('queryActivitySummary', arguments);
+    final result =
+        await _channel.invokeMethod('queryActivitySummary', arguments);
+    final Map<String, dynamic> map = jsonDecode(result);
+    final activitySummary = ActivitySummary.fromJson(map);
+    yield activitySummary;
   }
 
-  static Future<List<String>> anchoredObjectQuery(
+  // TODO: set event channel
+  static Stream<List<Sample>> anchoredObjectQuery(
       String identifier, Predicate predicate,
-      {bool monitorUpdates = false}) async {
+      {bool monitorUpdates = false}) async* {
     final arguments = {
       'identifier': identifier,
       'monitorUpdates': monitorUpdates
     };
     arguments.addAll(predicate.map);
-    return await _channel.invokeMethod('anchoredObjectQuery', arguments);
+    final result =
+        await _channel.invokeMethod('anchoredObjectQuery', arguments);
+    final List<dynamic> list = jsonDecode(result);
+    final samples = <Sample>[];
+    for (final Map<String, dynamic> map in list) {
+      final sample = Sample.factory(map);
+      samples.add(sample);
+    }
+    yield samples;
   }
 
   static Future<String> sourceQuery(
