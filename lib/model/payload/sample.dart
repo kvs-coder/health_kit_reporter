@@ -8,7 +8,6 @@ import 'package:health_kit_reporter/model/type/electrocardiogram_type.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
 import 'package:health_kit_reporter/model/type/workout_type.dart';
 
-import '../decorator/extensions.dart';
 import 'correlation.dart';
 import 'device.dart';
 import 'source_revision.dart';
@@ -24,8 +23,8 @@ abstract class Sample<Harmonized> {
   );
 
   final String identifier;
-  final int startTimestamp;
-  final int endTimestamp;
+  final num startTimestamp;
+  final num endTimestamp;
   final Device device;
   final SourceRevision sourceRevision;
   final Harmonized harmonized;
@@ -34,8 +33,8 @@ abstract class Sample<Harmonized> {
 
   Sample.fromJson(Map<String, dynamic> json, {Harmonized harmonized})
       : identifier = json['identifier'],
-        startTimestamp = json['startTimestamp'].toString().integer,
-        endTimestamp = json['endTimestamp'].toString().integer,
+        startTimestamp = json['startTimestamp'],
+        endTimestamp = json['endTimestamp'],
         device =
             json['device'] != null ? Device.fromJson(json['device']) : null,
         sourceRevision = SourceRevision.fromJson(json['sourceRevision']),

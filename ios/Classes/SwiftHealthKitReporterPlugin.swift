@@ -32,12 +32,13 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
     }
 
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(
-            name: "health_kit_reporter",
+        let methodChannel = FlutterMethodChannel(
+            name: "health_kit_reporter_method_channel",
             binaryMessenger: registrar.messenger()
         )
+
         let instance = SwiftHealthKitReporterPlugin()
-        registrar.addMethodCallDelegate(instance, channel: channel)
+        registrar.addMethodCallDelegate(instance, channel: methodChannel)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -1490,6 +1491,15 @@ extension SwiftHealthKitReporterPlugin {
         var types: [ObjectType] = []
         for argument in arguments {
             if let type = argument.objectType {
+                types.append(type)
+            }
+        }
+        return types
+    }
+    private func parse(arguments: [String]) -> [SampleType] {
+        var types: [SampleType] = []
+        for argument in arguments {
+            if let type = argument.objectType as? SampleType {
                 types.append(type)
             }
         }

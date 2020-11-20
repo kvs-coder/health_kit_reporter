@@ -50,7 +50,7 @@ class Harmonized {
     this.metadata,
   );
 
-  final int value;
+  final num value;
   final String description;
   final Map<String, dynamic> metadata;
 

@@ -27,7 +27,8 @@ class Statistics {
       : identifier = json['identifier'],
         startTimestamp = json['startTimestamp'].toString().integer,
         endTimestamp = json['endTimestamp'].toString().integer,
-        sources = Source.collect(json['sources']),
+        sources =
+            json['sources'] != null ? Source.collect(json['sources']) : null,
         harmonized = Harmonized.fromJson(json['harmonized']);
 }
 
@@ -39,9 +40,9 @@ class Harmonized {
     this.unit,
   );
 
-  final double summary;
-  final double average;
-  final double recent;
+  final num summary;
+  final num average;
+  final num recent;
   final String unit;
 
   Map<String, dynamic> get map => {
@@ -52,8 +53,8 @@ class Harmonized {
       };
 
   Harmonized.fromJson(Map<String, dynamic> json)
-      : summary = double.tryParse(json['summary']),
-        average = double.tryParse(json['average']),
-        recent = double.tryParse(json['recent']),
+      : summary = json['summary'],
+        average = json['average'],
+        recent = json['recent'],
         unit = json['unit'];
 }

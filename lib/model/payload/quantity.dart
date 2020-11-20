@@ -1,4 +1,3 @@
-import '../decorator/extensions.dart';
 import 'device.dart';
 import 'sample.dart';
 import 'source_revision.dart';
@@ -51,7 +50,7 @@ class Harmonized {
     this.metadata,
   );
 
-  final double value;
+  final num value;
   final String unit;
   final Map<String, dynamic> metadata;
 
@@ -62,7 +61,7 @@ class Harmonized {
       };
 
   Harmonized.fromJson(Map<String, dynamic> json)
-      : value = json['value'].toString().integer.toDouble(),
+      : value = json['value'],
         unit = json['unit'],
         metadata = json['metadata'];
 }

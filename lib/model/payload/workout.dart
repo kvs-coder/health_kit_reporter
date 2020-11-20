@@ -25,7 +25,7 @@ class Workout extends Sample<Harmonized> {
         );
 
   final String workoutName;
-  final double duration;
+  final num duration;
   final List<WorkoutEvent> workoutEvents;
 
   @override
@@ -64,13 +64,13 @@ class Harmonized {
   );
 
   final int value;
-  final double totalEnergyBurned;
+  final num totalEnergyBurned;
   final String totalEnergyBurnedUnit;
-  final double totalDistance;
+  final num totalDistance;
   final String totalDistanceUnit;
-  final double totalSwimmingStrokeCount;
+  final num totalSwimmingStrokeCount;
   final String totalSwimmingStrokeCountUnit;
-  final double totalFlightsClimbed;
+  final num totalFlightsClimbed;
   final String totalFlightsClimbedUnit;
   final Map<String, dynamic> metadata;
 
@@ -89,16 +89,13 @@ class Harmonized {
 
   Harmonized.fromJson(Map<String, dynamic> json)
       : value = json['value'].toString().integer,
-        totalEnergyBurned =
-            json['totalEnergyBurned']?.toString()?.integer?.toDouble(),
+        totalEnergyBurned = json['totalEnergyBurned'],
         totalEnergyBurnedUnit = json['totalEnergyBurnedUnit'],
-        totalDistance = json['totalDistance']?.toString()?.integer?.toDouble(),
+        totalDistance = json['totalDistance'],
         totalDistanceUnit = json['totalDistanceUnit'],
-        totalSwimmingStrokeCount =
-            json['totalSwimmingStrokeCount']?.toString()?.integer?.toDouble(),
+        totalSwimmingStrokeCount = json['totalSwimmingStrokeCount'],
         totalSwimmingStrokeCountUnit = json['totalSwimmingStrokeCountUnit'],
-        totalFlightsClimbed =
-            json['totalFlightsClimbed']?.toString()?.integer?.toDouble(),
+        totalFlightsClimbed = json['totalFlightsClimbed'],
         totalFlightsClimbedUnit = json['totalFlightsClimbedUnit'],
         metadata = json['metadata'];
 }

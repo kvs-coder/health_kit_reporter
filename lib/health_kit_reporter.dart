@@ -21,7 +21,10 @@ import 'model/predicate.dart';
 import 'model/update_frequency.dart';
 
 class HealthKitReporter {
-  static const MethodChannel _channel = MethodChannel('health_kit_reporter');
+  static const MethodChannel _methodChannel =
+      MethodChannel('health_kit_reporter_method_channel');
+  static const EventChannel _eventChannel =
+      EventChannel('health_kit_reporter_event_channel');
 
   static Future<bool> requestAuthorization(
       List<String> toRead, List<String> toWrite) async {
@@ -29,13 +32,14 @@ class HealthKitReporter {
       'toRead': toRead,
       'toWrite': toWrite,
     };
-    return await _channel.invokeMethod('requestAuthorization', arguments);
+    return await _methodChannel.invokeMethod('requestAuthorization', arguments);
   }
 
   static Future<List<PreferredUnit>> preferredUnits(
       List<QuantityType> types) async {
     final arguments = types.map((e) => e.identifier).toList();
-    final result = await _channel.invokeMethod('preferredUnits', arguments);
+    final result =
+        await _methodChannel.invokeMethod('preferredUnits', arguments);
     final List<dynamic> list = jsonDecode(result);
     final preferredUnits = <PreferredUnit>[];
     for (final Map<String, dynamic> map in list) {
@@ -46,7 +50,7 @@ class HealthKitReporter {
   }
 
   static Future<Characteristic> characteristicsQuery() async {
-    final result = await _channel.invokeMethod('characteristicsQuery');
+    final result = await _methodChannel.invokeMethod('characteristicsQuery');
     final Map<String, dynamic> map = jsonDecode(result);
     return Characteristic.fromJson(map);
   }
@@ -58,7 +62,8 @@ class HealthKitReporter {
       'unit': unit.unit,
     };
     arguments.addAll(predicate.map);
-    final result = await _channel.invokeMethod('quantityQuery', arguments);
+    final result =
+        await _methodChannel.invokeMethod('quantityQuery', arguments);
     final List<dynamic> list = jsonDecode(result);
     final quantities = <Quantity>[];
     for (final Map<String, dynamic> map in list) {
@@ -74,7 +79,8 @@ class HealthKitReporter {
       'identifier': type.identifier,
     };
     arguments.addAll(predicate.map);
-    final result = await _channel.invokeMethod('categoryQuery', arguments);
+    final result =
+        await _methodChannel.invokeMethod('categoryQuery', arguments);
     final List<dynamic> list = jsonDecode(result);
     final categories = <Category>[];
     for (final Map<String, dynamic> map in list) {
@@ -85,7 +91,8 @@ class HealthKitReporter {
   }
 
   static Future<List<Workout>> workoutQuery(Predicate predicate) async {
-    final result = await _channel.invokeMethod('workoutQuery', predicate.map);
+    final result =
+        await _methodChannel.invokeMethod('workoutQuery', predicate.map);
     final List<dynamic> list = jsonDecode(result);
     final workouts = <Workout>[];
     for (final Map<String, dynamic> map in list) {
@@ -97,8 +104,8 @@ class HealthKitReporter {
 
   static Future<List<Electrocardiogram>> electrocardiogramQuery(
       Predicate predicate) async {
-    final result =
-        await _channel.invokeMethod('electrocardiogramQuery', predicate.map);
+    final result = await _methodChannel.invokeMethod(
+        'electrocardiogramQuery', predicate.map);
     final List<dynamic> list = jsonDecode(result);
     final electrocardiograms = <Electrocardiogram>[];
     for (final Map<String, dynamic> map in list) {
@@ -114,7 +121,7 @@ class HealthKitReporter {
       'identifier': identifier,
     };
     arguments.addAll(predicate.map);
-    final result = await _channel.invokeMethod('sampleQuery', arguments);
+    final result = await _methodChannel.invokeMethod('sampleQuery', arguments);
     final List<dynamic> list = jsonDecode(result);
     final samples = <Sample>[];
     for (final Map<String, dynamic> map in list) {
@@ -131,7 +138,8 @@ class HealthKitReporter {
       'unit': unit.unit,
     };
     arguments.addAll(predicate.map);
-    final result = await _channel.invokeMethod('statisticsQuery', arguments);
+    final result =
+        await _methodChannel.invokeMethod('statisticsQuery', arguments);
     final Map<String, dynamic> map = jsonDecode(result);
     final statistics = Statistics.fromJson(map);
     return statistics;
@@ -155,8 +163,8 @@ class HealthKitReporter {
       'monitorUpdates': monitorUpdates,
     };
     arguments.addAll(predicate.map);
-    final result =
-        await _channel.invokeMethod('statisticsCollectionQuery', arguments);
+    final result = await _methodChannel.invokeMethod(
+        'statisticsCollectionQuery', arguments);
     final Map<String, dynamic> map = jsonDecode(result);
     final statistics = Statistics.fromJson(map);
     yield statistics;
@@ -164,8 +172,8 @@ class HealthKitReporter {
 
   static Future<HeartbeatSerie> heartbeatSeriesQuery(
       Predicate predicate) async {
-    final result =
-        await _channel.invokeMethod('heartbeatSeriesQuery', predicate.map);
+    final result = await _methodChannel.invokeMethod(
+        'heartbeatSeriesQuery', predicate.map);
     final Map<String, dynamic> map = jsonDecode(result);
     final heartbeatSerie = HeartbeatSerie.fromJson(map);
     return heartbeatSerie;
@@ -178,7 +186,7 @@ class HealthKitReporter {
     arguments.addAll(predicate.map);
     arguments['monitorUpdates'] = monitorUpdates;
     final result =
-        await _channel.invokeMethod('queryActivitySummary', arguments);
+        await _methodChannel.invokeMethod('queryActivitySummary', arguments);
     final Map<String, dynamic> map = jsonDecode(result);
     final activitySummary = ActivitySummary.fromJson(map);
     yield activitySummary;
@@ -194,7 +202,7 @@ class HealthKitReporter {
     };
     arguments.addAll(predicate.map);
     final result =
-        await _channel.invokeMethod('anchoredObjectQuery', arguments);
+        await _methodChannel.invokeMethod('anchoredObjectQuery', arguments);
     final List<dynamic> list = jsonDecode(result);
     final samples = <Sample>[];
     for (final Map<String, dynamic> map in list) {
@@ -210,7 +218,7 @@ class HealthKitReporter {
       'identifier': identifier,
     };
     arguments.addAll(predicate.map);
-    return await _channel.invokeMethod('sourceQuery', arguments);
+    return await _methodChannel.invokeMethod('sourceQuery', arguments);
   }
 
   static Future<String> correlationQuery(String identifier, Predicate predicate,
@@ -220,7 +228,7 @@ class HealthKitReporter {
       'typePredicates': typePredicates,
     };
     arguments.addAll(predicate.map);
-    return await _channel.invokeMethod('correlationQuery', arguments);
+    return await _methodChannel.invokeMethod('correlationQuery', arguments);
   }
 
   static Future<String> observerQuery(
@@ -229,7 +237,7 @@ class HealthKitReporter {
       'identifier': identifier,
     };
     arguments.addAll(predicate.map);
-    return await _channel.invokeMethod('observerQuery', arguments);
+    return await _methodChannel.invokeMethod('observerQuery', arguments);
   }
 
   static Future<bool> enableBackgroundDelivery(
@@ -238,29 +246,31 @@ class HealthKitReporter {
       'identifier': identifier,
       'frequency': frequency.value,
     };
-    return await _channel.invokeMethod('enableBackgroundDelivery', arguments);
+    return await _methodChannel.invokeMethod(
+        'enableBackgroundDelivery', arguments);
   }
 
   static Future<bool> disableAllBackgroundDelivery() async =>
-      await _channel.invokeMethod('disableAllBackgroundDelivery');
+      await _methodChannel.invokeMethod('disableAllBackgroundDelivery');
 
   static Future<bool> disableBackgroundDelivery(String identifier) async {
     final arguments = {
       'identifier': identifier,
     };
-    return await _channel.invokeMethod('disableBackgroundDelivery', arguments);
+    return await _methodChannel.invokeMethod(
+        'disableBackgroundDelivery', arguments);
   }
 
   static Future<bool> startWatchApp(
           WorkoutConfiguration workoutConfiguration) async =>
-      await _channel.invokeMethod(
+      await _methodChannel.invokeMethod(
           'disableBackgroundDelivery', workoutConfiguration.map);
 
   static Future<bool> isAuthorizedToWrite(String identifier) async {
     final arguments = {
       'identifier': identifier,
     };
-    return await _channel.invokeMethod('isAuthorizedToWrite', arguments);
+    return await _methodChannel.invokeMethod('isAuthorizedToWrite', arguments);
   }
 
   static Future<bool> addCategory(
@@ -270,7 +280,7 @@ class HealthKitReporter {
       'device': device.map,
       'workout': workout.map,
     };
-    return await _channel.invokeMethod('addCategory', arguments);
+    return await _methodChannel.invokeMethod('addCategory', arguments);
   }
 
   static Future<bool> addQuantity(
@@ -280,7 +290,7 @@ class HealthKitReporter {
       'device': device.map,
       'workout': workout.map,
     };
-    return await _channel.invokeMethod('addQuantity', arguments);
+    return await _methodChannel.invokeMethod('addQuantity', arguments);
   }
 
   static Future<bool> delete(Sample sample) async {
@@ -294,7 +304,7 @@ class HealthKitReporter {
     if (sample is Quantity) {
       arguments['workout'] = sample.map;
     }
-    return await _channel.invokeMethod('delete', arguments);
+    return await _methodChannel.invokeMethod('delete', arguments);
   }
 
   static Future<bool> deleteObjects(
@@ -303,7 +313,7 @@ class HealthKitReporter {
       'identifier': identifier,
     };
     arguments.addAll(predicate.map);
-    return await _channel.invokeMethod('deleteObjects', arguments);
+    return await _methodChannel.invokeMethod('deleteObjects', arguments);
   }
 
   static Future<bool> save(Sample sample) async {
@@ -317,6 +327,6 @@ class HealthKitReporter {
     if (sample is Quantity) {
       arguments['workout'] = sample.map;
     }
-    return await _channel.invokeMethod('save', arguments);
+    return await _methodChannel.invokeMethod('save', arguments);
   }
 }

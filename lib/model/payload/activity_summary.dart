@@ -36,14 +36,14 @@ class Harmonized {
     this.appleStandHoursUnit,
   );
 
-  final double activeEnergyBurned;
-  final double activeEnergyBurnedGoal;
+  final num activeEnergyBurned;
+  final num activeEnergyBurnedGoal;
   final String activeEnergyBurnedUnit;
-  final double appleExerciseTime;
-  final double appleExerciseTimeGoal;
+  final num appleExerciseTime;
+  final num appleExerciseTimeGoal;
   final String appleExerciseTimeUnit;
-  final double appleStandHours;
-  final double appleStandHoursGoal;
+  final num appleStandHours;
+  final num appleStandHoursGoal;
   final String appleStandHoursUnit;
 
   Map<String, dynamic> get map => {

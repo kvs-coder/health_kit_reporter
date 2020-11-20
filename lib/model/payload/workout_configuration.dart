@@ -18,7 +18,7 @@ class WorkoutConfiguration {
 class Harmonized {
   const Harmonized(this.value, this.unit);
 
-  final double value;
+  final int value;
   final String unit;
 
   Map<String, dynamic> get map => {

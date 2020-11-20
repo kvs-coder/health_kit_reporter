@@ -1,10 +1,8 @@
-import '../decorator/extensions.dart';
-
 class WorkoutEvent {
   final String type;
-  final int startTimestamp;
-  final int endTimestamp;
-  final double duration;
+  final num startTimestamp;
+  final num endTimestamp;
+  final num duration;
   final Harmonized harmonized;
 
   const WorkoutEvent(
@@ -25,9 +23,9 @@ class WorkoutEvent {
 
   WorkoutEvent.fromJson(Map<String, dynamic> json)
       : type = json['type'],
-        startTimestamp = json['startTimestamp'].toString().integer,
-        endTimestamp = json['endTimestamp'].toString().integer,
-        duration = json['duration'].toString().integer.toDouble(),
+        startTimestamp = json['startTimestamp'],
+        endTimestamp = json['endTimestamp'],
+        duration = json['duration'],
         harmonized = Harmonized.fromJson(json['harmonized']);
 
   static List<WorkoutEvent> collect(List<dynamic> list) {
@@ -55,6 +53,6 @@ class Harmonized {
       };
 
   Harmonized.fromJson(Map<String, dynamic> json)
-      : value = json['value'].toString().integer,
+      : value = json['value'],
         metadata = json['metadata'];
 }
