@@ -61,7 +61,6 @@ public class HealthKitReporterInvoker {
         }
     }
     public func observerQuery(type: ObjectType, predicate: NSPredicate?) {
-        print("Invoker called observerQuery")
         reporter.observer.observerQuery(
             type: type,
             predicate: predicate

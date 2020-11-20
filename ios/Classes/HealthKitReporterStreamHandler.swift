@@ -101,7 +101,6 @@ extension HealthKitReporterStreamHandler: HealthKitReporterDelegate {
         eventSink?(jsonArray)
     }
     func report(observeredIdentifier: String?, error: Error?) {
-        print("report from delegate")
         guard error == nil else {
             eventSink?(error)
             return
