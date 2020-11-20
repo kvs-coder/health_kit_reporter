@@ -18,7 +18,6 @@ import 'model/payload/sample.dart';
 import 'model/payload/workout.dart';
 import 'model/payload/workout_configuration.dart';
 import 'model/predicate.dart';
-import 'model/update_frequency.dart';
 
 class HealthKitReporter {
   static const MethodChannel _methodChannel =
@@ -145,31 +144,6 @@ class HealthKitReporter {
     return statistics;
   }
 
-  // TODO: set event channel
-  static Stream<Statistics> statisticsCollectionQuery(
-      QuantityType type,
-      PreferredUnit unit,
-      Predicate predicate,
-      DateTime anchorDate,
-      DateTime enumerateFrom,
-      DateTime enumerateTo,
-      {bool monitorUpdates = false}) async* {
-    final arguments = {
-      'identifier': type.identifier,
-      'unit': unit.unit,
-      'anchorDate': anchorDate.toIso8601String(),
-      'enumerateFrom': enumerateFrom.toIso8601String(),
-      'enumerateTo': enumerateTo.toIso8601String(),
-      'monitorUpdates': monitorUpdates,
-    };
-    arguments.addAll(predicate.map);
-    final result = await _methodChannel.invokeMethod(
-        'statisticsCollectionQuery', arguments);
-    final Map<String, dynamic> map = jsonDecode(result);
-    final statistics = Statistics.fromJson(map);
-    yield statistics;
-  }
-
   static Future<HeartbeatSerie> heartbeatSeriesQuery(
       Predicate predicate) async {
     final result = await _methodChannel.invokeMethod(
@@ -179,9 +153,8 @@ class HealthKitReporter {
     return heartbeatSerie;
   }
 
-  // TODO: set event channel
-  static Stream<ActivitySummary> queryActivitySummary(Predicate predicate,
-      {bool monitorUpdates = false}) async* {
+  static Future<ActivitySummary> queryActivitySummary(Predicate predicate,
+      {bool monitorUpdates = false}) async {
     final arguments = <String, dynamic>{};
     arguments.addAll(predicate.map);
     arguments['monitorUpdates'] = monitorUpdates;
@@ -189,28 +162,92 @@ class HealthKitReporter {
         await _methodChannel.invokeMethod('queryActivitySummary', arguments);
     final Map<String, dynamic> map = jsonDecode(result);
     final activitySummary = ActivitySummary.fromJson(map);
-    yield activitySummary;
+    return activitySummary;
   }
 
-  // TODO: set event channel
-  static Stream<List<Sample>> anchoredObjectQuery(
-      String identifier, Predicate predicate,
-      {bool monitorUpdates = false}) async* {
-    final arguments = {
-      'identifier': identifier,
-      'monitorUpdates': monitorUpdates
-    };
-    arguments.addAll(predicate.map);
-    final result =
-        await _methodChannel.invokeMethod('anchoredObjectQuery', arguments);
-    final List<dynamic> list = jsonDecode(result);
-    final samples = <Sample>[];
-    for (final Map<String, dynamic> map in list) {
-      final sample = Sample.factory(map);
-      samples.add(sample);
-    }
-    yield samples;
-  }
+//  // TODO: set event channel
+//  static Stream<Statistics> statisticsCollectionQuery(
+//      QuantityType type,
+//      PreferredUnit unit,
+//      Predicate predicate,
+//      DateTime anchorDate,
+//      DateTime enumerateFrom,
+//      DateTime enumerateTo,
+//      {bool monitorUpdates = false}) async* {
+//    final arguments = {
+//      'identifier': type.identifier,
+//      'unit': unit.unit,
+//      'anchorDate': anchorDate.toIso8601String(),
+//      'enumerateFrom': enumerateFrom.toIso8601String(),
+//      'enumerateTo': enumerateTo.toIso8601String(),
+//      'monitorUpdates': monitorUpdates,
+//    };
+//    arguments.addAll(predicate.map);
+//    final result = await _methodChannel.invokeMethod(
+//        'statisticsCollectionQuery', arguments);
+//    final Map<String, dynamic> map = jsonDecode(result);
+//    final statistics = Statistics.fromJson(map);
+//    yield statistics;
+//  }
+//  static Future<ActivitySummary> queryActivitySummary(Predicate predicate,
+//      {bool monitorUpdates = false}) async {
+//    final arguments = <String, dynamic>{};
+//    arguments.addAll(predicate.map);
+//    arguments['monitorUpdates'] = monitorUpdates;
+//    final result =
+//    await _methodChannel.invokeMethod('queryActivitySummary', arguments);
+//    final Map<String, dynamic> map = jsonDecode(result);
+//    final activitySummary = ActivitySummary.fromJson(map);
+//    return activitySummary;
+//  }
+//  // TODO: set event channel
+//  static Stream<List<Sample>> anchoredObjectQuery(
+//      String identifier, Predicate predicate,
+//      {bool monitorUpdates = false}) async* {
+//    final arguments = {
+//      'identifier': identifier,
+//      'monitorUpdates': monitorUpdates
+//    };
+//    arguments.addAll(predicate.map);
+//    final result =
+//        await _methodChannel.invokeMethod('anchoredObjectQuery', arguments);
+//    final List<dynamic> list = jsonDecode(result);
+//    final samples = <Sample>[];
+//    for (final Map<String, dynamic> map in list) {
+//      final sample = Sample.factory(map);
+//      samples.add(sample);
+//    }
+//    yield samples;
+//  }
+//  static Future<void> observerQuery(
+//      String identifier, Predicate predicate) async {
+//    final arguments = {
+//      'identifier': identifier,
+//    };
+//    arguments.addAll(predicate.map);
+//    return await _methodChannel.invokeMethod('observerQuery', arguments);
+//  }
+//
+//  static Future<bool> enableBackgroundDelivery(
+//      String identifier, UpdateFrequency frequency) async {
+//    final arguments = {
+//      'identifier': identifier,
+//      'frequency': frequency.value,
+//    };
+//    return await _methodChannel.invokeMethod(
+//        'enableBackgroundDelivery', arguments);
+//  }
+//
+//  static Future<bool> disableAllBackgroundDelivery() async =>
+//      await _methodChannel.invokeMethod('disableAllBackgroundDelivery');
+//
+//  static Future<bool> disableBackgroundDelivery(String identifier) async {
+//    final arguments = {
+//      'identifier': identifier,
+//    };
+//    return await _methodChannel.invokeMethod(
+//        'disableBackgroundDelivery', arguments);
+//  }
 
   static Future<String> sourceQuery(
       String identifier, Predicate predicate) async {
@@ -229,36 +266,6 @@ class HealthKitReporter {
     };
     arguments.addAll(predicate.map);
     return await _methodChannel.invokeMethod('correlationQuery', arguments);
-  }
-
-  static Future<String> observerQuery(
-      String identifier, Predicate predicate) async {
-    final arguments = {
-      'identifier': identifier,
-    };
-    arguments.addAll(predicate.map);
-    return await _methodChannel.invokeMethod('observerQuery', arguments);
-  }
-
-  static Future<bool> enableBackgroundDelivery(
-      String identifier, UpdateFrequency frequency) async {
-    final arguments = {
-      'identifier': identifier,
-      'frequency': frequency.value,
-    };
-    return await _methodChannel.invokeMethod(
-        'enableBackgroundDelivery', arguments);
-  }
-
-  static Future<bool> disableAllBackgroundDelivery() async =>
-      await _methodChannel.invokeMethod('disableAllBackgroundDelivery');
-
-  static Future<bool> disableBackgroundDelivery(String identifier) async {
-    final arguments = {
-      'identifier': identifier,
-    };
-    return await _methodChannel.invokeMethod(
-        'disableBackgroundDelivery', arguments);
   }
 
   static Future<bool> startWatchApp(

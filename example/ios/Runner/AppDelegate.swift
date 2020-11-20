@@ -1,5 +1,7 @@
 import UIKit
 import Flutter
+import HealthKitReporter
+import health_kit_reporter
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
@@ -8,6 +10,15 @@ import Flutter
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
+    if let rootViewController = window.rootViewController {
+        let handler = HealthKitReporterStreamHandler(viewController: rootViewController)
+        handler.setEventChannelStreamHandler { (invoker, error) in
+            guard error == nil else {
+                return
+            }
+            invoker?.observerQuery(type: QuantityType.stepCount, predicate: nil)
+        }
+    }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
