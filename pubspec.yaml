@@ -1,7 +1,6 @@
 name: health_kit_reporter
 description: Helps to write or read data from Apple Health via HealthKit framework.
-version: 1.2.0+1
-author: Victor Kachalov
+version: 0.0.1+1
 homepage: https://github.com/VictorKachalov/health_kit_reporter
 
 environment:

@@ -1,3 +1,5 @@
-## 0.0.1
+## 0.0.1+1
 
-* TODO: Describe initial release.
+* Dart HK Models from HealthKitReporter
+* iOS Swift bridging
+* Event and Method channel wrappers
