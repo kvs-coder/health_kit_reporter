@@ -14,7 +14,13 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    HealthKitReporter.receiveBroadcastStream();
+    final predicate = Predicate(
+      DateTime.utc(1990, 1, 1, 12, 30, 30),
+      DateTime.utc(2020, 12, 31, 12, 30, 30),
+    );
+    final sub = HealthKitReporter.observerQuery(
+        QuantityType.stepCount.identifier, predicate);
+    print(sub);
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(

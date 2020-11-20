@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:health_kit_reporter/model/event_channel_method.dart';
 import 'package:health_kit_reporter/model/payload/activity_summary.dart';
 import 'package:health_kit_reporter/model/payload/characteristic/characteristic.dart';
 import 'package:health_kit_reporter/model/payload/electrocardiogram.dart';
@@ -18,6 +19,7 @@ import 'model/payload/sample.dart';
 import 'model/payload/workout.dart';
 import 'model/payload/workout_configuration.dart';
 import 'model/predicate.dart';
+import 'model/update_frequency.dart';
 
 class HealthKitReporter {
   static const MethodChannel _methodChannel =
@@ -26,11 +28,15 @@ class HealthKitReporter {
       EventChannel('health_kit_reporter_event_channel');
   static StreamSubscription<dynamic> _streamSubscription;
 
-  static void receiveBroadcastStream() async {
-    print('start broadcast');
-    _streamSubscription =
-        _eventChannel.receiveBroadcastStream({'add': 'fff'}).listen((event) {
-      print('observer here');
+  static StreamSubscription<dynamic> observerQuery(
+      String identifier, Predicate predicate) {
+    final arguments = {
+      'identifier': identifier,
+      'eventMethod': EventChannelMethod.observerQuery.name,
+    };
+    arguments.addAll(predicate.map);
+    print('start observerQuery broadcast');
+    return _eventChannel.receiveBroadcastStream(arguments).listen((event) {
       print(event);
     });
   }
@@ -234,35 +240,27 @@ class HealthKitReporter {
 //    }
 //    yield samples;
 //  }
-//  static Future<void> observerQuery(
-//      String identifier, Predicate predicate) async {
-//    final arguments = {
-//      'identifier': identifier,
-//    };
-//    arguments.addAll(predicate.map);
-//    return await _methodChannel.invokeMethod('observerQuery', arguments);
-//  }
 //
-//  static Future<bool> enableBackgroundDelivery(
-//      String identifier, UpdateFrequency frequency) async {
-//    final arguments = {
-//      'identifier': identifier,
-//      'frequency': frequency.value,
-//    };
-//    return await _methodChannel.invokeMethod(
-//        'enableBackgroundDelivery', arguments);
-//  }
-//
-//  static Future<bool> disableAllBackgroundDelivery() async =>
-//      await _methodChannel.invokeMethod('disableAllBackgroundDelivery');
-//
-//  static Future<bool> disableBackgroundDelivery(String identifier) async {
-//    final arguments = {
-//      'identifier': identifier,
-//    };
-//    return await _methodChannel.invokeMethod(
-//        'disableBackgroundDelivery', arguments);
-//  }
+  static Future<bool> enableBackgroundDelivery(
+      String identifier, UpdateFrequency frequency) async {
+    final arguments = {
+      'identifier': identifier,
+      'frequency': frequency.value,
+    };
+    return await _methodChannel.invokeMethod(
+        'enableBackgroundDelivery', arguments);
+  }
+
+  static Future<bool> disableAllBackgroundDelivery() async =>
+      await _methodChannel.invokeMethod('disableAllBackgroundDelivery');
+
+  static Future<bool> disableBackgroundDelivery(String identifier) async {
+    final arguments = {
+      'identifier': identifier,
+    };
+    return await _methodChannel.invokeMethod(
+        'disableBackgroundDelivery', arguments);
+  }
 
   static Future<String> sourceQuery(
       String identifier, Predicate predicate) async {

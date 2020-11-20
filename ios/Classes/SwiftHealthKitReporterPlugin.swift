@@ -16,6 +16,9 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
         case queryActivitySummary
         case sourceQuery
         case correlationQuery
+        case enableBackgroundDelivery
+        case disableAllBackgroundDelivery
+        case disableBackgroundDelivery
         case startWatchApp
         case isAuthorizedToWrite
         case addCategory
@@ -168,6 +171,31 @@ extension SwiftHealthKitReporterPlugin {
                     return
                 }
                 correlationQuery(
+                    reporter: reporter,
+                    arguments: arguments,
+                    result: result
+                )
+            case .enableBackgroundDelivery:
+                guard let arguments = call.arguments as? [String: String] else {
+                    throwNoArgumentsError(result: result)
+                    return
+                }
+                enableBackgroundDelivery(
+                    reporter: reporter,
+                    arguments: arguments,
+                    result: result
+                )
+            case .disableAllBackgroundDelivery:
+                disableAllBackgroundDelivery(
+                    reporter: reporter,
+                    result: result
+                )
+            case .disableBackgroundDelivery:
+                guard let arguments = call.arguments as? [String: String] else {
+                    throwNoArgumentsError(result: result)
+                    return
+                }
+                disableBackgroundDelivery(
                     reporter: reporter,
                     arguments: arguments,
                     result: result
@@ -890,6 +918,107 @@ extension SwiftHealthKitReporterPlugin {
                     )
                 )
             }
+        }
+    }
+    private func enableBackgroundDelivery(
+        reporter: HealthKitReporter,
+        arguments: [String: String],
+        result: @escaping FlutterResult
+    ) {
+        guard
+            let identifier = arguments["identifier"],
+            let frequency = arguments["frequency"]?.integer
+        else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        guard let type = identifier.objectType else {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "Error in parsing identifier: \(identifier)",
+                    details: "Invalid identifier for any existing ObjectType"
+                )
+            )
+            return
+        }
+        do {
+            let updateFrequency = try UpdateFrequency.make(from: frequency)
+            reporter.observer.enableBackgroundDelivery(
+                type: type,
+                frequency: updateFrequency
+            ) { (success, error) in
+                guard error == nil else {
+                    result(
+                        FlutterError(
+                            code: #function,
+                            message: "\(#line). Error in enableBackgroundDelivery",
+                            details: "Arguments: \(String(describing: arguments)). \(error!)"
+                        )
+                    )
+                    return
+                }
+                result(success)
+            }
+        } catch {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "Error in parsing frequency: \(frequency)",
+                    details: "\(error)"
+                )
+            )
+        }
+    }
+    private func disableAllBackgroundDelivery(
+        reporter: HealthKitReporter,
+        result: @escaping FlutterResult
+    ) {
+        reporter.observer.disableAllBackgroundDelivery { (success, error) in
+            guard error == nil else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "\(#line). Error in disableAllBackgroundDelivery",
+                        details: "\(error!)"
+                    )
+                )
+                return
+            }
+            result(success)
+        }
+    }
+    private func disableBackgroundDelivery(
+        reporter: HealthKitReporter,
+        arguments: [String: String],
+        result: @escaping FlutterResult
+    ) {
+        guard let identifier = arguments["identifier"] else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        guard let type = identifier.objectType else {
+            result(
+                FlutterError(
+                    code: #function,
+                    message: "Error in parsing identifier: \(identifier)",
+                    details: "Invalid identifier for any existing ObjectType"
+                )
+            )
+            return
+        }
+        reporter.observer.disableBackgroundDelivery(type: type) { (success, error) in
+            guard error == nil else {
+                result(
+                    FlutterError(
+                        code: #function,
+                        message: "\(#line). Error in disableBackgroundDelivery",
+                        details: "Arguments: \(String(describing: arguments)). \(error!)"
+                    )
+                )
+                return
+            }
+            result(success)
         }
     }
     private func startWatchApp(
