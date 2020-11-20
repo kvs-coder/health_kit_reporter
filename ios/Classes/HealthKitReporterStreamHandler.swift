@@ -28,6 +28,7 @@ public class HealthKitReporterStreamHandler: NSObject {
     }
 
     public func setEventChannelStreamHandler(
+        reporter: HealthKitReporter,
         invokeEventCallback: (HealthKitReporterInvoker?, Error?) -> Void
     ) {
         if let binaryMessenger = self.binaryMessenger {
@@ -36,15 +37,9 @@ public class HealthKitReporterStreamHandler: NSObject {
                 binaryMessenger: binaryMessenger
             )
             eventChannel.setStreamHandler(self)
-            do {
-                let reporter = try HealthKitReporter()
-                let wrapper = HealthKitReporterInvoker(reporter: reporter)
-                wrapper.delegate = self
-                invokeEventCallback(wrapper, nil)
-            }
-            catch {
-                invokeEventCallback(nil, error)
-            }
+            let wrapper = HealthKitReporterInvoker(reporter: reporter)
+            wrapper.delegate = self
+            invokeEventCallback(wrapper, nil)
         }
     }
 }
@@ -71,48 +66,67 @@ extension HealthKitReporterStreamHandler: HealthKitReporterDelegate {
             eventSink?(error)
             return
         }
-        eventSink?(activitySummary)
+        do {
+            eventSink?(try activitySummary.encoded())
+        } catch {
+            eventSink?(error)
+        }
     }
     func report(enumeratedStatistics: Statistics?, error: Error?) {
         guard error == nil else {
             eventSink?(error)
             return
         }
-        eventSink?(enumeratedStatistics)
+        do {
+            eventSink?(try enumeratedStatistics.encoded())
+        } catch {
+            eventSink?(error)
+        }
     }
     func report(anchoredSamples: [Sample], error: Error?) {
         guard error == nil else {
             eventSink?(error)
             return
         }
-        eventSink?(anchoredSamples)
+        var jsonArray: [String] = []
+        for sample in anchoredSamples {
+            do {
+                let encoded = try sample.encoded()
+                jsonArray.append(encoded)
+            } catch {
+                eventSink?(error)
+                continue
+            }
+        }
+        eventSink?(jsonArray)
     }
     func report(observeredIdentifier: String?, error: Error?) {
+        print("report from delegate")
         guard error == nil else {
             eventSink?(error)
             return
         }
-        eventSink?(observeredIdentifier)
+        eventSink?(["identifier": observeredIdentifier])
     }
     func report(backgroundDeliveryEnabled: Bool, error: Error?) {
         guard error == nil else {
             eventSink?(error)
             return
         }
-        eventSink?(backgroundDeliveryEnabled)
+        eventSink?(["backgroundDeliveryEnabled": backgroundDeliveryEnabled])
     }
     func report(allBackgroundDeliveriesDisabled: Bool, error: Error?) {
         guard error == nil else {
             eventSink?(error)
             return
         }
-        eventSink?(allBackgroundDeliveriesDisabled)
+        eventSink?(["allBackgroundDeliveriesDisabled": allBackgroundDeliveriesDisabled])
     }
     func report(backgroundDeliveryDisabled: Bool, error: Error?) {
         guard error == nil else {
             eventSink?(error)
             return
         }
-        eventSink?(backgroundDeliveryDisabled)
+        eventSink?(["backgroundDeliveryDisabled": backgroundDeliveryDisabled])
     }
 }

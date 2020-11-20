@@ -8,8 +8,8 @@ import 'source_revision.dart';
 class Correlation extends Sample<Harmonized> {
   const Correlation(
     String identifier,
-    int startTimestamp,
-    int endTimestamp,
+    num startTimestamp,
+    num endTimestamp,
     Device device,
     SourceRevision sourceRevision,
     Harmonized harmonized,

@@ -1,4 +1,3 @@
-import '../decorator/extensions.dart';
 import 'device.dart';
 import 'sample.dart';
 import 'source_revision.dart';
@@ -7,8 +6,8 @@ import 'workout_event.dart';
 class Workout extends Sample<Harmonized> {
   const Workout(
     String identifier,
-    int startTimestamp,
-    int endTimestamp,
+    num startTimestamp,
+    num endTimestamp,
     Device device,
     SourceRevision sourceRevision,
     Harmonized harmonized,
@@ -88,7 +87,7 @@ class Harmonized {
       };
 
   Harmonized.fromJson(Map<String, dynamic> json)
-      : value = json['value'].toString().integer,
+      : value = json['value'],
         totalEnergyBurned = json['totalEnergyBurned'],
         totalEnergyBurnedUnit = json['totalEnergyBurnedUnit'],
         totalDistance = json['totalDistance'],

@@ -1,4 +1,3 @@
-import '../decorator/extensions.dart';
 import 'source.dart';
 
 class Statistics {
@@ -11,8 +10,8 @@ class Statistics {
   );
 
   final String identifier;
-  final int startTimestamp;
-  final int endTimestamp;
+  final num startTimestamp;
+  final num endTimestamp;
   final List<Source> sources;
   final Harmonized harmonized;
 
@@ -25,8 +24,8 @@ class Statistics {
 
   Statistics.fromJson(Map<String, dynamic> json, {Harmonized harmonized})
       : identifier = json['identifier'],
-        startTimestamp = json['startTimestamp'].toString().integer,
-        endTimestamp = json['endTimestamp'].toString().integer,
+        startTimestamp = json['startTimestamp'],
+        endTimestamp = json['endTimestamp'],
         sources =
             json['sources'] != null ? Source.collect(json['sources']) : null,
         harmonized = Harmonized.fromJson(json['harmonized']);

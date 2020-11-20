@@ -1,4 +1,3 @@
-import '../decorator/extensions.dart';
 import 'device.dart';
 import 'sample.dart';
 import 'source_revision.dart';
@@ -6,8 +5,8 @@ import 'source_revision.dart';
 class Electrocardiogram extends Sample<Harmonized> {
   const Electrocardiogram(
     String identifier,
-    int startTimestamp,
-    int endTimestamp,
+    num startTimestamp,
+    num endTimestamp,
     Device device,
     SourceRevision sourceRevision,
     Harmonized harmonized,
@@ -51,9 +50,9 @@ class Harmonized {
     this.metadata,
   );
 
-  final int averageHeartRate;
+  final num averageHeartRate;
   final String averageHeartRateUnit;
-  final double samplingFrequency;
+  final num samplingFrequency;
   final String samplingFrequencyUnit;
   final String classification;
   final String symptomsStatus;
@@ -70,9 +69,9 @@ class Harmonized {
       };
 
   Harmonized.fromJson(Map<String, dynamic> json)
-      : averageHeartRate = json['averageHeartRate'].toString().integer,
+      : averageHeartRate = json['averageHeartRate'],
         averageHeartRateUnit = json['averageHeartRateUnit'],
-        samplingFrequency = double.tryParse(json['averageHeartRate']),
+        samplingFrequency = json['averageHeartRate'],
         samplingFrequencyUnit = json['samplingFrequencyUnit'],
         classification = json['classification'],
         symptomsStatus = json['symptomsStatus'],

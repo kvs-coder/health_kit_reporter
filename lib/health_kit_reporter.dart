@@ -24,6 +24,21 @@ class HealthKitReporter {
       MethodChannel('health_kit_reporter_method_channel');
   static const EventChannel _eventChannel =
       EventChannel('health_kit_reporter_event_channel');
+  static StreamSubscription<dynamic> _streamSubscription;
+
+  static void receiveBroadcastStream() async {
+    print('start broadcast');
+    _streamSubscription =
+        _eventChannel.receiveBroadcastStream({'add': 'fff'}).listen((event) {
+      print('observer here');
+      print(event);
+    });
+  }
+
+  static void cancelBroadcastStream() async {
+    await _streamSubscription?.cancel();
+    _streamSubscription = null;
+  }
 
   static Future<bool> requestAuthorization(
       List<String> toRead, List<String> toWrite) async {

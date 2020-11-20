@@ -12,11 +12,16 @@ import health_kit_reporter
     GeneratedPluginRegistrant.register(with: self)
     if let rootViewController = window.rootViewController {
         let handler = HealthKitReporterStreamHandler(viewController: rootViewController)
-        handler.setEventChannelStreamHandler { (invoker, error) in
-            guard error == nil else {
-                return
+        do {
+            let reporter = try HealthKitReporter()
+            handler.setEventChannelStreamHandler(reporter: reporter) { (invoker, error) in
+                guard error == nil else {
+                    return
+                }
+                invoker?.observerQuery(type: QuantityType.stepCount, predicate: nil)
             }
-            invoker?.observerQuery(type: QuantityType.stepCount, predicate: nil)
+        } catch {
+            print(error)
         }
     }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

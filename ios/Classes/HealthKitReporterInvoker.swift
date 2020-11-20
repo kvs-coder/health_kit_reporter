@@ -9,7 +9,7 @@ import Foundation
 import HealthKitReporter
 
 public class HealthKitReporterInvoker {
-    private let reporter: HealthKitReporter
+    public let reporter: HealthKitReporter
     weak var delegate: HealthKitReporterDelegate?
 
     init(reporter: HealthKitReporter) {
@@ -20,8 +20,8 @@ public class HealthKitReporterInvoker {
         reporter.reader.queryActivitySummary(
             predicate: predicate,
             monitorUpdates: true
-        ) { [weak self] (activitySummaries, error) in
-            self?.delegate?.report(activitySummary: activitySummaries, error: error)
+        ) { [self] (activitySummaries, error) in
+            delegate?.report(activitySummary: activitySummaries, error: error)
         }
     }
     public func statisticsCollectionQuery(
@@ -43,8 +43,8 @@ public class HealthKitReporterInvoker {
             enumerateTo: enumerateTo,
             intervalComponents: intervalComponents,
             monitorUpdates: monitorUpdates
-        ) { [weak self] (statistics, error) in
-            self?.delegate?.report(enumeratedStatistics: statistics, error: error)
+        ) { [self] (statistics, error) in
+            delegate?.report(enumeratedStatistics: statistics, error: error)
         }
     }
     public func anchoredObjectQuery(
@@ -56,16 +56,17 @@ public class HealthKitReporterInvoker {
             type: type,
             predicate: predicate,
             monitorUpdates: false
-        ) { [weak self] (samples, error) in
-            self?.delegate?.report(anchoredSamples: samples, error: error)
+        ) { [self] (samples, error) in
+            delegate?.report(anchoredSamples: samples, error: error)
         }
     }
     public func observerQuery(type: ObjectType, predicate: NSPredicate?) {
+        print("Invoker called observerQuery")
         reporter.observer.observerQuery(
             type: type,
             predicate: predicate
-        ) { [weak self] (identifier, error) in
-            self?.delegate?.report(observeredIdentifier: identifier, error: error)
+        ) { [self] (identifier, error) in
+            delegate?.report(observeredIdentifier: identifier, error: error)
         }
     }
     public func enableBackgroundDelivery(
@@ -75,20 +76,20 @@ public class HealthKitReporterInvoker {
         reporter.observer.enableBackgroundDelivery(
             type: type,
             frequency: frequency
-        ) { [weak self] (success, error) in
-            self?.delegate?.report(backgroundDeliveryEnabled: success, error: error)
+        ) { [self] (success, error) in
+            delegate?.report(backgroundDeliveryEnabled: success, error: error)
         }
     }
     public func disableAllBackgroundDelivery() {
-        reporter.observer.disableAllBackgroundDelivery { [weak self] (success, error) in
-            self?.delegate?.report(allBackgroundDeliveriesDisabled: success, error: error)
+        reporter.observer.disableAllBackgroundDelivery { [self] (success, error) in
+            delegate?.report(allBackgroundDeliveriesDisabled: success, error: error)
         }
     }
     public func disableBackgroundDelivery(type: ObjectType) {
         reporter.observer.disableBackgroundDelivery(
             type: type
-        ) { [weak self] (success, error) in
-            self?.delegate?.report(backgroundDeliveryDisabled: success, error: error)
+        ) { [self] (success, error) in
+            delegate?.report(backgroundDeliveryDisabled: success, error: error)
         }
     }
 }

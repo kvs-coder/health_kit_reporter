@@ -14,6 +14,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    HealthKitReporter.receiveBroadcastStream();
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(

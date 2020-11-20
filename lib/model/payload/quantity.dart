@@ -5,8 +5,8 @@ import 'source_revision.dart';
 class Quantity extends Sample<Harmonized> {
   const Quantity(
     String identifier,
-    int startTimestamp,
-    int endTimestamp,
+    num startTimestamp,
+    num endTimestamp,
     Device device,
     SourceRevision sourceRevision,
     Harmonized harmonized,
