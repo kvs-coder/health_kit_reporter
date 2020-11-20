@@ -9,37 +9,27 @@ import Foundation
 import HealthKitReporter
 
 public class HealthKitReporterStreamHandler: NSObject {
-    public enum EventMethod: String {
+    public enum Method: String {
         case statisticsCollectionQuery
         case queryActivitySummary
         case anchoredObjectQuery
         case observerQuery
-        case enableBackgroundDelivery
-        case disableAllBackgroundDelivery
-        case disableBackgroundDelivery
     }
 
     private let binaryMessenger: FlutterBinaryMessenger?
-    private var eventSink: FlutterEventSink?
 
     public init(viewController: UIViewController) {
         let flutterViewController = viewController as? FlutterViewController
         self.binaryMessenger = flutterViewController?.binaryMessenger
     }
 
-    public func setEventChannelStreamHandler(
-        reporter: HealthKitReporter,
-        invokeEventCallback: (HealthKitReporterInvoker?, Error?) -> Void
-    ) {
+    public func setEventChannelStreamHandler() {
         if let binaryMessenger = self.binaryMessenger {
             let eventChannel = FlutterEventChannel(
                 name: "health_kit_reporter_event_channel",
                 binaryMessenger: binaryMessenger
             )
             eventChannel.setStreamHandler(self)
-            let wrapper = HealthKitReporterInvoker(reporter: reporter)
-            wrapper.delegate = self
-            invokeEventCallback(wrapper, nil)
         }
     }
 }
@@ -49,83 +39,258 @@ extension HealthKitReporterStreamHandler: FlutterStreamHandler {
         withArguments arguments: Any?,
         eventSink events: @escaping FlutterEventSink
     ) -> FlutterError? {
-        self.eventSink = events
+        guard let arguments = arguments as? [String: Any] else {
+            return FlutterError(
+                code: #function,
+                message: "\(#line). Error call arguments.",
+                details: "No arguments"
+            )
+        }
+        guard let eventMethod = arguments["eventMethod"] as? String else {
+            return FlutterError(
+                code: #function,
+                message: "Invalid function name: \(arguments)",
+                details: "Wrong arguments"
+            )
+        }
+        guard let method = Method.init(rawValue: eventMethod) else {
+            return FlutterError(
+                code: #function,
+                message: "Method enum can not be represented",
+                details: "Raw value was: \(eventMethod)"
+            )
+        }
+        do {
+            let reporter = try HealthKitReporter()
+            switch method {
+            case .statisticsCollectionQuery:
+                statisticsCollectionQuery(
+                    reporter: reporter,
+                    arguments: arguments,
+                    events: events
+                )
+            case .queryActivitySummary:
+                guard let arguments = arguments as? [String: String] else {
+                    return nil
+                }
+                queryActivitySummary(
+                    reporter: reporter,
+                    arguments: arguments,
+                    events: events
+                )
+            case .anchoredObjectQuery:
+                guard let arguments = arguments as? [String: String] else {
+                    return nil
+                }
+                anchoredObjectQuery(
+                    reporter: reporter,
+                    arguments: arguments,
+                    events: events
+                )
+            case .observerQuery:
+                guard let arguments = arguments as? [String: String] else {
+                    return nil
+                }
+                observerQuery(
+                    reporter: reporter,
+                    arguments: arguments,
+                    events: events
+                )
+            }
+        } catch {
+            events(nil)
+        }
         return nil
     }
     public func onCancel(
         withArguments arguments: Any?
     ) -> FlutterError? {
-        self.eventSink = nil
         return nil
     }
 }
-// MARK: - HealthKitReporterDelegate
-extension HealthKitReporterStreamHandler: HealthKitReporterDelegate {
-    func report(activitySummary: [ActivitySummary], error: Error?) {
-        guard error == nil else {
-            eventSink?(error)
+// MARK: - EventChannel Methods
+extension HealthKitReporterStreamHandler {
+    private func statisticsCollectionQuery(
+        reporter: HealthKitReporter,
+        arguments: [String: Any],
+        events: @escaping FlutterEventSink
+    ) {
+        guard
+            let identifier = arguments["identifier"] as? String,
+            let unit = arguments["unit"] as? String,
+            let startDate = (arguments["startDate"] as? String)?
+                .asDate(format: Date.iso8601),
+            let endDate = (arguments["endDate"] as? String)?
+                .asDate(format: Date.iso8601),
+            let anchorDate = (arguments["anchorDate"] as? String)?
+                .asDate(format: Date.iso8601),
+            let enumerateFrom = (arguments["enumerateFrom"] as? String)?
+                .asDate(format: Date.iso8601),
+            let enumerateTo = (arguments["enumerateTo"] as? String)?
+                .asDate(format: Date.iso8601),
+        let intervalComponents = arguments["intervalComponents"] as? [String: Any]
+        else {
             return
         }
-        do {
-            eventSink?(try activitySummary.encoded())
-        } catch {
-            eventSink?(error)
-        }
-    }
-    func report(enumeratedStatistics: Statistics?, error: Error?) {
-        guard error == nil else {
-            eventSink?(error)
+        guard let type = identifier.objectType as? QuantityType else {
             return
         }
-        do {
-            eventSink?(try enumeratedStatistics.encoded())
-        } catch {
-            eventSink?(error)
-        }
-    }
-    func report(anchoredSamples: [Sample], error: Error?) {
-        guard error == nil else {
-            eventSink?(error)
-            return
-        }
-        var jsonArray: [String] = []
-        for sample in anchoredSamples {
+        let predicate = NSPredicate.samplesPredicate(
+            startDate: startDate,
+            endDate: endDate
+        )
+        let monitorUpdates = (
+            arguments["monitorUpdates"] as? String
+        )?.boolean ?? true
+        reporter.reader.statisticsCollectionQuery(
+            type: type,
+            unit: unit,
+            quantitySamplePredicate: predicate,
+            anchorDate: anchorDate,
+            enumerateFrom: enumerateFrom,
+            enumerateTo: enumerateTo,
+            intervalComponents: DateComponents.make(
+                from: intervalComponents
+            ),
+            monitorUpdates: monitorUpdates
+        ) { (statistics, error) in
+            guard error == nil else {
+                return
+            }
             do {
-                let encoded = try sample.encoded()
-                jsonArray.append(encoded)
+                guard let statistics = statistics else {
+                    return
+                }
+                let dictionary: [String: Any] = [
+                    "event": Method.statisticsCollectionQuery.rawValue,
+                    "result": try statistics.encoded()
+                ]
+                events(dictionary)
             } catch {
-                eventSink?(error)
-                continue
+                events(nil)
             }
         }
-        eventSink?(jsonArray)
     }
-    func report(observeredIdentifier: String?, error: Error?) {
-        guard error == nil else {
-            eventSink?(error)
+    private func queryActivitySummary(
+        reporter: HealthKitReporter,
+        arguments: [String: String],
+        events: @escaping FlutterEventSink
+    ) {
+        guard
+            let startDate = arguments["startDate"]?
+                .asDate(format: Date.iso8601),
+            let endDate = arguments["endDate"]?
+                .asDate(format: Date.iso8601)
+        else {
             return
         }
-        eventSink?(["identifier": observeredIdentifier])
+        let predicate = NSPredicate.samplesPredicate(
+            startDate: startDate,
+            endDate: endDate
+        )
+        let monitorUpdates = arguments["monitorUpdates"]?.boolean ?? true
+        reporter.reader.queryActivitySummary(
+            predicate: predicate,
+            monitorUpdates: monitorUpdates
+        ) { (activitySummaries, error) in
+            guard error == nil else {
+                return
+            }
+            do {
+                let dictionary: [String: Any] = [
+                    "event": Method.queryActivitySummary.rawValue,
+                    "result": try activitySummaries.encoded()
+                ]
+                events(dictionary)
+            } catch {
+                events(nil)
+            }
+        }
     }
-    func report(backgroundDeliveryEnabled: Bool, error: Error?) {
-        guard error == nil else {
-            eventSink?(error)
+    private func anchoredObjectQuery(
+        reporter: HealthKitReporter,
+        arguments: [String: String],
+        events: @escaping FlutterEventSink
+    ) {
+        guard
+            let identifier = arguments["identifier"],
+            let startDate = arguments["startDate"]?
+                .asDate(format: Date.iso8601),
+            let endDate = arguments["endDate"]?
+                .asDate(format: Date.iso8601)
+        else {
             return
         }
-        eventSink?(["backgroundDeliveryEnabled": backgroundDeliveryEnabled])
-    }
-    func report(allBackgroundDeliveriesDisabled: Bool, error: Error?) {
-        guard error == nil else {
-            eventSink?(error)
+        guard let type = identifier.objectType else {
             return
         }
-        eventSink?(["allBackgroundDeliveriesDisabled": allBackgroundDeliveriesDisabled])
+        let monitorUpdates = arguments["monitorUpdates"]?.boolean ?? true
+        let predicate = NSPredicate.samplesPredicate(
+            startDate: startDate,
+            endDate: endDate
+        )
+        reporter.reader.anchoredObjectQuery(
+            type: type,
+            predicate: predicate,
+            monitorUpdates: monitorUpdates
+        ) { (samples, error) in
+            guard error == nil else {
+                return
+            }
+            var jsonArray: [String] = []
+            for sample in samples {
+                do {
+                    let encoded = try sample.encoded()
+                    jsonArray.append(encoded)
+                } catch {
+                    continue
+                }
+            }
+            let dictionary: [String: Any] = [
+                "event": Method.anchoredObjectQuery.rawValue,
+                "result": jsonArray
+            ]
+            events(dictionary)
+        }
     }
-    func report(backgroundDeliveryDisabled: Bool, error: Error?) {
-        guard error == nil else {
-            eventSink?(error)
+    private func observerQuery(
+        reporter: HealthKitReporter,
+        arguments: [String: String],
+        events: @escaping FlutterEventSink
+    ) {
+        guard
+            let identifier = arguments["identifier"],
+            let startDate = arguments["startDate"]?
+                .asDate(format: Date.iso8601),
+            let endDate = arguments["endDate"]?
+                .asDate(format: Date.iso8601)
+        else {
             return
         }
-        eventSink?(["backgroundDeliveryDisabled": backgroundDeliveryDisabled])
+        guard let type = identifier.objectType else {
+            return
+        }
+        let predicate = NSPredicate.samplesPredicate(
+            startDate: startDate,
+            endDate: endDate
+        )
+        reporter.observer.observerQuery(
+            type: type,
+            predicate: predicate
+        ) { (identifier, error) in
+            guard error == nil else {
+                return
+            }
+            guard let identifier = identifier else {
+                return
+            }
+            let dictionary: [String: Any] = [
+                "event": Method.anchoredObjectQuery.rawValue,
+                "result": [
+                    "observingTypeIdentifier": identifier
+                ]
+            ]
+            events(dictionary)
+        }
     }
 }
