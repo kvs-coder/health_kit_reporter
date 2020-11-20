@@ -3,9 +3,6 @@ enum EventChannelMethod {
   queryActivitySummary,
   anchoredObjectQuery,
   observerQuery,
-  enableBackgroundDelivery,
-  disableAllBackgroundDelivery,
-  disableBackgroundDelivery,
 }
 
 extension Name on EventChannelMethod {

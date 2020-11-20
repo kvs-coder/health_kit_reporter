@@ -2,25 +2,28 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:health_kit_reporter/health_kit_reporter.dart';
+import 'package:health_kit_reporter/model/payload/date_components.dart';
+import 'package:health_kit_reporter/model/payload/preferred_unit.dart';
 import 'package:health_kit_reporter/model/predicate.dart';
+import 'package:health_kit_reporter/model/type/activity_summary_type.dart';
 import 'package:health_kit_reporter/model/type/category_type.dart';
 import 'package:health_kit_reporter/model/type/characteristic_type.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
+import 'package:health_kit_reporter/model/type/workout_type.dart';
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  final _predicate = Predicate(
+    DateTime.utc(2020, 1, 1, 12, 30, 30),
+    DateTime.utc(2020, 12, 31, 12, 30, 30),
+  );
+
   @override
   Widget build(BuildContext context) {
-    final predicate = Predicate(
-      DateTime.utc(1990, 1, 1, 12, 30, 30),
-      DateTime.utc(2020, 12, 31, 12, 30, 30),
-    );
-    final sub = HealthKitReporter.observerQuery(
-        QuantityType.stepCount.identifier, predicate);
-    print(sub);
+    statisticsCollectionQuery();
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -44,42 +47,93 @@ class MyApp extends StatelessWidget {
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      final readTypes = [
-        CategoryType.sleepAnalysis.identifier,
-        QuantityType.stepCount.identifier,
-        CharacteristicType.biologicalSex.identifier,
-        CharacteristicType.dateOfBirth.identifier,
-        CharacteristicType.bloodType.identifier,
-        CharacteristicType.fitzpatrickSkinType.identifier,
-      ];
-      final writeTypes = [
-        QuantityType.stepCount,
-      ];
-      final predicate = Predicate(
-        DateTime.utc(1990, 1, 1, 12, 30, 30),
-        DateTime.utc(2020, 12, 31, 12, 30, 30),
-      );
-      final isRequested = await HealthKitReporter.requestAuthorization(
-          readTypes, writeTypes.map((e) => e.identifier).toList());
+      final readTypes = <String>[];
+      readTypes.addAll(ActivitySummaryType.values.map((e) => e.identifier));
+      readTypes.addAll(CategoryType.values.map((e) => e.identifier));
+      readTypes.addAll(CharacteristicType.values.map((e) => e.identifier));
+//      readTypes.addAll(CorrelationType.values.map((e) => e.identifier));
+//      readTypes.addAll(DocumentType.values.map((e) => e.identifier));
+//      readTypes.addAll(ElectrocardiogramType.values.map((e) => e.identifier));
+      readTypes.addAll(QuantityType.values.map((e) => e.identifier));
+//      readTypes.addAll(SeriesType.values.map((e) => e.identifier));
+      readTypes.addAll(WorkoutType.values.map((e) => e.identifier));
+      final writeTypes = <String>[];
+//      writeTypes.addAll(QuantityType.values.map((e) => e.identifier));
+//      writeTypes.addAll(CategoryType.values.map((e) => e.identifier));
+//      writeTypes.addAll(WorkoutType.values.map((e) => e.identifier));
+      final isRequested =
+          await HealthKitReporter.requestAuthorization(readTypes, writeTypes);
       print('IsRequested: $isRequested');
-      final preferredUnits = await HealthKitReporter.preferredUnits(writeTypes);
+      final preferredUnits =
+          await HealthKitReporter.preferredUnits([QuantityType.stepCount]);
       preferredUnits.forEach((preferredUnit) async {
         print('preferredUnit: ${preferredUnit.identifier}');
         final type = QuantityTypeFactory.from(preferredUnit.identifier);
         final quantities = await HealthKitReporter.quantityQuery(
-            type, preferredUnit, predicate);
+            type, preferredUnit, _predicate);
         print('quantity: ${quantities.map((e) => e.map)}');
         final statistics = await HealthKitReporter.statisticsQuery(
-            type, preferredUnit, predicate);
+            type, preferredUnit, _predicate);
         print('statistics: ${statistics.map}');
       });
       final characteristics = await HealthKitReporter.characteristicsQuery();
       print('characteristics: ${characteristics.map}');
       final categories = await HealthKitReporter.categoryQuery(
-          CategoryType.sleepAnalysis, predicate);
+          CategoryType.sleepAnalysis, _predicate);
       print('categories: ${categories.map((e) => e.map)}');
+      final samples = await HealthKitReporter.sampleQuery(
+          QuantityType.stepCount.identifier, _predicate);
+      print('samples: ${samples.map((e) => e.map)}');
     } catch (exception) {
       print('general exception: $exception');
-    }
+    } finally {}
+  }
+
+  void observerQuery() {
+    final identifier = QuantityType.stepCount.identifier;
+    final sub = HealthKitReporter.observerQuery(identifier, _predicate,
+        onUpdate: (identifier) {
+      print('Updates for observerQuerySub');
+      print(identifier);
+    });
+    print('observerQuerySub: $sub');
+  }
+
+  void anchoredObjectQuery() {
+    final identifier = QuantityType.stepCount.identifier;
+    final sub = HealthKitReporter.anchoredObjectQuery(identifier, _predicate,
+        onUpdate: (samples) {
+      print('Updates for anchoredObjectQuerySub');
+      print(samples.map((e) => e.map));
+    });
+    print('anchoredObjectQuerySub: $sub');
+  }
+
+  void queryActivitySummaryUpdates() {
+    final sub = HealthKitReporter.queryActivitySummaryUpdates(_predicate,
+        onUpdate: (samples) {
+      print('Updates for activitySummaryUpdatesSub');
+      print(samples.map((e) => e.map));
+    });
+    print('activitySummaryUpdatesSub: $sub');
+  }
+
+  void statisticsCollectionQuery() {
+    final anchorDate = DateTime.utc(2020, 2, 1, 12, 30, 30);
+    final enumerateFrom = DateTime.utc(2020, 3, 1, 12, 30, 30);
+    final enumerateTo = DateTime.utc(2020, 12, 31, 12, 30, 30);
+    final intervalComponents = DateComponents(month: 1);
+    final sub = HealthKitReporter.statisticsCollectionQuery(
+        QuantityType.stepCount,
+        PreferredUnit(QuantityType.stepCount.identifier, 'count'),
+        _predicate,
+        anchorDate,
+        enumerateFrom,
+        enumerateTo,
+        intervalComponents, onUpdate: (statistics) {
+      print('Updates for statisticsCollectionQuerySub');
+      print(statistics.map);
+    });
+    print('statisticsCollectionQuery: $sub');
   }
 }

@@ -14,13 +14,9 @@ public class HealthKitReporterStreamHandler: NSObject {
         case queryActivitySummary
         case anchoredObjectQuery
         case observerQuery
-        case enableBackgroundDelivery
-        case disableAllBackgroundDelivery
-        case disableBackgroundDelivery
     }
 
     private let binaryMessenger: FlutterBinaryMessenger?
-    private var eventSink: FlutterEventSink?
 
     public init(viewController: UIViewController) {
         let flutterViewController = viewController as? FlutterViewController
@@ -100,29 +96,6 @@ extension HealthKitReporterStreamHandler: FlutterStreamHandler {
                     arguments: arguments,
                     events: events
                 )
-            case .enableBackgroundDelivery:
-                guard let arguments = arguments as? [String: String] else {
-                    return nil
-                }
-                enableBackgroundDelivery(
-                    reporter: reporter,
-                    arguments: arguments,
-                    events: events
-                )
-            case .disableAllBackgroundDelivery:
-                disableAllBackgroundDelivery(
-                    reporter: reporter,
-                    events: events
-                )
-            case .disableBackgroundDelivery:
-                guard let arguments = arguments as? [String: String] else {
-                    return nil
-                }
-                disableBackgroundDelivery(
-                    reporter: reporter,
-                    arguments: arguments,
-                    events: events
-                )
             }
         } catch {
             events(nil)
@@ -132,7 +105,6 @@ extension HealthKitReporterStreamHandler: FlutterStreamHandler {
     public func onCancel(
         withArguments arguments: Any?
     ) -> FlutterError? {
-        self.eventSink = nil
         return nil
     }
 }
@@ -155,7 +127,8 @@ extension HealthKitReporterStreamHandler {
             let enumerateFrom = (arguments["enumerateFrom"] as? String)?
                 .asDate(format: Date.iso8601),
             let enumerateTo = (arguments["enumerateTo"] as? String)?
-                .asDate(format: Date.iso8601)
+                .asDate(format: Date.iso8601),
+        let intervalComponents = arguments["intervalComponents"] as? [String: Any]
         else {
             return
         }
@@ -166,8 +139,9 @@ extension HealthKitReporterStreamHandler {
             startDate: startDate,
             endDate: endDate
         )
-        let intervalComponents = DateComponents.make(from: arguments)
-        let monitorUpdates = (arguments["monitorUpdates"] as? String)?.boolean ?? true
+        let monitorUpdates = (
+            arguments["monitorUpdates"] as? String
+        )?.boolean ?? true
         reporter.reader.statisticsCollectionQuery(
             type: type,
             unit: unit,
@@ -175,7 +149,9 @@ extension HealthKitReporterStreamHandler {
             anchorDate: anchorDate,
             enumerateFrom: enumerateFrom,
             enumerateTo: enumerateTo,
-            intervalComponents: intervalComponents,
+            intervalComponents: DateComponents.make(
+                from: intervalComponents
+            ),
             monitorUpdates: monitorUpdates
         ) { (statistics, error) in
             guard error == nil else {
@@ -185,7 +161,11 @@ extension HealthKitReporterStreamHandler {
                 guard let statistics = statistics else {
                     return
                 }
-                events(try statistics.encoded())
+                let dictionary: [String: Any] = [
+                    "event": Method.statisticsCollectionQuery.rawValue,
+                    "result": try statistics.encoded()
+                ]
+                events(dictionary)
             } catch {
                 events(nil)
             }
@@ -197,8 +177,10 @@ extension HealthKitReporterStreamHandler {
         events: @escaping FlutterEventSink
     ) {
         guard
-            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+            let startDate = arguments["startDate"]?
+                .asDate(format: Date.iso8601),
+            let endDate = arguments["endDate"]?
+                .asDate(format: Date.iso8601)
         else {
             return
         }
@@ -215,7 +197,11 @@ extension HealthKitReporterStreamHandler {
                 return
             }
             do {
-                events(try activitySummaries.encoded())
+                let dictionary: [String: Any] = [
+                    "event": Method.queryActivitySummary.rawValue,
+                    "result": try activitySummaries.encoded()
+                ]
+                events(dictionary)
             } catch {
                 events(nil)
             }
@@ -228,8 +214,10 @@ extension HealthKitReporterStreamHandler {
     ) {
         guard
             let identifier = arguments["identifier"],
-            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+            let startDate = arguments["startDate"]?
+                .asDate(format: Date.iso8601),
+            let endDate = arguments["endDate"]?
+                .asDate(format: Date.iso8601)
         else {
             return
         }
@@ -258,7 +246,11 @@ extension HealthKitReporterStreamHandler {
                     continue
                 }
             }
-            events(jsonArray)
+            let dictionary: [String: Any] = [
+                "event": Method.anchoredObjectQuery.rawValue,
+                "result": jsonArray
+            ]
+            events(dictionary)
         }
     }
     private func observerQuery(
@@ -268,8 +260,10 @@ extension HealthKitReporterStreamHandler {
     ) {
         guard
             let identifier = arguments["identifier"],
-            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+            let startDate = arguments["startDate"]?
+                .asDate(format: Date.iso8601),
+            let endDate = arguments["endDate"]?
+                .asDate(format: Date.iso8601)
         else {
             return
         }
@@ -290,67 +284,13 @@ extension HealthKitReporterStreamHandler {
             guard let identifier = identifier else {
                 return
             }
-            events(["observingTypeIdentifier": identifier])
-        }
-    }
-    private func enableBackgroundDelivery(
-        reporter: HealthKitReporter,
-        arguments: [String: String],
-        events: @escaping FlutterEventSink
-    ) {
-        guard
-            let identifier = arguments["identifier"],
-            let frequency = arguments["frequency"]?.integer
-        else {
-            return
-        }
-        guard let type = identifier.objectType else {
-            return
-        }
-        do {
-            let updateFrequency = try UpdateFrequency.make(from: frequency)
-            reporter.observer.enableBackgroundDelivery(
-                type: type,
-                frequency: updateFrequency
-            ) { (success, error) in
-                guard error == nil else {
-                    return
-                }
-                events(["enableBackgroundDelivery": success])
-            }
-        } catch {
-            events(nil)
-        }
-    }
-    private func disableAllBackgroundDelivery(
-        reporter: HealthKitReporter,
-        events: @escaping FlutterEventSink
-    ) {
-        reporter.observer.disableAllBackgroundDelivery { (success, error) in
-            guard error == nil else {
-                return
-            }
-            events(["disableAllBackgroundDelivery": success])
-        }
-    }
-    private func disableBackgroundDelivery(
-        reporter: HealthKitReporter,
-        arguments: [String: String],
-        events: @escaping FlutterEventSink
-    ) {
-        guard let identifier = arguments["identifier"] else {
-            return
-        }
-        guard let type = identifier.objectType else {
-            return
-        }
-        reporter.observer.disableBackgroundDelivery(
-            type: type
-        ) { (success, error) in
-            guard error == nil else {
-                return
-            }
-            events(["disableBackgroundDelivery": success])
+            let dictionary: [String: Any] = [
+                "event": Method.anchoredObjectQuery.rawValue,
+                "result": [
+                    "observingTypeIdentifier": identifier
+                ]
+            ]
+            events(dictionary)
         }
     }
 }
