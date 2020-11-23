@@ -81,8 +81,14 @@ class MyApp extends StatelessWidget {
       final samples = await HealthKitReporter.sampleQuery(
           QuantityType.stepCount.identifier, _predicate);
       print('samples: ${samples.map((e) => e.map)}');
-      final stepsSaved = await saveSteps();
-      print('stepsSaved: $stepsSaved');
+      final canWrite = await HealthKitReporter.isAuthorizedToWrite(
+          QuantityType.stepCount.identifier);
+      if (canWrite) {
+        final stepsSaved = await saveSteps();
+        print('stepsSaved: $stepsSaved');
+      } else {
+        print('canWrite: $canWrite');
+      }
     } catch (exception) {
       print('general exception: $exception');
     } finally {}

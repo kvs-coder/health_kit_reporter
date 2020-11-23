@@ -289,17 +289,15 @@ extension SwiftHealthKitReporterPlugin {
         arguments: [String: [String]],
         result: @escaping FlutterResult
     ) {
-        guard let toReadArguments = arguments["toRead"] else {
-            throwParsingArgumentsError(result: result, arguments: arguments)
-            return
-        }
-        guard let toWriteArguments = arguments["toWrite"] else {
-            throwParsingArgumentsError(result: result, arguments: arguments)
-            return
-        }
+        let toReadArguments = arguments["toRead"]
+        let toWriteArguments = arguments["toWrite"]
         reporter.manager.requestAuthorization(
-            toRead: parse(arguments: toReadArguments),
-            toWrite: parse(arguments: toWriteArguments)
+            toRead: toReadArguments != nil
+                ? parse(arguments: toReadArguments!)
+                : [],
+            toWrite: toWriteArguments != nil
+                ? parse(arguments: toWriteArguments!)
+                : []
         ) { (success, error) in
             guard error == nil else {
                 result(
