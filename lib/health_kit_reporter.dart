@@ -32,7 +32,7 @@ class HealthKitReporter {
       String identifier, Predicate predicate,
       {Function(String) onUpdate}) {
     final eventMethod = EventChannelMethod.observerQuery.name;
-    final arguments = {
+    final arguments = <String, dynamic>{
       'identifier': identifier,
       'eventMethod': eventMethod,
     };
@@ -51,7 +51,7 @@ class HealthKitReporter {
       String identifier, Predicate predicate,
       {Function(List<Sample>) onUpdate}) {
     final eventMethod = EventChannelMethod.anchoredObjectQuery.name;
-    final arguments = {
+    final arguments = <String, dynamic>{
       'identifier': identifier,
       'eventMethod': eventMethod,
     };
@@ -75,7 +75,7 @@ class HealthKitReporter {
       Predicate predicate,
       {Function(List<ActivitySummary>) onUpdate}) {
     final eventMethod = EventChannelMethod.queryActivitySummary.name;
-    final arguments = {
+    final arguments = <String, dynamic>{
       'eventMethod': eventMethod,
     };
     arguments.addAll(predicate.map);
@@ -106,9 +106,9 @@ class HealthKitReporter {
     final arguments = {
       'identifier': type.identifier,
       'unit': unit.unit,
-      'anchorDate': anchorDate.toIso8601String(),
-      'enumerateFrom': enumerateFrom.toIso8601String(),
-      'enumerateTo': enumerateTo.toIso8601String(),
+      'anchorTimestamp': anchorDate.millisecondsSinceEpoch,
+      'enumerateFrom': enumerateFrom.millisecondsSinceEpoch,
+      'enumerateTo': enumerateTo.millisecondsSinceEpoch,
       'eventMethod': eventMethod,
       'intervalComponents': intervalComponents.map,
     };
@@ -155,7 +155,7 @@ class HealthKitReporter {
 
   static Future<List<Quantity>> quantityQuery(
       QuantityType type, PreferredUnit unit, Predicate predicate) async {
-    final arguments = {
+    final arguments = <String, dynamic>{
       'identifier': type.identifier,
       'unit': unit.unit,
     };
@@ -173,7 +173,7 @@ class HealthKitReporter {
 
   static Future<List<Category>> categoryQuery(
       CategoryType type, Predicate predicate) async {
-    final arguments = {
+    final arguments = <String, dynamic>{
       'identifier': type.identifier,
     };
     arguments.addAll(predicate.map);
@@ -215,7 +215,7 @@ class HealthKitReporter {
 
   static Future<List<Sample>> sampleQuery(
       String identifier, Predicate predicate) async {
-    final arguments = {
+    final arguments = <String, dynamic>{
       'identifier': identifier,
     };
     arguments.addAll(predicate.map);
@@ -232,7 +232,7 @@ class HealthKitReporter {
 
   static Future<Statistics> statisticsQuery(
       QuantityType type, PreferredUnit unit, Predicate predicate) async {
-    final arguments = {
+    final arguments = <String, dynamic>{
       'identifier': type.identifier,
       'unit': unit.unit,
     };
@@ -291,7 +291,7 @@ class HealthKitReporter {
 
   static Future<String> sourceQuery(
       String identifier, Predicate predicate) async {
-    final arguments = {
+    final arguments = <String, dynamic>{
       'identifier': identifier,
     };
     arguments.addAll(predicate.map);
@@ -356,7 +356,7 @@ class HealthKitReporter {
 
   static Future<bool> deleteObjects(
       String identifier, Predicate predicate) async {
-    final arguments = {
+    final arguments = <String, dynamic>{
       'identifier': identifier,
     };
     arguments.addAll(predicate.map);

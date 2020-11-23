@@ -7,8 +7,8 @@ class Predicate {
   final DateTime startDate;
   final DateTime endDate;
 
-  Map<String, String> get map => {
-        'startDate': startDate.toIso8601String(),
-        'endDate': endDate.toIso8601String()
+  Map<String, int> get map => {
+        'startTimestamp': startDate.millisecondsSinceEpoch,
+        'endTimestamp': endDate.millisecondsSinceEpoch,
       };
 }

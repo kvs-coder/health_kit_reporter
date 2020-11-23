@@ -76,7 +76,7 @@ extension SwiftHealthKitReporterPlugin {
             case .characteristicsQuery:
                 characteristicsQuery(reporter: reporter, result: result)
             case .quantityQuery:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Any] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -86,7 +86,7 @@ extension SwiftHealthKitReporterPlugin {
                     result: result
                 )
             case .categoryQuery:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Any] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -96,7 +96,7 @@ extension SwiftHealthKitReporterPlugin {
                     result: result
                 )
             case .workoutQuery:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Double] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -106,7 +106,7 @@ extension SwiftHealthKitReporterPlugin {
                     result: result
                 )
             case .electrocardiogramQuery:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Double] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -116,7 +116,7 @@ extension SwiftHealthKitReporterPlugin {
                     result: result
                 )
             case .sampleQuery:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Any] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -126,7 +126,7 @@ extension SwiftHealthKitReporterPlugin {
                     result: result
                 )
             case .statisticsQuery:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Any] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -136,7 +136,7 @@ extension SwiftHealthKitReporterPlugin {
                     result: result
                 )
             case .heartbeatSeriesQuery:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Double] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -146,7 +146,7 @@ extension SwiftHealthKitReporterPlugin {
                     result: result
                 )
             case .queryActivitySummary:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Double] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -156,7 +156,7 @@ extension SwiftHealthKitReporterPlugin {
                     result: result
                 )
             case .sourceQuery:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Any] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -221,7 +221,7 @@ extension SwiftHealthKitReporterPlugin {
                     result: result
                 )
             case .addCategory:
-                guard let arguments = call.arguments as? [String: String] else {
+                guard let arguments = call.arguments as? [String: Any] else {
                     throwNoArgumentsError(result: result)
                     return
                 }
@@ -372,14 +372,14 @@ extension SwiftHealthKitReporterPlugin {
     }
     private func quantityQuery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         result: @escaping FlutterResult
     ) {
         guard
-            let identifier = arguments["identifier"],
-            let unit = arguments["unit"],
-            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+            let identifier = arguments["identifier"] as? String,
+            let unit = arguments["unit"] as? String,
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
@@ -387,8 +387,8 @@ extension SwiftHealthKitReporterPlugin {
         do {
             let type = try QuantityType.make(from: identifier)
             let predicate = NSPredicate.samplesPredicate(
-                startDate: startDate,
-                endDate: endDate
+                startDate: Date.make(from: startTimestamp),
+                endDate: Date.make(from: endTimestamp)
             )
             reporter.reader.quantityQuery(
                 type: type,
@@ -423,13 +423,13 @@ extension SwiftHealthKitReporterPlugin {
     }
     private func categoryQuery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         result: @escaping FlutterResult
     ) {
         guard
-            let identifier = arguments["identifier"],
-            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+            let identifier = arguments["identifier"] as? String,
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
@@ -437,8 +437,8 @@ extension SwiftHealthKitReporterPlugin {
         do {
             let type = try CategoryType.make(from: identifier)
             let predicate = NSPredicate.samplesPredicate(
-                startDate: startDate,
-                endDate: endDate
+                startDate: Date.make(from: startTimestamp),
+                endDate: Date.make(from: endTimestamp)
             )
             reporter.reader.categoryQuery(
                 type: type,
@@ -472,19 +472,19 @@ extension SwiftHealthKitReporterPlugin {
     }
     private func workoutQuery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Double],
         result: @escaping FlutterResult
     ) {
         guard
-            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+            let startTimestamp = arguments["startTimestamp"],
+            let endTimestamp = arguments["endTimestamp"]
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
         let predicate = NSPredicate.samplesPredicate(
-            startDate: startDate,
-            endDate: endDate
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
         )
         reporter.reader.workoutQuery(
             predicate: predicate
@@ -514,19 +514,19 @@ extension SwiftHealthKitReporterPlugin {
     }
     private func electrocardiogramQuery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Double],
         result: @escaping FlutterResult
     ) {
         guard
-            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+            let startTimestamp = arguments["startTimestamp"],
+            let endTimestamp = arguments["endTimestamp"]
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
         let predicate = NSPredicate.samplesPredicate(
-            startDate: startDate,
-            endDate: endDate
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
         )
         if #available(iOS 14.0, *) {
             reporter.reader.electrocardiogramQuery(
@@ -566,18 +566,18 @@ extension SwiftHealthKitReporterPlugin {
     }
     private func sampleQuery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         result: @escaping FlutterResult
     ) {
         guard
-            let identifier = arguments["identifier"],
-            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+            let identifier = arguments["identifier"] as? String,
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
-        guard let type = identifier.objectType else {
+        guard let type = identifier.objectType as? SampleType else {
             result(
                 FlutterError(
                     code: #function,
@@ -588,13 +588,13 @@ extension SwiftHealthKitReporterPlugin {
             return
         }
         let predicate = NSPredicate.samplesPredicate(
-            startDate: startDate,
-            endDate: endDate
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
         )
         reporter.reader.sampleQuery(
             type: type,
             predicate: predicate
-        ) { (samples, error) in
+        ) { (_, samples, error) in
             guard error == nil else {
                 result(
                     FlutterError(
@@ -626,14 +626,14 @@ extension SwiftHealthKitReporterPlugin {
     }
     private func statisticsQuery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         result: @escaping FlutterResult
     ) {
         guard
-            let identifier = arguments["identifier"],
-            let unit = arguments["unit"],
-            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+            let identifier = arguments["identifier"] as? String,
+            let unit = arguments["unit"] as? String,
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
@@ -649,8 +649,8 @@ extension SwiftHealthKitReporterPlugin {
             return
         }
         let predicate = NSPredicate.samplesPredicate(
-            startDate: startDate,
-            endDate: endDate
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
         )
         reporter.reader.statisticsQuery(
             type: type,
@@ -692,19 +692,19 @@ extension SwiftHealthKitReporterPlugin {
     }
     private func heartbeatSeriesQuery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Double],
         result: @escaping FlutterResult
     ) {
         guard
-            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+            let startTimestamp = arguments["startTimestamp"],
+            let endTimestamp = arguments["endTimestamp"]
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
         let predicate = NSPredicate.samplesPredicate(
-            startDate: startDate,
-            endDate: endDate
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
         )
         if #available(iOS 13.0, *) {
             reporter.reader.heartbeatSeriesQuery(
@@ -754,19 +754,19 @@ extension SwiftHealthKitReporterPlugin {
     }
     private func queryActivitySummary(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Double],
         result: @escaping FlutterResult
     ) {
         guard
-            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+            let startTimestamp = arguments["startTimestamp"],
+            let endTimestamp = arguments["endTimestamp"]
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
         let predicate = NSPredicate.samplesPredicate(
-            startDate: startDate,
-            endDate: endDate
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
         )
         reporter.reader.queryActivitySummary(
             predicate: predicate,
@@ -797,18 +797,18 @@ extension SwiftHealthKitReporterPlugin {
     }
     private func sourceQuery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         result: @escaping FlutterResult
     ) {
         guard
-            let identifier = arguments["identifier"],
-            let startDate = arguments["startDate"]?.asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?.asDate(format: Date.iso8601)
+            let identifier = arguments["identifier"] as? String,
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
-        guard let type = identifier.objectType else {
+        guard let type = identifier.objectType as? SampleType else {
             result(
                 FlutterError(
                     code: #function,
@@ -819,8 +819,8 @@ extension SwiftHealthKitReporterPlugin {
             return
         }
         let predicate = NSPredicate.samplesPredicate(
-            startDate: startDate,
-            endDate: endDate
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
         )
         reporter.reader.sourceQuery(
             type: type,
@@ -856,8 +856,8 @@ extension SwiftHealthKitReporterPlugin {
     ) {
         guard
             let identifier = arguments["identifier"] as? String,
-            let startDate = (arguments["startDate"] as? String)?.asDate(format: Date.iso8601),
-            let endDate = (arguments["endDate"] as? String)?.asDate(format: Date.iso8601)
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
@@ -873,21 +873,21 @@ extension SwiftHealthKitReporterPlugin {
             return
         }
         let predicate = NSPredicate.samplesPredicate(
-            startDate: startDate,
-            endDate: endDate
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
         )
         var typePredicates: [String: NSPredicate] = [:]
-        if let typePredicatesArgument = arguments["typePredicates"] as? [String: [String: String]] {
+        if let typePredicatesArgument = arguments["typePredicates"] as? [String: [String: Double]] {
             for (key, value) in typePredicatesArgument {
                 guard
-                    let startDate = value["startDate"]?.asDate(format: Date.iso8601),
-                    let endDate = value["endDate"]?.asDate(format: Date.iso8601)
+                    let startTimestamp = value["startTimestamp"],
+                    let endTimestamp = value["endTimestamp"]
                 else {
                     continue
                 }
                 let typePredicate = NSPredicate.samplesPredicate(
-                    startDate: startDate,
-                    endDate: endDate
+                    startDate: Date.make(from: startTimestamp),
+                    endDate: Date.make(from: endTimestamp)
                 )
                 typePredicates[key] = typePredicate
             }
@@ -1187,10 +1187,8 @@ extension SwiftHealthKitReporterPlugin {
     ) {
         guard
             let identifier = arguments["identifier"] as? String,
-            let startDate = (arguments["startDate"] as? String)?
-                .asDate(format: Date.iso8601),
-            let endDate = (arguments["endDate"] as? String)?
-                .asDate(format: Date.iso8601)
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
@@ -1206,8 +1204,8 @@ extension SwiftHealthKitReporterPlugin {
             return
         }
         let predicate = NSPredicate.samplesPredicate(
-            startDate: startDate,
-            endDate: endDate
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
         )
         reporter.writer.deleteObjects(
             of: type,

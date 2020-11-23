@@ -20,7 +20,7 @@ class SourceRevision {
         'version': version,
         'productType': productType,
         'systemVersion': systemVersion,
-        'patchVersion': operatingSystem.map,
+        'operatingSystem': operatingSystem.map,
       };
 
   SourceRevision.fromJson(Map<String, dynamic> json)

@@ -3,7 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:health_kit_reporter/health_kit_reporter.dart';
 import 'package:health_kit_reporter/model/payload/date_components.dart';
+import 'package:health_kit_reporter/model/payload/device.dart';
 import 'package:health_kit_reporter/model/payload/preferred_unit.dart';
+import 'package:health_kit_reporter/model/payload/quantity.dart';
+import 'package:health_kit_reporter/model/payload/source.dart';
+import 'package:health_kit_reporter/model/payload/source_revision.dart';
 import 'package:health_kit_reporter/model/predicate.dart';
 import 'package:health_kit_reporter/model/type/activity_summary_type.dart';
 import 'package:health_kit_reporter/model/type/category_type.dart';
@@ -23,7 +27,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    statisticsCollectionQuery();
+    observerQuery();
+    //anchoredObjectQuery();
+    //queryActivitySummaryUpdates();
+    //statisticsCollectionQuery();
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -42,25 +49,15 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> runHealthKitReporter() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       final readTypes = <String>[];
       readTypes.addAll(ActivitySummaryType.values.map((e) => e.identifier));
       readTypes.addAll(CategoryType.values.map((e) => e.identifier));
       readTypes.addAll(CharacteristicType.values.map((e) => e.identifier));
-//      readTypes.addAll(CorrelationType.values.map((e) => e.identifier));
-//      readTypes.addAll(DocumentType.values.map((e) => e.identifier));
-//      readTypes.addAll(ElectrocardiogramType.values.map((e) => e.identifier));
       readTypes.addAll(QuantityType.values.map((e) => e.identifier));
-//      readTypes.addAll(SeriesType.values.map((e) => e.identifier));
       readTypes.addAll(WorkoutType.values.map((e) => e.identifier));
-      final writeTypes = <String>[];
-//      writeTypes.addAll(QuantityType.values.map((e) => e.identifier));
-//      writeTypes.addAll(CategoryType.values.map((e) => e.identifier));
-//      writeTypes.addAll(WorkoutType.values.map((e) => e.identifier));
+      final writeTypes = <String>[QuantityType.stepCount.identifier];
       final isRequested =
           await HealthKitReporter.requestAuthorization(readTypes, writeTypes);
       print('IsRequested: $isRequested');
@@ -84,6 +81,8 @@ class MyApp extends StatelessWidget {
       final samples = await HealthKitReporter.sampleQuery(
           QuantityType.stepCount.identifier, _predicate);
       print('samples: ${samples.map((e) => e.map)}');
+      final stepsSaved = await saveSteps();
+      print('stepsSaved: $stepsSaved');
     } catch (exception) {
       print('general exception: $exception');
     } finally {}
@@ -135,5 +134,26 @@ class MyApp extends StatelessWidget {
       print(statistics.map);
     });
     print('statisticsCollectionQuery: $sub');
+  }
+
+  Future<bool> saveSteps() {
+    final now = DateTime.now();
+    final minuteAgo = now.add(Duration(minutes: -1));
+    final device = Device('FlutterTracker', 'kvs', 'T-800', '3', '3.0', '1.1.1',
+        'kvs.f.t', '444-888-555');
+    final source = Source('maApp', 'com.kvs.health_kit_reporter_example');
+    final operatingSystem = OperatingSystem(1, 2, 3);
+    final sourceRevision =
+        SourceRevision(source, '5', 'fit', '4', operatingSystem);
+    final harmonized = Harmonized(100, 'count', null);
+    final steps = Quantity(
+        QuantityType.stepCount.identifier,
+        minuteAgo.millisecondsSinceEpoch,
+        now.millisecondsSinceEpoch,
+        device,
+        sourceRevision,
+        harmonized);
+    print(steps.map);
+    return HealthKitReporter.save(steps);
   }
 }

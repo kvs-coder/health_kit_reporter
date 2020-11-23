@@ -70,27 +70,18 @@ extension HealthKitReporterStreamHandler: FlutterStreamHandler {
                     events: events
                 )
             case .queryActivitySummary:
-                guard let arguments = arguments as? [String: String] else {
-                    return nil
-                }
                 queryActivitySummary(
                     reporter: reporter,
                     arguments: arguments,
                     events: events
                 )
             case .anchoredObjectQuery:
-                guard let arguments = arguments as? [String: String] else {
-                    return nil
-                }
                 anchoredObjectQuery(
                     reporter: reporter,
                     arguments: arguments,
                     events: events
                 )
             case .observerQuery:
-                guard let arguments = arguments as? [String: String] else {
-                    return nil
-                }
                 observerQuery(
                     reporter: reporter,
                     arguments: arguments,
@@ -118,17 +109,12 @@ extension HealthKitReporterStreamHandler {
         guard
             let identifier = arguments["identifier"] as? String,
             let unit = arguments["unit"] as? String,
-            let startDate = (arguments["startDate"] as? String)?
-                .asDate(format: Date.iso8601),
-            let endDate = (arguments["endDate"] as? String)?
-                .asDate(format: Date.iso8601),
-            let anchorDate = (arguments["anchorDate"] as? String)?
-                .asDate(format: Date.iso8601),
-            let enumerateFrom = (arguments["enumerateFrom"] as? String)?
-                .asDate(format: Date.iso8601),
-            let enumerateTo = (arguments["enumerateTo"] as? String)?
-                .asDate(format: Date.iso8601),
-        let intervalComponents = arguments["intervalComponents"] as? [String: Any]
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double,
+            let anchorTimestamp = arguments["anchorTimestamp"] as? Double,
+            let enumerateFrom = arguments["enumerateFrom"] as? Double,
+            let enumerateTo = arguments["enumerateTo"] as? Double,
+            let intervalComponents = arguments["intervalComponents"] as? [String: Any]
         else {
             return
         }
@@ -136,8 +122,8 @@ extension HealthKitReporterStreamHandler {
             return
         }
         let predicate = NSPredicate.samplesPredicate(
-            startDate: startDate,
-            endDate: endDate
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
         )
         let monitorUpdates = (
             arguments["monitorUpdates"] as? String
@@ -146,9 +132,9 @@ extension HealthKitReporterStreamHandler {
             type: type,
             unit: unit,
             quantitySamplePredicate: predicate,
-            anchorDate: anchorDate,
-            enumerateFrom: enumerateFrom,
-            enumerateTo: enumerateTo,
+            anchorDate: Date.make(from: anchorTimestamp),
+            enumerateFrom: Date.make(from: enumerateFrom),
+            enumerateTo: Date.make(from: enumerateTo),
             intervalComponents: DateComponents.make(
                 from: intervalComponents
             ),
@@ -173,22 +159,20 @@ extension HealthKitReporterStreamHandler {
     }
     private func queryActivitySummary(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         events: @escaping FlutterEventSink
     ) {
         guard
-            let startDate = arguments["startDate"]?
-                .asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?
-                .asDate(format: Date.iso8601)
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double
         else {
             return
         }
         let predicate = NSPredicate.samplesPredicate(
-            startDate: startDate,
-            endDate: endDate
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
         )
-        let monitorUpdates = arguments["monitorUpdates"]?.boolean ?? true
+        let monitorUpdates = (arguments["monitorUpdates"] as? String)?.boolean ?? true
         reporter.reader.queryActivitySummary(
             predicate: predicate,
             monitorUpdates: monitorUpdates
@@ -209,31 +193,29 @@ extension HealthKitReporterStreamHandler {
     }
     private func anchoredObjectQuery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         events: @escaping FlutterEventSink
     ) {
         guard
-            let identifier = arguments["identifier"],
-            let startDate = arguments["startDate"]?
-                .asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?
-                .asDate(format: Date.iso8601)
+            let identifier = arguments["identifier"] as? String,
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double
         else {
             return
         }
-        guard let type = identifier.objectType else {
+        guard let type = identifier.objectType as? SampleType else {
             return
         }
-        let monitorUpdates = arguments["monitorUpdates"]?.boolean ?? true
+        let monitorUpdates = (arguments["monitorUpdates"] as? String)?.boolean ?? true
         let predicate = NSPredicate.samplesPredicate(
-            startDate: startDate,
-            endDate: endDate
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
         )
         reporter.reader.anchoredObjectQuery(
             type: type,
             predicate: predicate,
             monitorUpdates: monitorUpdates
-        ) { (samples, error) in
+        ) { (_, samples, error) in
             guard error == nil else {
                 return
             }
@@ -255,15 +237,13 @@ extension HealthKitReporterStreamHandler {
     }
     private func observerQuery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         events: @escaping FlutterEventSink
     ) {
         guard
-            let identifier = arguments["identifier"],
-            let startDate = arguments["startDate"]?
-                .asDate(format: Date.iso8601),
-            let endDate = arguments["endDate"]?
-                .asDate(format: Date.iso8601)
+            let identifier = arguments["identifier"] as? String,
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double
         else {
             return
         }
@@ -271,13 +251,13 @@ extension HealthKitReporterStreamHandler {
             return
         }
         let predicate = NSPredicate.samplesPredicate(
-            startDate: startDate,
-            endDate: endDate
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
         )
         reporter.observer.observerQuery(
             type: type,
             predicate: predicate
-        ) { (identifier, error) in
+        ) { (_, identifier, error) in
             guard error == nil else {
                 return
             }
@@ -285,7 +265,7 @@ extension HealthKitReporterStreamHandler {
                 return
             }
             let dictionary: [String: Any] = [
-                "event": Method.anchoredObjectQuery.rawValue,
+                "event": Method.observerQuery.rawValue,
                 "result": [
                     "observingTypeIdentifier": identifier
                 ]
