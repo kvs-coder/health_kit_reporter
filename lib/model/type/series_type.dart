@@ -5,7 +5,7 @@ enum SeriesType {
   route,
 }
 
-extension Identifier on SeriesType {
+extension SeriesTypeIdentifier on SeriesType {
   String get identifier {
     switch (this) {
       case SeriesType.heartbeatSeries:

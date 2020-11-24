@@ -5,7 +5,7 @@ class WorkoutConfiguration {
   final int activityValue;
   final int locationValue;
   final int swimmingValue;
-  final Harmonized harmonized;
+  final WorkoutConfigurationHarmonized harmonized;
 
   Map<String, dynamic> get map => {
         'activityValue': activityValue,
@@ -15,8 +15,8 @@ class WorkoutConfiguration {
       };
 }
 
-class Harmonized {
-  const Harmonized(this.value, this.unit);
+class WorkoutConfigurationHarmonized {
+  const WorkoutConfigurationHarmonized(this.value, this.unit);
 
   final int value;
   final String unit;

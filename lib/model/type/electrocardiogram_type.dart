@@ -4,7 +4,7 @@ enum ElectrocardiogramType {
   electrocardiogramType,
 }
 
-extension Identifier on ElectrocardiogramType {
+extension ElectrocardiogramTypeIdentifier on ElectrocardiogramType {
   String get identifier {
     switch (this) {
       case ElectrocardiogramType.electrocardiogramType:

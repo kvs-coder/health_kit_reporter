@@ -2,14 +2,14 @@ import 'device.dart';
 import 'sample.dart';
 import 'source_revision.dart';
 
-class Quantity extends Sample<Harmonized> {
+class Quantity extends Sample<QuantityHarmonized> {
   const Quantity(
     String identifier,
     num startTimestamp,
     num endTimestamp,
     Device device,
     SourceRevision sourceRevision,
-    Harmonized harmonized,
+    QuantityHarmonized harmonized,
   ) : super(
           identifier,
           startTimestamp,
@@ -31,7 +31,7 @@ class Quantity extends Sample<Harmonized> {
 
   Quantity.fromJson(Map<String, dynamic> json)
       : super.fromJson(json,
-            harmonized: Harmonized.fromJson(json['harmonized']));
+            harmonized: QuantityHarmonized.fromJson(json['harmonized']));
 
   static List<Quantity> collect(List<dynamic> list) {
     final samples = <Quantity>[];
@@ -43,8 +43,8 @@ class Quantity extends Sample<Harmonized> {
   }
 }
 
-class Harmonized {
-  const Harmonized(
+class QuantityHarmonized {
+  const QuantityHarmonized(
     this.value,
     this.unit,
     this.metadata,
@@ -60,7 +60,7 @@ class Harmonized {
         'metadata': metadata,
       };
 
-  Harmonized.fromJson(Map<String, dynamic> json)
+  QuantityHarmonized.fromJson(Map<String, dynamic> json)
       : value = json['value'],
         unit = json['unit'],
         metadata = json['metadata'];

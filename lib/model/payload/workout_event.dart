@@ -3,7 +3,7 @@ class WorkoutEvent {
   final num startTimestamp;
   final num endTimestamp;
   final num duration;
-  final Harmonized harmonized;
+  final WorkoutEventHarmonized harmonized;
 
   const WorkoutEvent(
     this.type,
@@ -26,7 +26,7 @@ class WorkoutEvent {
         startTimestamp = json['startTimestamp'],
         endTimestamp = json['endTimestamp'],
         duration = json['duration'],
-        harmonized = Harmonized.fromJson(json['harmonized']);
+        harmonized = WorkoutEventHarmonized.fromJson(json['harmonized']);
 
   static List<WorkoutEvent> collect(List<dynamic> list) {
     final samples = <WorkoutEvent>[];
@@ -38,8 +38,8 @@ class WorkoutEvent {
   }
 }
 
-class Harmonized {
-  const Harmonized(
+class WorkoutEventHarmonized {
+  const WorkoutEventHarmonized(
     this.value,
     this.metadata,
   );
@@ -52,7 +52,7 @@ class Harmonized {
         'metadata': metadata,
       };
 
-  Harmonized.fromJson(Map<String, dynamic> json)
+  WorkoutEventHarmonized.fromJson(Map<String, dynamic> json)
       : value = json['value'],
         metadata = json['metadata'];
 }

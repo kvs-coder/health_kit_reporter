@@ -164,7 +164,7 @@ class MyApp extends StatelessWidget {
     final operatingSystem = OperatingSystem(1, 2, 3);
     final sourceRevision =
         SourceRevision(source, '5', 'fit', '4', operatingSystem);
-    final harmonized = Harmonized(100, 'count', null);
+    final harmonized = QuantityHarmonized(100, 'count', null);
     final steps = Quantity(
         QuantityType.stepCount.identifier,
         minuteAgo.millisecondsSinceEpoch,

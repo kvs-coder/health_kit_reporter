@@ -58,7 +58,7 @@ enum QuantityType {
   headphoneAudioExposure,
 }
 
-extension Identifier on QuantityType {
+extension QuantityTypeIdentifier on QuantityType {
   String get identifier {
     switch (this) {
       case QuantityType.heartRateVariabilitySDNN:

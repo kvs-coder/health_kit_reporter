@@ -5,14 +5,14 @@ import 'package:health_kit_reporter/model/payload/sample.dart';
 import 'device.dart';
 import 'source_revision.dart';
 
-class Correlation extends Sample<Harmonized> {
+class Correlation extends Sample<CorrelationHarmonized> {
   const Correlation(
     String identifier,
     num startTimestamp,
     num endTimestamp,
     Device device,
     SourceRevision sourceRevision,
-    Harmonized harmonized,
+    CorrelationHarmonized harmonized,
   ) : super(
           identifier,
           startTimestamp,
@@ -24,7 +24,7 @@ class Correlation extends Sample<Harmonized> {
 
   Correlation.fromJson(Map<String, dynamic> json)
       : super.fromJson(json,
-            harmonized: Harmonized.fromJson(json['harmonized']));
+            harmonized: CorrelationHarmonized.fromJson(json['harmonized']));
 
   @override
   Map<String, dynamic> get map => {
@@ -37,8 +37,8 @@ class Correlation extends Sample<Harmonized> {
       };
 }
 
-class Harmonized {
-  const Harmonized(
+class CorrelationHarmonized {
+  const CorrelationHarmonized(
     this.quantitySamples,
     this.categorySamples,
     this.metadata,
@@ -54,7 +54,7 @@ class Harmonized {
         'metadata': metadata,
       };
 
-  Harmonized.fromJson(Map<String, dynamic> json)
+  CorrelationHarmonized.fromJson(Map<String, dynamic> json)
       : quantitySamples = Quantity.collect(json['quantitySamples']),
         categorySamples = Category.collect(json['categorySamples']),
         metadata = json['metadata'];

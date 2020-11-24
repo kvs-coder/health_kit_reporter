@@ -11,7 +11,7 @@ enum CategoryType {
   audioExposureEvent,
 }
 
-extension Identifier on CategoryType {
+extension CategoryTypeIdentifier on CategoryType {
   String get identifier {
     switch (this) {
       case CategoryType.sleepAnalysis:

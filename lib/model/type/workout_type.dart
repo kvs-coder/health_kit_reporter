@@ -4,7 +4,7 @@ enum WorkoutType {
   workoutType,
 }
 
-extension Identifier on WorkoutType {
+extension WorkoutTypeIdentifier on WorkoutType {
   String get identifier {
     switch (this) {
       case WorkoutType.workoutType:

@@ -4,7 +4,7 @@ enum DocumentType {
   cda,
 }
 
-extension Identifier on DocumentType {
+extension DocumentTypeIdentifier on DocumentType {
   String get identifier {
     switch (this) {
       case DocumentType.cda:

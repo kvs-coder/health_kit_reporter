@@ -13,7 +13,7 @@ class Statistics {
   final num startTimestamp;
   final num endTimestamp;
   final List<Source> sources;
-  final Harmonized harmonized;
+  final StatisticsHarmonized harmonized;
 
   Map<String, dynamic> get map => {
         'identifier': identifier,
@@ -22,17 +22,18 @@ class Statistics {
         'harmonized': harmonized.map,
       };
 
-  Statistics.fromJson(Map<String, dynamic> json, {Harmonized harmonized})
+  Statistics.fromJson(Map<String, dynamic> json,
+      {StatisticsHarmonized harmonized})
       : identifier = json['identifier'],
         startTimestamp = json['startTimestamp'],
         endTimestamp = json['endTimestamp'],
         sources =
             json['sources'] != null ? Source.collect(json['sources']) : null,
-        harmonized = Harmonized.fromJson(json['harmonized']);
+        harmonized = StatisticsHarmonized.fromJson(json['harmonized']);
 }
 
-class Harmonized {
-  const Harmonized(
+class StatisticsHarmonized {
+  const StatisticsHarmonized(
     this.summary,
     this.average,
     this.recent,
@@ -51,7 +52,7 @@ class Harmonized {
         'unit': unit,
       };
 
-  Harmonized.fromJson(Map<String, dynamic> json)
+  StatisticsHarmonized.fromJson(Map<String, dynamic> json)
       : summary = json['summary'],
         average = json['average'],
         recent = json['recent'],

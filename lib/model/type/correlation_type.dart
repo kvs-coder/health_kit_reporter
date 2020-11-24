@@ -5,7 +5,7 @@ enum CorrelationType {
   food,
 }
 
-extension Identifier on CorrelationType {
+extension CorrelationTypeIdentifier on CorrelationType {
   String get identifier {
     switch (this) {
       case CorrelationType.bloodPressure:

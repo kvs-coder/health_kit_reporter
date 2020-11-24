@@ -4,7 +4,7 @@ enum ActivitySummaryType {
   activitySummaryType,
 }
 
-extension Identifier on ActivitySummaryType {
+extension ActivitySummaryTypeIdentifier on ActivitySummaryType {
   String get identifier {
     switch (this) {
       case ActivitySummaryType.activitySummaryType:

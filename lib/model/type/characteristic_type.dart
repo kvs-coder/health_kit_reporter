@@ -7,7 +7,7 @@ enum CharacteristicType {
   biologicalSex,
 }
 
-extension Identifier on CharacteristicType {
+extension CharacteristicTypeIdentifier on CharacteristicType {
   String get identifier {
     switch (this) {
       case CharacteristicType.fitzpatrickSkinType:

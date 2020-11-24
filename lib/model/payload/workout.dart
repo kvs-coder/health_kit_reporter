@@ -3,14 +3,14 @@ import 'sample.dart';
 import 'source_revision.dart';
 import 'workout_event.dart';
 
-class Workout extends Sample<Harmonized> {
+class Workout extends Sample<WorkoutHarmonized> {
   const Workout(
     String identifier,
     num startTimestamp,
     num endTimestamp,
     Device device,
     SourceRevision sourceRevision,
-    Harmonized harmonized,
+    WorkoutHarmonized harmonized,
     this.workoutName,
     this.duration,
     this.workoutEvents,
@@ -45,11 +45,11 @@ class Workout extends Sample<Harmonized> {
         duration = json['duration'],
         workoutEvents = WorkoutEvent.collect(json['workoutEvents']),
         super.fromJson(json,
-            harmonized: Harmonized.fromJson(json['harmonized']));
+            harmonized: WorkoutHarmonized.fromJson(json['harmonized']));
 }
 
-class Harmonized {
-  const Harmonized(
+class WorkoutHarmonized {
+  const WorkoutHarmonized(
     this.value,
     this.totalEnergyBurned,
     this.totalEnergyBurnedUnit,
@@ -86,7 +86,7 @@ class Harmonized {
         'metadata': metadata
       };
 
-  Harmonized.fromJson(Map<String, dynamic> json)
+  WorkoutHarmonized.fromJson(Map<String, dynamic> json)
       : value = json['value'],
         totalEnergyBurned = json['totalEnergyBurned'],
         totalEnergyBurnedUnit = json['totalEnergyBurnedUnit'],
