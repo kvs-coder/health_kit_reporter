@@ -40,6 +40,14 @@ abstract class Sample<Harmonized> {
         sourceRevision = SourceRevision.fromJson(json['sourceRevision']),
         harmonized = harmonized;
 
+  Map<String, dynamic> parsed() {
+    final arguments = <String, dynamic>{};
+    if (this is Quantity) arguments['quantity'] = map;
+    if (this is Category) arguments['category'] = map;
+    if (this is Workout) arguments['workout'] = map;
+    return arguments;
+  }
+
   static Sample factory(Map<String, dynamic> json) {
     final identifier = json['identifier'];
     final quantityType = QuantityTypeFactory.tryFrom(identifier);

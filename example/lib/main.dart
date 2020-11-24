@@ -12,6 +12,7 @@ import 'package:health_kit_reporter/model/predicate.dart';
 import 'package:health_kit_reporter/model/type/activity_summary_type.dart';
 import 'package:health_kit_reporter/model/type/category_type.dart';
 import 'package:health_kit_reporter/model/type/characteristic_type.dart';
+import 'package:health_kit_reporter/model/type/correlation_type.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
 import 'package:health_kit_reporter/model/type/workout_type.dart';
 
@@ -27,10 +28,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    observerQuery();
-    //anchoredObjectQuery();
-    //queryActivitySummaryUpdates();
-    //statisticsCollectionQuery();
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -57,37 +54,53 @@ class MyApp extends StatelessWidget {
       readTypes.addAll(CharacteristicType.values.map((e) => e.identifier));
       readTypes.addAll(QuantityType.values.map((e) => e.identifier));
       readTypes.addAll(WorkoutType.values.map((e) => e.identifier));
-      final writeTypes = <String>[QuantityType.stepCount.identifier];
+      //readTypes.addAll(CorrelationType.values.map((e) => e.identifier));
+      final writeTypes = <String>[
+        QuantityType.stepCount.identifier,
+      ];
       final isRequested =
           await HealthKitReporter.requestAuthorization(readTypes, writeTypes);
-      print('IsRequested: $isRequested');
-      final preferredUnits =
-          await HealthKitReporter.preferredUnits([QuantityType.stepCount]);
-      preferredUnits.forEach((preferredUnit) async {
-        print('preferredUnit: ${preferredUnit.identifier}');
-        final type = QuantityTypeFactory.from(preferredUnit.identifier);
-        final quantities = await HealthKitReporter.quantityQuery(
-            type, preferredUnit, _predicate);
-        print('quantity: ${quantities.map((e) => e.map)}');
-        final statistics = await HealthKitReporter.statisticsQuery(
-            type, preferredUnit, _predicate);
-        print('statistics: ${statistics.map}');
-      });
-      final characteristics = await HealthKitReporter.characteristicsQuery();
-      print('characteristics: ${characteristics.map}');
-      final categories = await HealthKitReporter.categoryQuery(
-          CategoryType.sleepAnalysis, _predicate);
-      print('categories: ${categories.map((e) => e.map)}');
-      final samples = await HealthKitReporter.sampleQuery(
-          QuantityType.stepCount.identifier, _predicate);
-      print('samples: ${samples.map((e) => e.map)}');
-      final canWrite = await HealthKitReporter.isAuthorizedToWrite(
-          QuantityType.stepCount.identifier);
-      if (canWrite) {
-        final stepsSaved = await saveSteps();
-        print('stepsSaved: $stepsSaved');
+      if (isRequested) {
+        observerQuery();
+        //anchoredObjectQuery();
+        //queryActivitySummaryUpdates();
+        //statisticsCollectionQuery();
+        final preferredUnits =
+            await HealthKitReporter.preferredUnits([QuantityType.stepCount]);
+        preferredUnits.forEach((preferredUnit) async {
+          print('preferredUnit: ${preferredUnit.identifier}');
+          final type = QuantityTypeFactory.from(preferredUnit.identifier);
+          final quantities = await HealthKitReporter.quantityQuery(
+              type, preferredUnit, _predicate);
+          print('quantity: ${quantities.map((e) => e.map)}');
+          final statistics = await HealthKitReporter.statisticsQuery(
+              type, preferredUnit, _predicate);
+          print('statistics: ${statistics.map}');
+        });
+        final characteristics = await HealthKitReporter.characteristicsQuery();
+        print('characteristics: ${characteristics.map}');
+        final categories = await HealthKitReporter.categoryQuery(
+            CategoryType.sleepAnalysis, _predicate);
+        print('categories: ${categories.map((e) => e.map)}');
+        final samples = await HealthKitReporter.sampleQuery(
+            QuantityType.stepCount.identifier, _predicate);
+        print('samples: ${samples.map((e) => e.map)}');
+        final canWrite = await HealthKitReporter.isAuthorizedToWrite(
+            QuantityType.stepCount.identifier);
+        if (canWrite) {
+          final stepsSaved = await saveSteps();
+          print('stepsSaved: $stepsSaved');
+        } else {
+          print('error canWrite: $canWrite');
+        }
+        final sources = await HealthKitReporter.sourceQuery(
+            QuantityType.stepCount.identifier, _predicate);
+        print('sources: ${sources.map((e) => e.map)}');
+        final correlations = await HealthKitReporter.correlationQuery(
+            CorrelationType.bloodPressure.identifier, _predicate);
+        print('correlations: ${correlations.map((e) => e.map)}');
       } else {
-        print('canWrite: $canWrite');
+        print('error isRequested: $isRequested');
       }
     } catch (exception) {
       print('general exception: $exception');

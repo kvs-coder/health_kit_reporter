@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:health_kit_reporter/model/event_channel_method.dart';
 import 'package:health_kit_reporter/model/payload/activity_summary.dart';
 import 'package:health_kit_reporter/model/payload/characteristic/characteristic.dart';
+import 'package:health_kit_reporter/model/payload/correlation.dart';
 import 'package:health_kit_reporter/model/payload/electrocardiogram.dart';
 import 'package:health_kit_reporter/model/payload/heartbeat_serie.dart';
 import 'package:health_kit_reporter/model/payload/statistics.dart';
@@ -24,6 +25,7 @@ import 'model/payload/device.dart';
 import 'model/payload/preferred_unit.dart';
 import 'model/payload/quantity.dart';
 import 'model/payload/sample.dart';
+import 'model/payload/source.dart';
 import 'model/payload/workout.dart';
 import 'model/payload/workout_configuration.dart';
 import 'model/predicate.dart';
@@ -57,6 +59,14 @@ import 'model/update_frequency.dart';
 /// - [delete]
 /// - [deleteObjects]
 /// - [save]
+///
+/// Functions [enableBackgroundDelivery], [disableAllBackgroundDelivery], [disableBackgroundDelivery]
+/// are preferred to use with [observerQuery] set up, since they allow
+/// background notifications when data in [HealthKit] changes. This combination
+/// will wake up your App in background and perform actions you specify when any data changes
+/// in [HealthKit] depending on the provided [UpdateFrequency]. See [enableBackgroundDelivery].
+///
+/// See more about observer queries in https://developer.apple.com/documentation/healthkit/hkobserverquery
 ///
 /// Every call to [HealthKit] with a read request should be accompanies with [requestAuthorization]
 /// method. Without permissions, [HealthKit] will not allow you to read or write the data.
@@ -274,8 +284,7 @@ class HealthKitReporter {
   /// Returns [Characteristic] info.
   ///
   /// Warning: The characteristics should be set manually by the user inside
-  /// [Apple Health] app.
-  /// Otherwise it will always return null.
+  /// [Apple Health] app. Otherwise it will always return null.
   ///
   static Future<Characteristic> characteristicsQuery() async {
     final result = await _methodChannel.invokeMethod('characteristicsQuery');
@@ -283,8 +292,8 @@ class HealthKitReporter {
     return Characteristic.fromJson(map);
   }
 
-  /// Returns [Quantity] samples for provided [type],
-  /// preferred [unit] and time interval predicate [predicate].
+  /// Returns [Quantity] samples for the provided [type],
+  /// the preferred [unit] and the time interval predicate [predicate].
   ///
   /// Warning: The [unit] should be valid. See [preferredUnits].
   ///
@@ -306,6 +315,9 @@ class HealthKitReporter {
     return quantities;
   }
 
+  /// Returns [Category] samples for the provided [type]
+  /// and the time interval predicate [predicate].
+  ///
   static Future<List<Category>> categoryQuery(
       CategoryType type, Predicate predicate) async {
     final arguments = <String, dynamic>{
@@ -323,6 +335,9 @@ class HealthKitReporter {
     return categories;
   }
 
+  /// Returns [Workout] samples for the provided
+  /// time interval predicate [predicate].
+  ///
   static Future<List<Workout>> workoutQuery(Predicate predicate) async {
     final result =
         await _methodChannel.invokeMethod('workoutQuery', predicate.map);
@@ -335,6 +350,9 @@ class HealthKitReporter {
     return workouts;
   }
 
+  /// Returns [Electrocardiogram] samples for the provided
+  /// time interval predicate [predicate].
+  ///
   static Future<List<Electrocardiogram>> electrocardiogramQuery(
       Predicate predicate) async {
     final result = await _methodChannel.invokeMethod(
@@ -348,6 +366,15 @@ class HealthKitReporter {
     return electrocardiograms;
   }
 
+  /// Returns [Sample] samples for the provided [identifier] and the
+  /// time interval predicate [predicate].
+  ///
+  /// If [identifier] was recognized as one of [QuantityType], the
+  /// units will be set automatically by original
+  /// library [HealthKitReporter] according to SI.
+  /// See https://cocoapods.org/pods/HealthKitReporter
+  /// file [Extensions+HKQuantityType.swift]
+  ///
   static Future<List<Sample>> sampleQuery(
       String identifier, Predicate predicate) async {
     final arguments = <String, dynamic>{
@@ -365,6 +392,9 @@ class HealthKitReporter {
     return samples;
   }
 
+  /// Returns [Sample] samples for the provided [identifier] and the
+  /// time interval predicate [predicate].
+  ///
   static Future<Statistics> statisticsQuery(
       QuantityType type, PreferredUnit unit, Predicate predicate) async {
     final arguments = <String, dynamic>{
@@ -379,6 +409,9 @@ class HealthKitReporter {
     return statistics;
   }
 
+  /// Returns [HeartbeatSerie] samples for the provided
+  /// time interval predicate [predicate].
+  ///
   static Future<HeartbeatSerie> heartbeatSeriesQuery(
       Predicate predicate) async {
     final result = await _methodChannel.invokeMethod(
@@ -388,6 +421,9 @@ class HealthKitReporter {
     return heartbeatSerie;
   }
 
+  /// Returns [HeartbeatSerie] samples for the provided
+  /// time interval predicate [predicate].
+  ///
   static Future<List<ActivitySummary>> queryActivitySummary(
       Predicate predicate) async {
     final arguments = <String, dynamic>{};
@@ -403,6 +439,18 @@ class HealthKitReporter {
     return activitySummaries;
   }
 
+  /// Returns a status of calling native method for
+  /// enabling background notifications about the data changing for the type
+  /// with the [identifier].
+  /// Set the [frequency] to get updates on specified time interval.
+  ///
+  /// Warning: not all the notifications can be provided
+  /// by [HealthKit] on time you specify. For instance, if you provide
+  /// [UpdateFrequency.immediate] for [QuantityType.stepCount] the
+  /// notifications will happen hourly.
+  /// Please see more here:
+  /// https://developer.apple.com/documentation/healthkit/hkhealthstore/1614175-enablebackgrounddelivery
+  ///
   static Future<bool> enableBackgroundDelivery(
       String identifier, UpdateFrequency frequency) async {
     final arguments = {
@@ -413,9 +461,13 @@ class HealthKitReporter {
         'enableBackgroundDelivery', arguments);
   }
 
+  /// Disables all previous background notifications.
+  ///
   static Future<bool> disableAllBackgroundDelivery() async =>
       await _methodChannel.invokeMethod('disableAllBackgroundDelivery');
 
+  /// Disables specific background notifications for type with [identifier].
+  ///
   static Future<bool> disableBackgroundDelivery(String identifier) async {
     final arguments = {
       'identifier': identifier,
@@ -424,30 +476,68 @@ class HealthKitReporter {
         'disableBackgroundDelivery', arguments);
   }
 
-  static Future<String> sourceQuery(
+  /// Returns [Source] samples for the provided [identifier] and the
+  /// time interval predicate [predicate].
+  ///
+  static Future<List<Source>> sourceQuery(
       String identifier, Predicate predicate) async {
     final arguments = <String, dynamic>{
       'identifier': identifier,
     };
     arguments.addAll(predicate.map);
-    return await _methodChannel.invokeMethod('sourceQuery', arguments);
+    final result = await _methodChannel.invokeMethod('sourceQuery', arguments);
+    final List<dynamic> list = jsonDecode(result);
+    final sources = <Source>[];
+    for (final Map<String, dynamic> map in list) {
+      final source = Source.fromJson(map);
+      sources.add(source);
+    }
+    return sources;
   }
 
-  static Future<String> correlationQuery(String identifier, Predicate predicate,
-      Map<String, Predicate> typePredicates) async {
+  /// Returns [Correlation] samples for the provided [identifier], the
+  /// time interval predicate [predicate] and optional [typePredicates] for
+  /// [Category] and/or [Quantity] values.
+  ///
+  /// Warning: In order to use the correlations, you must be sure, that you have
+  /// provided reading permissions for relevant [QuantityType].
+  ///
+  /// For instance, if you want to get the data for [CorrelationType.bloodPressure],
+  /// you need to ask user to give read permissions for [QuantityType.bloodPressureDiastolic] and
+  /// [QuantityType.bloodPressureSystolic]. Otherwise [HealthKit] will throw fatal error with
+  /// message: "Authorization to read the following types is disallowed:
+  /// HKCorrelationTypeIdentifierBloodPressure".
+  ///
+  static Future<List<Correlation>> correlationQuery(
+      String identifier, Predicate predicate,
+      {Map<String, Predicate> typePredicates}) async {
     final arguments = {
       'identifier': identifier,
       'typePredicates': typePredicates,
     };
     arguments.addAll(predicate.map);
-    return await _methodChannel.invokeMethod('correlationQuery', arguments);
+    final result =
+        await _methodChannel.invokeMethod('correlationQuery', arguments);
+    final List<dynamic> list = jsonDecode(result);
+    final correlations = <Correlation>[];
+    for (final Map<String, dynamic> map in list) {
+      final correlation = Correlation.fromJson(map);
+      correlations.add(correlation);
+    }
+    return correlations;
   }
 
+  /// Returns status of the App on WatchOS device.
+  /// Expects [workoutConfiguration] as the main parameter.
+  ///
   static Future<bool> startWatchApp(
           WorkoutConfiguration workoutConfiguration) async =>
       await _methodChannel.invokeMethod(
-          'disableBackgroundDelivery', workoutConfiguration.map);
+          'startWatchApp', workoutConfiguration.map);
 
+  /// Checks if the provided type with [identifier] is
+  /// allowed for writing in [HealthKit].
+  ///
   static Future<bool> isAuthorizedToWrite(String identifier) async {
     final arguments = {
       'identifier': identifier,
@@ -455,40 +545,41 @@ class HealthKitReporter {
     return await _methodChannel.invokeMethod('isAuthorizedToWrite', arguments);
   }
 
-  static Future<bool> addCategory(
-      List<Category> categories, Device device, Workout workout) async {
+  /// Adds [Category] samples to your [workout].
+  /// [device] is optional.
+  ///
+  static Future<bool> addCategory(List<Category> categories, Workout workout,
+      {Device device}) async {
     final arguments = {
       'categories': categories.map((e) => e.map),
-      'device': device.map,
       'workout': workout.map,
     };
+    if (device != null) arguments['device'] = device.map;
     return await _methodChannel.invokeMethod('addCategory', arguments);
   }
 
-  static Future<bool> addQuantity(
-      List<Quantity> quantities, Device device, Workout workout) async {
+  /// Adds [Quantity] samples to your [workout].
+  /// [device] is optional.
+  ///
+  static Future<bool> addQuantity(List<Quantity> quantities, Workout workout,
+      {Device device}) async {
     final arguments = {
       'categories': quantities.map((e) => e.map),
-      'device': device.map,
       'workout': workout.map,
     };
+    if (device != null) arguments['device'] = device.map;
     return await _methodChannel.invokeMethod('addQuantity', arguments);
   }
 
+  /// Deletes [Sample] from [HealthKit].
+  ///
   static Future<bool> delete(Sample sample) async {
-    final arguments = {};
-    if (sample is Quantity) {
-      arguments['quantity'] = sample.map;
-    }
-    if (sample is Quantity) {
-      arguments['category'] = sample.map;
-    }
-    if (sample is Quantity) {
-      arguments['workout'] = sample.map;
-    }
+    final arguments = sample.parsed();
     return await _methodChannel.invokeMethod('delete', arguments);
   }
 
+  /// Deletes all objects related to [identifier] with [predicate].
+  ///
   static Future<bool> deleteObjects(
       String identifier, Predicate predicate) async {
     final arguments = <String, dynamic>{
@@ -498,17 +589,10 @@ class HealthKitReporter {
     return await _methodChannel.invokeMethod('deleteObjects', arguments);
   }
 
+  /// Saves [Sample] in [HealthKit].
+  ///
   static Future<bool> save(Sample sample) async {
-    final arguments = {};
-    if (sample is Quantity) {
-      arguments['quantity'] = sample.map;
-    }
-    if (sample is Quantity) {
-      arguments['category'] = sample.map;
-    }
-    if (sample is Quantity) {
-      arguments['workout'] = sample.map;
-    }
+    final arguments = sample.parsed();
     return await _methodChannel.invokeMethod('save', arguments);
   }
 }

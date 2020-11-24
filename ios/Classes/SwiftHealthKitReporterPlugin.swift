@@ -1089,18 +1089,20 @@ extension SwiftHealthKitReporterPlugin {
     ) {
         guard
             let category = arguments["categories"] as? [[String: Any]],
-            let device = arguments["device"] as? [String: Any],
             let workout = arguments["workout"] as? [String: Any]
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
+        let device = arguments["device"] as? [String: Any]
         do {
             reporter.writer.addCategory(
                 try category.map {
                     try Category.make(from: $0)
                 },
-                from: try Device.make(from: device),
+                from: device != nil
+                    ? try Device.make(from: device!)
+                    : nil,
                 to: try Workout.make(from: workout)
             ) { (success, error) in
                 guard error == nil else {
@@ -1126,17 +1128,19 @@ extension SwiftHealthKitReporterPlugin {
     ) {
         guard
             let quantity = arguments["quantities"] as? [[String: Any]],
-            let device = arguments["device"] as? [String: Any],
             let workout = arguments["workout"] as? [String: Any]
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
+        let device = arguments["device"] as? [String: Any]
         do {
             reporter.writer.addQuantitiy(try quantity.map {
                 try Quantity.make(from: $0)
             },
-            from: try Device.make(from: device),
+            from: device != nil
+                ? try Device.make(from: device!)
+                : nil,
             to: try Workout.make(from: workout)) { (success, error) in
                 guard error == nil else {
                     result(

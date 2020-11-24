@@ -53,6 +53,7 @@ enum QuantityType {
   dietaryZinc,
   dietaryIodine,
   dietaryManganese,
+  dietaryWater,
   environmentalAudioExposure,
   headphoneAudioExposure,
 }
@@ -164,6 +165,8 @@ extension Identifier on QuantityType {
         return 'HKQuantityTypeIdentifierDietaryIodine';
       case QuantityType.dietaryManganese:
         return 'HKQuantityTypeIdentifierDietaryManganese';
+      case QuantityType.dietaryWater:
+        return 'HKQuantityTypeIdentifierDietaryWater';
       case QuantityType.environmentalAudioExposure:
         return 'HKQuantityTypeIdentifierEnvironmentalAudioExposure';
       case QuantityType.headphoneAudioExposure:
