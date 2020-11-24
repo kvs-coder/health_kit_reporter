@@ -1,3 +1,6 @@
+/// Event channel methods
+/// which are handled by [HealthKitReporterStreamHandler.swift]
+///
 enum EventChannelMethod {
   statisticsCollectionQuery,
   queryActivitySummary,

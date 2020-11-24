@@ -1,5 +1,11 @@
 import '../exceptions.dart';
 
+/// Equivalent of [UpdateFrequency]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [value] extension representing
+/// original [int] of the type.
+///
 enum UpdateFrequency {
   immediate,
   hourly,

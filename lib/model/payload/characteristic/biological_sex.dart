@@ -5,6 +5,12 @@ import '../../../exceptions.dart';
 /// Equivalent of [BiologicalSex]
 /// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
 ///
+/// Supports [String] description extension [Description]
+/// for available cases
+///
+/// Has a factory method [from]
+/// Creating from [String]
+///
 enum BiologicalSex {
   notSet,
   female,
@@ -12,8 +18,6 @@ enum BiologicalSex {
   other,
 }
 
-/// String description of [BiologicalSex] cases
-///
 extension Description on BiologicalSex {
   String get string {
     switch (this) {
@@ -30,9 +34,6 @@ extension Description on BiologicalSex {
   }
 }
 
-/// Factory for [BiologicalSex]
-/// Creating from [String]
-///
 extension BiologicalSexFactory on BiologicalSex {
   static BiologicalSex from(String string) {
     switch (string) {

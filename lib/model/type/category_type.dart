@@ -1,5 +1,14 @@
 import '../../exceptions.dart';
 
+/// Equivalent of [CategoryType]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [identifier] extension representing
+/// original [String] of the type.
+///
+/// Has a factory methods [from] and [tryFrom]
+/// Creating from [String]
+///
 enum CategoryType {
   sleepAnalysis,
   appleStandHour,
