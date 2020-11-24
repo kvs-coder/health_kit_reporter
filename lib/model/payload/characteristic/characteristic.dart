@@ -1,8 +1,7 @@
-import 'package:health_kit_reporter/model/payload/characteristic/blood_type.dart';
-import 'package:health_kit_reporter/model/payload/characteristic/fitzpatrick_skin_type.dart';
-
 import '../../decorator/extensions.dart';
 import 'biological_sex.dart';
+import 'blood_type.dart';
+import 'fitzpatrick_skin_type.dart';
 
 class Characteristic {
   const Characteristic(
