@@ -1,7 +1,19 @@
+import 'package:health_kit_reporter/model/type/electrocardiogram_type.dart';
+
 import 'device.dart';
 import 'sample.dart';
 import 'source_revision.dart';
 
+/// Equivalent of [Electrocardiogram]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [Electrocardiogram.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
+/// Requires [ElectrocardiogramType] permissions provided.
+///
 class Electrocardiogram extends Sample<ElectrocardiogramHarmonized> {
   const Electrocardiogram(
     String identifier,
@@ -40,6 +52,14 @@ class Electrocardiogram extends Sample<ElectrocardiogramHarmonized> {
                 ElectrocardiogramHarmonized.fromJson(json['harmonized']));
 }
 
+/// Equivalent of [Electrocardiogram.Harmonized]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [ElectrocardiogramHarmonized.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
 class ElectrocardiogramHarmonized {
   const ElectrocardiogramHarmonized(
     this.averageHeartRate,

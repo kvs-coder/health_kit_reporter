@@ -1,5 +1,13 @@
 import 'source.dart';
 
+/// Equivalent of [SourceRevision]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [SourceRevision.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
 class SourceRevision {
   const SourceRevision(
     this.source,
@@ -31,6 +39,14 @@ class SourceRevision {
         operatingSystem = OperatingSystem.fromJson(json['operatingSystem']);
 }
 
+/// Equivalent of [SourceRevision.OperatingSystem]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [OperatingSystem.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
 class OperatingSystem {
   const OperatingSystem(
     this.majorVersion,

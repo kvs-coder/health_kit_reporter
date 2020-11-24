@@ -1,3 +1,10 @@
+/// Equivalent of [WorkoutConfiguration]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Requires [WorkoutType] permissions provided.
+///
 class WorkoutConfiguration {
   const WorkoutConfiguration(this.activityValue, this.locationValue,
       this.swimmingValue, this.harmonized);
@@ -15,6 +22,11 @@ class WorkoutConfiguration {
       };
 }
 
+/// Equivalent of [WorkoutConfiguration.Harmonized]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
 class WorkoutConfigurationHarmonized {
   const WorkoutConfigurationHarmonized(this.value, this.unit);
 

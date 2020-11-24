@@ -392,8 +392,10 @@ class HealthKitReporter {
     return samples;
   }
 
-  /// Returns [Sample] samples for the provided [identifier] and the
-  /// time interval predicate [predicate].
+  /// Returns [Statistics] for the provided [type] and the,
+  /// the preferred [unit] and the time interval predicate [predicate].
+  ///
+  /// Warning: The [unit] should be valid. See [preferredUnits].
   ///
   static Future<Statistics> statisticsQuery(
       QuantityType type, PreferredUnit unit, Predicate predicate) async {

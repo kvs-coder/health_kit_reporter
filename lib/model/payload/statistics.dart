@@ -1,5 +1,16 @@
 import 'source.dart';
 
+/// Equivalent of [Statistics]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [Statistics.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+/// And supports multiple object creation by [collect] method from JSON list.
+///
+/// Requires [QuantityType] permissions provided.
+///
 class Statistics {
   const Statistics(
     this.identifier,
@@ -32,6 +43,14 @@ class Statistics {
         harmonized = StatisticsHarmonized.fromJson(json['harmonized']);
 }
 
+/// Equivalent of [Statistics.Harmonized]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [StatisticsHarmonized.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
 class StatisticsHarmonized {
   const StatisticsHarmonized(
     this.summary,

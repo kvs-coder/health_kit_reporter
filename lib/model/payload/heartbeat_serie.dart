@@ -1,3 +1,13 @@
+/// Equivalent of [HeartbeatSerie]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [HeartbeatSerie.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
+/// Requires [SeriesType] permissions provided.
+///
 class HeartbeatSerie {
   const HeartbeatSerie(
     this.ibiArray,

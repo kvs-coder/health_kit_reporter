@@ -2,6 +2,17 @@ import 'device.dart';
 import 'sample.dart';
 import 'source_revision.dart';
 
+/// Equivalent of [Quantity]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [Quantity.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+/// And supports multiple object creation by [collect] method from JSON list.
+///
+/// Requires [QuantityType] permissions provided.
+///
 class Quantity extends Sample<QuantityHarmonized> {
   const Quantity(
     String identifier,
@@ -43,6 +54,14 @@ class Quantity extends Sample<QuantityHarmonized> {
   }
 }
 
+/// Equivalent of [Quantity.Harmonized]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [QuantityHarmonized.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
 class QuantityHarmonized {
   const QuantityHarmonized(
     this.value,

@@ -1,10 +1,21 @@
-import 'package:health_kit_reporter/model/payload/category.dart';
-import 'package:health_kit_reporter/model/payload/quantity.dart';
-import 'package:health_kit_reporter/model/payload/sample.dart';
+import 'package:health_kit_reporter/model/type/correlation_type.dart';
 
+import 'category.dart';
 import 'device.dart';
+import 'quantity.dart';
+import 'sample.dart';
 import 'source_revision.dart';
 
+/// Equivalent of [Correlation]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [Correlation.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
+/// Requires [CorrelationType] permissions provided.
+///
 class Correlation extends Sample<CorrelationHarmonized> {
   const Correlation(
     String identifier,
@@ -37,6 +48,14 @@ class Correlation extends Sample<CorrelationHarmonized> {
       };
 }
 
+/// Equivalent of [Correlation.Harmonized]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [CorrelationHarmonized.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
 class CorrelationHarmonized {
   const CorrelationHarmonized(
     this.quantitySamples,

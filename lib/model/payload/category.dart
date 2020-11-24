@@ -2,6 +2,17 @@ import 'device.dart';
 import 'sample.dart';
 import 'source_revision.dart';
 
+/// Equivalent of [Category]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [Category.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+/// And supports multiple object creation by [collect] method from JSON list.
+///
+/// Requires [CategoryType] permissions provided.
+///
 class Category extends Sample<CategoryHarmonized> {
   const Category(
     String identifier,
@@ -43,6 +54,14 @@ class Category extends Sample<CategoryHarmonized> {
   }
 }
 
+/// Equivalent of [Category.Harmonized]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [CategoryHarmonized.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
 class CategoryHarmonized {
   const CategoryHarmonized(
     this.value,

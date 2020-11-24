@@ -1,3 +1,11 @@
+/// Equivalent of [Device]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [Device.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
 class Device {
   const Device(
     this.name,

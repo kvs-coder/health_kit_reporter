@@ -1,8 +1,20 @@
+import 'package:health_kit_reporter/model/type/characteristic_type.dart';
+
 import '../../decorator/extensions.dart';
 import 'biological_sex.dart';
 import 'blood_type.dart';
 import 'fitzpatrick_skin_type.dart';
 
+/// Equivalent of [Characteristic]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [Characteristic.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
+/// Requires [CharacteristicType] permissions provided.
+///
 class Characteristic {
   const Characteristic(
     this.biologicalSex,

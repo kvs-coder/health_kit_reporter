@@ -1,3 +1,8 @@
+/// Equivalent of [DateComponents]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
 class DateComponents {
   const DateComponents({
     this.era,

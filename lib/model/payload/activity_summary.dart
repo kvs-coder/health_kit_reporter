@@ -1,5 +1,17 @@
+import 'package:health_kit_reporter/model/type/activity_summary_type.dart';
+
 import '../decorator/extensions.dart';
 
+/// Equivalent of [ActivitySummary]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [ActivitySummary.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
+/// Requires [ActivitySummaryType] permissions provided.
+///
 class ActivitySummary {
   const ActivitySummary(
     this.identifier,
@@ -9,7 +21,7 @@ class ActivitySummary {
 
   final String identifier;
   final DateTime date;
-  final Harmonized harmonized;
+  final ActivitySummaryHarmonized harmonized;
 
   Map<String, dynamic> get map => {
         'identifier': identifier,
@@ -20,11 +32,19 @@ class ActivitySummary {
   ActivitySummary.fromJson(Map<String, dynamic> json)
       : identifier = json['identifier'],
         date = json['date']?.toString()?.date,
-        harmonized = Harmonized.fromJson(json['harmonized']);
+        harmonized = ActivitySummaryHarmonized.fromJson(json['harmonized']);
 }
 
-class Harmonized {
-  const Harmonized(
+/// Equivalent of [ActivitySummary.Harmonized]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [ActivitySummaryHarmonized.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
+class ActivitySummaryHarmonized {
+  const ActivitySummaryHarmonized(
     this.activeEnergyBurned,
     this.activeEnergyBurnedGoal,
     this.activeEnergyBurnedUnit,
@@ -58,7 +78,7 @@ class Harmonized {
         'appleStandHoursUnit': appleStandHoursUnit,
       };
 
-  Harmonized.fromJson(Map<String, dynamic> json)
+  ActivitySummaryHarmonized.fromJson(Map<String, dynamic> json)
       : activeEnergyBurned = json['activeEnergyBurned'],
         activeEnergyBurnedGoal = json['activeEnergyBurnedGoal'],
         activeEnergyBurnedUnit = json['activeEnergyBurnedUnit'],

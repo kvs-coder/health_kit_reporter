@@ -1,3 +1,12 @@
+/// Equivalent of [Source]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [Source.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+/// And supports multiple object creation by [collect] method from JSON list.
+///
 class Source {
   const Source(
     this.name,

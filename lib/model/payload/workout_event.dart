@@ -1,3 +1,13 @@
+/// Equivalent of [WorkoutEvent]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [WorkoutEvent.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
+/// Requires [WorkoutType] permissions provided.
+///
 class WorkoutEvent {
   final String type;
   final num startTimestamp;
@@ -38,6 +48,14 @@ class WorkoutEvent {
   }
 }
 
+/// Equivalent of [WorkoutEvent.Harmonized]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [WorkoutEventHarmonized.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
 class WorkoutEventHarmonized {
   const WorkoutEventHarmonized(
     this.value,

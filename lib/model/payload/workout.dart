@@ -1,8 +1,19 @@
+import '../type/workout_type.dart';
 import 'device.dart';
 import 'sample.dart';
 import 'source_revision.dart';
 import 'workout_event.dart';
 
+/// Equivalent of [Workout]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [Workout.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
+/// Requires [WorkoutType] permissions provided.
+///
 class Workout extends Sample<WorkoutHarmonized> {
   const Workout(
     String identifier,
@@ -48,6 +59,14 @@ class Workout extends Sample<WorkoutHarmonized> {
             harmonized: WorkoutHarmonized.fromJson(json['harmonized']));
 }
 
+/// Equivalent of [Workout.Harmonized]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [WorkoutHarmonized.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
 class WorkoutHarmonized {
   const WorkoutHarmonized(
     this.value,

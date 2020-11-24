@@ -1,17 +1,44 @@
-import 'package:health_kit_reporter/model/payload/category.dart';
-import 'package:health_kit_reporter/model/payload/electrocardiogram.dart';
-import 'package:health_kit_reporter/model/payload/quantity.dart';
-import 'package:health_kit_reporter/model/payload/workout.dart';
-import 'package:health_kit_reporter/model/type/category_type.dart';
-import 'package:health_kit_reporter/model/type/correlation_type.dart';
-import 'package:health_kit_reporter/model/type/electrocardiogram_type.dart';
-import 'package:health_kit_reporter/model/type/quantity_type.dart';
-import 'package:health_kit_reporter/model/type/workout_type.dart';
-
+import '../type/category_type.dart';
+import '../type/correlation_type.dart';
+import '../type/electrocardiogram_type.dart';
+import '../type/quantity_type.dart';
+import '../type/workout_type.dart';
+import 'category.dart';
 import 'correlation.dart';
 import 'device.dart';
+import 'electrocardiogram.dart';
+import 'quantity.dart';
 import 'source_revision.dart';
+import 'workout.dart';
 
+/// Equivalent of [Sample]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [Sample.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
+/// Has a [factory] method for creating a specific instance of types:
+/// - [Quantity]
+/// - [Category]
+/// - [Workout]
+/// - [Correlation]
+/// - [Electrocardiogram]
+/// Every type conforms the requirement
+/// to have an associated type [Harmonized]implemented.
+///
+/// Depending on request, requires permissions provided from available types:
+/// - [CategoryType]
+/// - [CorrelationType]
+/// - [ElectrocardiogramType]
+/// - [QuantityType]
+/// - [WorkoutType]
+///
+/// The method [parsed] is used for mapping values
+/// to save data in [HealthKit]
+///
+///
 abstract class Sample<Harmonized> {
   const Sample(
     this.identifier,

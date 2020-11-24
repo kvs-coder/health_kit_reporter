@@ -1,5 +1,8 @@
 import '../../../exceptions.dart';
 
+/// Equivalent of [BloodType]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
 enum BloodType {
   notSet,
   aPositive,
@@ -12,6 +15,8 @@ enum BloodType {
   oNegative,
 }
 
+/// String description of [BloodType] cases
+///
 extension Description on BloodType {
   String get string {
     switch (this) {
@@ -38,6 +43,9 @@ extension Description on BloodType {
   }
 }
 
+/// Factory for [BloodType]
+/// Creating from [String]
+///
 extension BloodTypeFactory on BloodType {
   static BloodType from(String string) {
     switch (string) {

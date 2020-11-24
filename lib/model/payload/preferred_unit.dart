@@ -1,3 +1,9 @@
+/// Equivalent of [PreferredUnit]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Has a [PreferredUnit.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
 class PreferredUnit {
   const PreferredUnit(
     this.identifier,

@@ -1,5 +1,8 @@
 import '../../../exceptions.dart';
 
+/// Equivalent of [FitzpatrickSkinType]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
 enum FitzpatrickSkinType {
   notSet,
   I,
@@ -10,6 +13,8 @@ enum FitzpatrickSkinType {
   VI,
 }
 
+/// String description of [FitzpatrickSkinType] cases
+///
 extension Description on FitzpatrickSkinType {
   String get string {
     switch (this) {
@@ -32,6 +37,9 @@ extension Description on FitzpatrickSkinType {
   }
 }
 
+/// Factory for [FitzpatrickSkinType]
+/// Creating from [String]
+///
 extension FitzpatrickSkinTypeFactory on FitzpatrickSkinType {
   static FitzpatrickSkinType from(String string) {
     switch (string) {
