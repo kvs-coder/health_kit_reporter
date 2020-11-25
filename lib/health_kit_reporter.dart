@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
-import 'model/event_channel_method.dart';
+import 'model/event_method.dart';
 import 'model/payload/activity_summary.dart';
 import 'model/payload/category.dart';
 import 'model/payload/characteristic/characteristic.dart';
@@ -116,11 +116,9 @@ class HealthKitReporter {
   ///
   static StreamSubscription<dynamic> heartbeatSeriesQuery(Predicate predicate,
       {Function(HeartbeatSerie) onUpdate}) {
-    final eventMethod = EventChannelMethod.heartbeatSeriesQuery.name;
-    final channel =
-        EventChannel('${EventChannelMethodName.prefix}_$eventMethod');
+    final channel = EventMethod.heartbeatSeriesQuery.channel;
     final arguments = <String, dynamic>{
-      'eventMethod': eventMethod,
+      'eventMethod': channel.eventName,
     };
     arguments.addAll(predicate.map);
     return channel.receiveBroadcastStream(arguments).listen((event) {
@@ -137,11 +135,9 @@ class HealthKitReporter {
   ///
   static StreamSubscription<dynamic> workoutRouteQuery(Predicate predicate,
       {Function(WorkoutRoute) onUpdate}) {
-    final eventMethod = EventChannelMethod.workoutRouteQuery.name;
-    final channel =
-        EventChannel('${EventChannelMethodName.prefix}_$eventMethod');
+    final channel = EventMethod.workoutRouteQuery.channel;
     final arguments = <String, dynamic>{
-      'eventMethod': eventMethod,
+      'eventMethod': channel.eventName,
     };
     arguments.addAll(predicate.map);
     return channel.receiveBroadcastStream(arguments).listen((event) {
@@ -160,12 +156,10 @@ class HealthKitReporter {
   static StreamSubscription<dynamic> observerQuery(
       String identifier, Predicate predicate,
       {Function(String) onUpdate}) {
-    final eventMethod = EventChannelMethod.observerQuery.name;
-    final channel =
-        EventChannel('${EventChannelMethodName.prefix}_$eventMethod');
+    final channel = EventMethod.observerQuery.channel;
     final arguments = <String, dynamic>{
       'identifier': identifier,
-      'eventMethod': eventMethod,
+      'eventMethod': channel.eventName,
     };
     arguments.addAll(predicate.map);
     return channel.receiveBroadcastStream(arguments).listen((event) {
@@ -185,12 +179,10 @@ class HealthKitReporter {
   static StreamSubscription<dynamic> anchoredObjectQuery(
       String identifier, Predicate predicate,
       {Function(List<Sample>) onUpdate}) {
-    final eventMethod = EventChannelMethod.anchoredObjectQuery.name;
-    final channel =
-        EventChannel('${EventChannelMethodName.prefix}_$eventMethod');
+    final channel = EventMethod.anchoredObjectQuery.channel;
     final arguments = <String, dynamic>{
       'identifier': identifier,
-      'eventMethod': eventMethod,
+      'eventMethod': channel.eventName,
     };
     arguments.addAll(predicate.map);
     return channel.receiveBroadcastStream(arguments).listen((event) {
@@ -215,11 +207,9 @@ class HealthKitReporter {
   static StreamSubscription<dynamic> queryActivitySummaryUpdates(
       Predicate predicate,
       {Function(List<ActivitySummary>) onUpdate}) {
-    final eventMethod = EventChannelMethod.queryActivitySummary.name;
-    final channel =
-        EventChannel('${EventChannelMethodName.prefix}_$eventMethod');
+    final channel = EventMethod.queryActivitySummary.channel;
     final arguments = <String, dynamic>{
-      'eventMethod': eventMethod,
+      'eventMethod': channel.eventName,
     };
     arguments.addAll(predicate.map);
     return channel.receiveBroadcastStream(arguments).listen((event) {
@@ -253,16 +243,14 @@ class HealthKitReporter {
       DateTime enumerateTo,
       DateComponents intervalComponents,
       {Function(Statistics) onUpdate}) {
-    final eventMethod = EventChannelMethod.statisticsCollectionQuery.name;
-    final channel =
-        EventChannel('${EventChannelMethodName.prefix}_$eventMethod');
+    final channel = EventMethod.statisticsCollectionQuery.channel;
     final arguments = {
       'identifier': type.identifier,
       'unit': unit.unit,
       'anchorTimestamp': anchorDate.millisecondsSinceEpoch,
       'enumerateFrom': enumerateFrom.millisecondsSinceEpoch,
       'enumerateTo': enumerateTo.millisecondsSinceEpoch,
-      'eventMethod': eventMethod,
+      'eventMethod': channel.eventName,
       'intervalComponents': intervalComponents.map,
     };
     arguments.addAll(predicate.map);
