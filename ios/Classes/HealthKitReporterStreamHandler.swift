@@ -162,11 +162,7 @@ extension HealthKitReporterStreamHandler {
                 return
             }
             do {
-                let dictionary: [String: Any] = [
-                    "event": Event.statisticsCollectionQuery.rawValue,
-                    "result": try statistics.encoded()
-                ]
-                events(dictionary)
+                events(try statistics.encoded())
             } catch {
                 events(nil)
             }
@@ -196,11 +192,7 @@ extension HealthKitReporterStreamHandler {
                 return
             }
             do {
-                let dictionary: [String: Any] = [
-                    "event": Event.queryActivitySummary.rawValue,
-                    "result": try activitySummaries.encoded()
-                ]
-                events(dictionary)
+                events(try activitySummaries.encoded())
             } catch {
                 events(nil)
             }
@@ -243,11 +235,7 @@ extension HealthKitReporterStreamHandler {
                     continue
                 }
             }
-            let dictionary: [String: Any] = [
-                "event": Event.anchoredObjectQuery.rawValue,
-                "result": jsonArray
-            ]
-            events(dictionary)
+            events(jsonArray)
         }
     }
     private func observerQuery(
@@ -279,13 +267,7 @@ extension HealthKitReporterStreamHandler {
             else {
                 return
             }
-            let dictionary: [String: Any] = [
-                "event": Event.observerQuery.rawValue,
-                "result": [
-                    "observingTypeIdentifier": identifier
-                ]
-            ]
-            events(dictionary)
+            events(["observingTypeIdentifier": identifier])
         }
     }
     private func heartbeatSeriesQuery(
@@ -314,11 +296,7 @@ extension HealthKitReporterStreamHandler {
                     return
                 }
                 do {
-                    let dictionary: [String: Any] = [
-                        "event": Event.heartbeatSeriesQuery.rawValue,
-                        "result": try heartbeatSerie.encoded()
-                    ]
-                    events(dictionary)
+                    events(try heartbeatSerie.encoded())
                 } catch {
                     events(nil)
                 }
@@ -353,11 +331,7 @@ extension HealthKitReporterStreamHandler {
                     return
                 }
                 do {
-                    let dictionary: [String: Any] = [
-                        "event": Event.workoutRouteQuery.rawValue,
-                        "result": try workoutRoute.encoded()
-                    ]
-                    events(dictionary)
+                    events(try workoutRoute.encoded())
                 } catch {
                     events(nil)
                 }

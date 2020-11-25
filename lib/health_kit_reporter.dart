@@ -124,13 +124,9 @@ class HealthKitReporter {
     };
     arguments.addAll(predicate.map);
     return channel.receiveBroadcastStream(arguments).listen((event) {
-      final map = Map<String, dynamic>.from(event);
-      if (map['event'] == eventMethod) {
-        final result = map['result'];
-        final json = jsonDecode(result);
-        final heartbeatSerie = HeartbeatSerie.fromJson(json);
-        onUpdate(heartbeatSerie);
-      }
+      final json = jsonDecode(event);
+      final heartbeatSerie = HeartbeatSerie.fromJson(json);
+      onUpdate(heartbeatSerie);
     });
   }
 
@@ -149,13 +145,9 @@ class HealthKitReporter {
     };
     arguments.addAll(predicate.map);
     return channel.receiveBroadcastStream(arguments).listen((event) {
-      final map = Map<String, dynamic>.from(event);
-      if (map['event'] == eventMethod) {
-        final result = map['result'];
-        final json = jsonDecode(result);
-        final workoutRoute = WorkoutRoute.fromJson(json);
-        onUpdate(workoutRoute);
-      }
+      final json = jsonDecode(event);
+      final workoutRoute = WorkoutRoute.fromJson(json);
+      onUpdate(workoutRoute);
     });
   }
 
@@ -178,11 +170,8 @@ class HealthKitReporter {
     arguments.addAll(predicate.map);
     return channel.receiveBroadcastStream(arguments).listen((event) {
       final map = Map<String, dynamic>.from(event);
-      if (map['event'] == eventMethod) {
-        final result = map['result'];
-        final identifier = result['observingTypeIdentifier'];
-        onUpdate(identifier);
-      }
+      final identifier = map['observingTypeIdentifier'];
+      onUpdate(identifier);
     });
   }
 
@@ -205,17 +194,14 @@ class HealthKitReporter {
     };
     arguments.addAll(predicate.map);
     return channel.receiveBroadcastStream(arguments).listen((event) {
-      final map = Map<String, dynamic>.from(event);
-      if (map['event'] == eventMethod) {
-        final list = List.from(map['result']);
-        final samples = <Sample>[];
-        for (final String element in list) {
-          final json = jsonDecode(element);
-          final sample = Sample.factory(json);
-          samples.add(sample);
-        }
-        onUpdate(samples);
+      final list = List.from(event);
+      final samples = <Sample>[];
+      for (final String element in list) {
+        final json = jsonDecode(element);
+        final sample = Sample.factory(json);
+        samples.add(sample);
       }
+      onUpdate(samples);
     });
   }
 
@@ -237,16 +223,13 @@ class HealthKitReporter {
     };
     arguments.addAll(predicate.map);
     return channel.receiveBroadcastStream(arguments).listen((event) {
-      final map = Map<String, dynamic>.from(event);
-      if (map['event'] == eventMethod) {
-        final List<dynamic> list = jsonDecode(map['result']);
-        final activitySummaries = <ActivitySummary>[];
-        for (final Map<String, dynamic> map in list) {
-          final activitySummary = ActivitySummary.fromJson(map);
-          activitySummaries.add(activitySummary);
-        }
-        onUpdate(activitySummaries);
+      final List<dynamic> list = jsonDecode(event);
+      final activitySummaries = <ActivitySummary>[];
+      for (final Map<String, dynamic> map in list) {
+        final activitySummary = ActivitySummary.fromJson(map);
+        activitySummaries.add(activitySummary);
       }
+      onUpdate(activitySummaries);
     });
   }
 
@@ -284,13 +267,9 @@ class HealthKitReporter {
     };
     arguments.addAll(predicate.map);
     return channel.receiveBroadcastStream(arguments).listen((event) {
-      final map = Map<String, dynamic>.from(event);
-      if (map['event'] == eventMethod) {
-        final result = map['result'];
-        final json = jsonDecode(result);
-        final statistics = Statistics.fromJson(json);
-        onUpdate(statistics);
-      }
+      final json = jsonDecode(event);
+      final statistics = Statistics.fromJson(json);
+      onUpdate(statistics);
     });
   }
 
