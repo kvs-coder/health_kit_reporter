@@ -53,6 +53,56 @@ class MyApp extends StatelessWidget {
     );
   }
 
+  void requestAuthorization() async {
+    try {
+      final readTypes = <String>[];
+      readTypes.addAll(QuantityType.values.map((e) => e.identifier));
+      final writeTypes = <String>[
+        QuantityType.stepCount.identifier,
+      ];
+      final isRequested =
+          await HealthKitReporter.requestAuthorization(readTypes, writeTypes);
+      if (isRequested) {
+        // read data/write data/observe data
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void read(bool isRequested) async {
+    if (isRequested) {
+      final preferredUnits =
+          await HealthKitReporter.preferredUnits([QuantityType.stepCount]);
+      preferredUnits.forEach((preferredUnit) async {
+        print('preferredUnit: ${preferredUnit.identifier}');
+        final type = QuantityTypeFactory.from(preferredUnit.identifier);
+        final quantities = await HealthKitReporter.quantityQuery(
+            type, preferredUnit, _predicate);
+        print('quantity: ${quantities.map((e) => e.map)}');
+        final statistics = await HealthKitReporter.statisticsQuery(
+            type, preferredUnit, _predicate);
+        print('statistics: ${statistics.map}');
+      });
+      final characteristics = await HealthKitReporter.characteristicsQuery();
+      print('characteristics: ${characteristics.map}');
+      final categories = await HealthKitReporter.categoryQuery(
+          CategoryType.sleepAnalysis, _predicate);
+      print('categories: ${categories.map((e) => e.map)}');
+      final samples = await HealthKitReporter.sampleQuery(
+          QuantityType.stepCount.identifier, _predicate);
+      print('samples: ${samples.map((e) => e.map)}');
+      final sources = await HealthKitReporter.sourceQuery(
+          QuantityType.stepCount.identifier, _predicate);
+      print('sources: ${sources.map((e) => e.map)}');
+      final correlations = await HealthKitReporter.correlationQuery(
+          CorrelationType.bloodPressure.identifier, _predicate);
+      print('correlations: ${correlations.map((e) => e.map)}');
+    } else {
+      print('error isRequested: $isRequested');
+    }
+  }
+
   Future<void> runHealthKitReporter() async {
     try {
       final readTypes = <String>[];
@@ -197,5 +247,16 @@ class MyApp extends StatelessWidget {
         harmonized);
     print(steps.map);
     return HealthKitReporter.save(steps);
+  }
+
+  void write() async {
+    final canWrite = await HealthKitReporter.isAuthorizedToWrite(
+        QuantityType.stepCount.identifier);
+    if (canWrite) {
+      final stepsSaved = await saveSteps();
+      print('stepsSaved: $stepsSaved');
+    } else {
+      print('error canWrite: $canWrite');
+    }
   }
 }
