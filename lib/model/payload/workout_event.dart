@@ -5,6 +5,7 @@
 ///
 /// Has a [WorkoutEvent.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
+/// And supports multiple object creation by [collect] method from JSON list.
 ///
 /// Requires [WorkoutType] permissions provided.
 ///

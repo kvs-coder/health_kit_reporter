@@ -12,7 +12,12 @@ import health_kit_reporter
     GeneratedPluginRegistrant.register(with: self)
     if let rootViewController = window.rootViewController {
         let handler = HealthKitReporterStreamHandler(viewController: rootViewController)
-        handler.setEventChannelStreamHandler()
+        handler.setStreamHandler(for: .observerQuery)
+        handler.setStreamHandler(for: .anchoredObjectQuery)
+        handler.setStreamHandler(for: .heartbeatSeriesQuery)
+        handler.setStreamHandler(for: .queryActivitySummary)
+        handler.setStreamHandler(for: .statisticsCollectionQuery)
+        handler.setStreamHandler(for: .workoutRouteQuery)
     }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }

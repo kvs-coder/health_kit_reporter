@@ -14,6 +14,7 @@ import 'package:health_kit_reporter/model/type/category_type.dart';
 import 'package:health_kit_reporter/model/type/characteristic_type.dart';
 import 'package:health_kit_reporter/model/type/correlation_type.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
+import 'package:health_kit_reporter/model/type/series_type.dart';
 import 'package:health_kit_reporter/model/type/workout_type.dart';
 
 void main() {
@@ -28,6 +29,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    observerQuery();
+    anchoredObjectQuery();
+    queryActivitySummaryUpdates();
+    statisticsCollectionQuery();
+    heartbeatSeriesQuery();
+    workoutRouteQuery();
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -54,17 +61,13 @@ class MyApp extends StatelessWidget {
       readTypes.addAll(CharacteristicType.values.map((e) => e.identifier));
       readTypes.addAll(QuantityType.values.map((e) => e.identifier));
       readTypes.addAll(WorkoutType.values.map((e) => e.identifier));
-      //readTypes.addAll(CorrelationType.values.map((e) => e.identifier));
+      readTypes.addAll(SeriesType.values.map((e) => e.identifier));
       final writeTypes = <String>[
         QuantityType.stepCount.identifier,
       ];
       final isRequested =
           await HealthKitReporter.requestAuthorization(readTypes, writeTypes);
       if (isRequested) {
-        observerQuery();
-        //anchoredObjectQuery();
-        //queryActivitySummaryUpdates();
-        //statisticsCollectionQuery();
         final preferredUnits =
             await HealthKitReporter.preferredUnits([QuantityType.stepCount]);
         preferredUnits.forEach((preferredUnit) async {
@@ -104,7 +107,9 @@ class MyApp extends StatelessWidget {
       }
     } catch (exception) {
       print('general exception: $exception');
-    } finally {}
+    } finally {
+      print('HealthKitReporter is done');
+    }
   }
 
   void observerQuery() {
@@ -115,6 +120,24 @@ class MyApp extends StatelessWidget {
       print(identifier);
     });
     print('observerQuerySub: $sub');
+  }
+
+  void heartbeatSeriesQuery() {
+    final sub =
+        HealthKitReporter.heartbeatSeriesQuery(_predicate, onUpdate: (serie) {
+      print('Updates for heartbeatSeriesQuery');
+      print(serie.map);
+    });
+    print('heartbeatSeriesQuery: $sub');
+  }
+
+  void workoutRouteQuery() {
+    final sub =
+        HealthKitReporter.workoutRouteQuery(_predicate, onUpdate: (serie) {
+      print('Updates for workoutRouteQuery');
+      print(serie.map);
+    });
+    print('workoutRouteQuery: $sub');
   }
 
   void anchoredObjectQuery() {

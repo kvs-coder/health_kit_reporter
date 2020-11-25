@@ -10,19 +10,23 @@
 ///
 class HeartbeatSerie {
   const HeartbeatSerie(
-    this.ibiArray,
-    this.indexArray,
+    this.timeSinceSeriesStart,
+    this.precededByGap,
+    this.done,
   );
 
-  final List<double> ibiArray;
-  final List<int> indexArray;
+  final num timeSinceSeriesStart;
+  final bool precededByGap;
+  final bool done;
 
   Map<String, dynamic> get map => {
-        'ibiArray': ibiArray,
-        'indexArray': indexArray,
+        'timeSinceSeriesStart': timeSinceSeriesStart,
+        'precededByGap': precededByGap,
+        'done': done,
       };
 
   HeartbeatSerie.fromJson(Map<String, dynamic> json)
-      : ibiArray = json['ibiArray'],
-        indexArray = json['indexArray'];
+      : timeSinceSeriesStart = json['timeSinceSeriesStart'],
+        precededByGap = json['precededByGap'],
+        done = json['done'];
 }

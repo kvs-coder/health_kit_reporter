@@ -19,6 +19,7 @@ import 'model/payload/source.dart';
 import 'model/payload/statistics.dart';
 import 'model/payload/workout.dart';
 import 'model/payload/workout_configuration.dart';
+import 'model/payload/workout_route.dart';
 import 'model/predicate.dart';
 import 'model/type/activity_summary_type.dart';
 import 'model/type/category_type.dart';
@@ -108,11 +109,55 @@ class HealthKitReporter {
   static const MethodChannel _methodChannel =
       MethodChannel('health_kit_reporter_method_channel');
 
-  /// [EventChannel] link to [HealthKitReporterStreamHandler.swift]
-  /// Will handle events coming from the native side.
+  /// Sets subscription for [HeartbeatSerie] series.
+  /// Will call [onUpdate] callback, if
+  /// there were new series came from enumeration block until it is done.
+  /// Provide the [predicate] to set the date interval.
   ///
-  static const EventChannel _eventChannel =
-      EventChannel('health_kit_reporter_event_channel');
+  static StreamSubscription<dynamic> heartbeatSeriesQuery(Predicate predicate,
+      {Function(HeartbeatSerie) onUpdate}) {
+    final eventMethod = EventChannelMethod.heartbeatSeriesQuery.name;
+    final channel =
+        EventChannel('${EventChannelMethodName.prefix}_$eventMethod');
+    final arguments = <String, dynamic>{
+      'eventMethod': eventMethod,
+    };
+    arguments.addAll(predicate.map);
+    return channel.receiveBroadcastStream(arguments).listen((event) {
+      final map = Map<String, dynamic>.from(event);
+      if (map['event'] == eventMethod) {
+        final result = map['result'];
+        final json = jsonDecode(result);
+        final heartbeatSerie = HeartbeatSerie.fromJson(json);
+        onUpdate(heartbeatSerie);
+      }
+    });
+  }
+
+  /// Sets subscription for [WorkoutRoute] series.
+  /// Will call [onUpdate] callback, if
+  /// there were new series came from enumeration block until it is done.
+  /// Provide the [predicate] to set the date interval.
+  ///
+  static StreamSubscription<dynamic> workoutRouteQuery(Predicate predicate,
+      {Function(WorkoutRoute) onUpdate}) {
+    final eventMethod = EventChannelMethod.workoutRouteQuery.name;
+    final channel =
+        EventChannel('${EventChannelMethodName.prefix}_$eventMethod');
+    final arguments = <String, dynamic>{
+      'eventMethod': eventMethod,
+    };
+    arguments.addAll(predicate.map);
+    return channel.receiveBroadcastStream(arguments).listen((event) {
+      final map = Map<String, dynamic>.from(event);
+      if (map['event'] == eventMethod) {
+        final result = map['result'];
+        final json = jsonDecode(result);
+        final workoutRoute = WorkoutRoute.fromJson(json);
+        onUpdate(workoutRoute);
+      }
+    });
+  }
 
   /// Sets subscription for data changes.
   /// Will call [onUpdate] callback, if
@@ -124,12 +169,14 @@ class HealthKitReporter {
       String identifier, Predicate predicate,
       {Function(String) onUpdate}) {
     final eventMethod = EventChannelMethod.observerQuery.name;
+    final channel =
+        EventChannel('${EventChannelMethodName.prefix}_$eventMethod');
     final arguments = <String, dynamic>{
       'identifier': identifier,
       'eventMethod': eventMethod,
     };
     arguments.addAll(predicate.map);
-    return _eventChannel.receiveBroadcastStream(arguments).listen((event) {
+    return channel.receiveBroadcastStream(arguments).listen((event) {
       final map = Map<String, dynamic>.from(event);
       if (map['event'] == eventMethod) {
         final result = map['result'];
@@ -150,12 +197,14 @@ class HealthKitReporter {
       String identifier, Predicate predicate,
       {Function(List<Sample>) onUpdate}) {
     final eventMethod = EventChannelMethod.anchoredObjectQuery.name;
+    final channel =
+        EventChannel('${EventChannelMethodName.prefix}_$eventMethod');
     final arguments = <String, dynamic>{
       'identifier': identifier,
       'eventMethod': eventMethod,
     };
     arguments.addAll(predicate.map);
-    return _eventChannel.receiveBroadcastStream(arguments).listen((event) {
+    return channel.receiveBroadcastStream(arguments).listen((event) {
       final map = Map<String, dynamic>.from(event);
       if (map['event'] == eventMethod) {
         final list = List.from(map['result']);
@@ -181,11 +230,13 @@ class HealthKitReporter {
       Predicate predicate,
       {Function(List<ActivitySummary>) onUpdate}) {
     final eventMethod = EventChannelMethod.queryActivitySummary.name;
+    final channel =
+        EventChannel('${EventChannelMethodName.prefix}_$eventMethod');
     final arguments = <String, dynamic>{
       'eventMethod': eventMethod,
     };
     arguments.addAll(predicate.map);
-    return _eventChannel.receiveBroadcastStream(arguments).listen((event) {
+    return channel.receiveBroadcastStream(arguments).listen((event) {
       final map = Map<String, dynamic>.from(event);
       if (map['event'] == eventMethod) {
         final List<dynamic> list = jsonDecode(map['result']);
@@ -220,6 +271,8 @@ class HealthKitReporter {
       DateComponents intervalComponents,
       {Function(Statistics) onUpdate}) {
     final eventMethod = EventChannelMethod.statisticsCollectionQuery.name;
+    final channel =
+        EventChannel('${EventChannelMethodName.prefix}_$eventMethod');
     final arguments = {
       'identifier': type.identifier,
       'unit': unit.unit,
@@ -230,7 +283,7 @@ class HealthKitReporter {
       'intervalComponents': intervalComponents.map,
     };
     arguments.addAll(predicate.map);
-    return _eventChannel.receiveBroadcastStream(arguments).listen((event) {
+    return channel.receiveBroadcastStream(arguments).listen((event) {
       final map = Map<String, dynamic>.from(event);
       if (map['event'] == eventMethod) {
         final result = map['result'];
@@ -409,18 +462,6 @@ class HealthKitReporter {
     final Map<String, dynamic> map = jsonDecode(result);
     final statistics = Statistics.fromJson(map);
     return statistics;
-  }
-
-  /// Returns [HeartbeatSerie] samples for the provided
-  /// time interval predicate [predicate].
-  ///
-  static Future<HeartbeatSerie> heartbeatSeriesQuery(
-      Predicate predicate) async {
-    final result = await _methodChannel.invokeMethod(
-        'heartbeatSeriesQuery', predicate.map);
-    final Map<String, dynamic> map = jsonDecode(result);
-    final heartbeatSerie = HeartbeatSerie.fromJson(map);
-    return heartbeatSerie;
   }
 
   /// Returns [HeartbeatSerie] samples for the provided

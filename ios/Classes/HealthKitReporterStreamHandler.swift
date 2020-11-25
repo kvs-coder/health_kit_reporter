@@ -9,11 +9,18 @@ import Foundation
 import HealthKitReporter
 
 public class HealthKitReporterStreamHandler: NSObject {
-    public enum Method: String {
+    public enum Event: String {
         case statisticsCollectionQuery
         case queryActivitySummary
         case anchoredObjectQuery
         case observerQuery
+        case heartbeatSeriesQuery
+        case workoutRouteQuery
+
+        var channelName: String {
+            let channel = "health_kit_reporter_event_channel"
+            return "\(channel)_\(self.rawValue)"
+        }
     }
 
     private let binaryMessenger: FlutterBinaryMessenger?
@@ -23,10 +30,10 @@ public class HealthKitReporterStreamHandler: NSObject {
         self.binaryMessenger = flutterViewController?.binaryMessenger
     }
 
-    public func setEventChannelStreamHandler() {
+    public func setStreamHandler(for event: Event) {
         if let binaryMessenger = self.binaryMessenger {
             let eventChannel = FlutterEventChannel(
-                name: "health_kit_reporter_event_channel",
+                name: event.channelName,
                 binaryMessenger: binaryMessenger
             )
             eventChannel.setStreamHandler(self)
@@ -46,23 +53,19 @@ extension HealthKitReporterStreamHandler: FlutterStreamHandler {
                 details: "No arguments"
             )
         }
-        guard let eventMethod = arguments["eventMethod"] as? String else {
+        guard
+            let eventMethod = arguments["eventMethod"] as? String,
+            let event = Event.init(rawValue: eventMethod)
+        else {
             return FlutterError(
                 code: #function,
-                message: "Invalid function name: \(arguments)",
+                message: "Invalid event name: \(arguments)",
                 details: "Wrong arguments"
-            )
-        }
-        guard let method = Method.init(rawValue: eventMethod) else {
-            return FlutterError(
-                code: #function,
-                message: "Method enum can not be represented",
-                details: "Raw value was: \(eventMethod)"
             )
         }
         do {
             let reporter = try HealthKitReporter()
-            switch method {
+            switch event {
             case .statisticsCollectionQuery:
                 statisticsCollectionQuery(
                     reporter: reporter,
@@ -83,6 +86,18 @@ extension HealthKitReporterStreamHandler: FlutterStreamHandler {
                 )
             case .observerQuery:
                 observerQuery(
+                    reporter: reporter,
+                    arguments: arguments,
+                    events: events
+                )
+            case .heartbeatSeriesQuery:
+                heartbeatSeriesQuery(
+                    reporter: reporter,
+                    arguments: arguments,
+                    events: events
+                )
+            case .workoutRouteQuery:
+                workoutRouteQuery(
                     reporter: reporter,
                     arguments: arguments,
                     events: events
@@ -140,15 +155,15 @@ extension HealthKitReporterStreamHandler {
             ),
             monitorUpdates: monitorUpdates
         ) { (statistics, error) in
-            guard error == nil else {
+            guard
+                error == nil,
+                let statistics = statistics
+            else {
                 return
             }
             do {
-                guard let statistics = statistics else {
-                    return
-                }
                 let dictionary: [String: Any] = [
-                    "event": Method.statisticsCollectionQuery.rawValue,
+                    "event": Event.statisticsCollectionQuery.rawValue,
                     "result": try statistics.encoded()
                 ]
                 events(dictionary)
@@ -182,7 +197,7 @@ extension HealthKitReporterStreamHandler {
             }
             do {
                 let dictionary: [String: Any] = [
-                    "event": Method.queryActivitySummary.rawValue,
+                    "event": Event.queryActivitySummary.rawValue,
                     "result": try activitySummaries.encoded()
                 ]
                 events(dictionary)
@@ -229,7 +244,7 @@ extension HealthKitReporterStreamHandler {
                 }
             }
             let dictionary: [String: Any] = [
-                "event": Method.anchoredObjectQuery.rawValue,
+                "event": Event.anchoredObjectQuery.rawValue,
                 "result": jsonArray
             ]
             events(dictionary)
@@ -258,19 +273,97 @@ extension HealthKitReporterStreamHandler {
             type: type,
             predicate: predicate
         ) { (_, identifier, error) in
-            guard error == nil else {
-                return
-            }
-            guard let identifier = identifier else {
+            guard
+                error == nil,
+                let identifier = identifier
+            else {
                 return
             }
             let dictionary: [String: Any] = [
-                "event": Method.observerQuery.rawValue,
+                "event": Event.observerQuery.rawValue,
                 "result": [
                     "observingTypeIdentifier": identifier
                 ]
             ]
             events(dictionary)
+        }
+    }
+    private func heartbeatSeriesQuery(
+        reporter: HealthKitReporter,
+        arguments: [String: Any],
+        events: @escaping FlutterEventSink
+    ) {
+        guard
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double
+        else {
+            return
+        }
+        let predicate = NSPredicate.samplesPredicate(
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
+        )
+        if #available(iOS 13.0, *) {
+            reporter.reader.heartbeatSeriesQuery(
+                predicate: predicate
+            ) { (heartbeatSerie, error) in
+                guard
+                    error == nil,
+                    let heartbeatSerie = heartbeatSerie
+                else {
+                    return
+                }
+                do {
+                    let dictionary: [String: Any] = [
+                        "event": Event.heartbeatSeriesQuery.rawValue,
+                        "result": try heartbeatSerie.encoded()
+                    ]
+                    events(dictionary)
+                } catch {
+                    events(nil)
+                }
+            }
+        } else {
+            events(nil)
+        }
+    }
+    private func workoutRouteQuery(
+        reporter: HealthKitReporter,
+        arguments: [String: Any],
+        events: @escaping FlutterEventSink
+    ) {
+        guard
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double
+        else {
+            return
+        }
+        let predicate = NSPredicate.samplesPredicate(
+            startDate: Date.make(from: startTimestamp),
+            endDate: Date.make(from: endTimestamp)
+        )
+        if #available(iOS 13.0, *) {
+            reporter.reader.workoutRouteQuery(
+                predicate: predicate
+            ) { (workoutRoute, error) in
+                guard
+                    error == nil,
+                    let workoutRoute = workoutRoute
+                else {
+                    return
+                }
+                do {
+                    let dictionary: [String: Any] = [
+                        "event": Event.workoutRouteQuery.rawValue,
+                        "result": try workoutRoute.encoded()
+                    ]
+                    events(dictionary)
+                } catch {
+                    events(nil)
+                }
+            }
+        } else {
+            events(nil)
         }
     }
 }
