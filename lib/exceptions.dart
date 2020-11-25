@@ -4,5 +4,7 @@
 class InvalidValueException implements Exception {
   const InvalidValueException(this.cause);
 
+  /// The message payload of the error.
+  ///
   final String cause;
 }

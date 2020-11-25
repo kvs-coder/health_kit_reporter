@@ -54,6 +54,8 @@ extension CategoryTypeFactory on CategoryType {
     throw InvalidValueException('Unknown identifier: $identifier');
   }
 
+  /// The [from] exception handling
+  ///
   static CategoryType tryFrom(String identifier) {
     try {
       return from(identifier);

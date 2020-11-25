@@ -34,6 +34,8 @@ class Electrocardiogram extends Sample<ElectrocardiogramHarmonized> {
 
   final int numberOfMeasurements;
 
+  /// General map representation
+  ///
   @override
   Map<String, dynamic> get map => {
         'identifier': identifier,
@@ -45,6 +47,8 @@ class Electrocardiogram extends Sample<ElectrocardiogramHarmonized> {
         'numberOfMeasurements': numberOfMeasurements,
       };
 
+  /// General constructor from JSON payload
+  ///
   Electrocardiogram.fromJson(Map<String, dynamic> json)
       : numberOfMeasurements = json['numberOfMeasurements'],
         super.fromJson(json,
@@ -79,6 +83,8 @@ class ElectrocardiogramHarmonized {
   final String symptomsStatus;
   final Map<String, dynamic> metadata;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'averageHeartRate': averageHeartRate,
         'averageHeartRateUnit': averageHeartRateUnit,
@@ -89,6 +95,8 @@ class ElectrocardiogramHarmonized {
         'metadata': metadata,
       };
 
+  /// General constructor from JSON payload
+  ///
   ElectrocardiogramHarmonized.fromJson(Map<String, dynamic> json)
       : averageHeartRate = json['averageHeartRate'],
         averageHeartRateUnit = json['averageHeartRateUnit'],

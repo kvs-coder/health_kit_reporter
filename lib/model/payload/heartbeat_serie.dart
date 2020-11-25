@@ -19,12 +19,16 @@ class HeartbeatSerie {
   final bool precededByGap;
   final bool done;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'timeSinceSeriesStart': timeSinceSeriesStart,
         'precededByGap': precededByGap,
         'done': done,
       };
 
+  /// General constructor from JSON payload
+  ///
   HeartbeatSerie.fromJson(Map<String, dynamic> json)
       : timeSinceSeriesStart = json['timeSinceSeriesStart'],
         precededByGap = json['precededByGap'],

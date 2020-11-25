@@ -14,6 +14,8 @@ class WorkoutConfiguration {
   final int swimmingValue;
   final WorkoutConfigurationHarmonized harmonized;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'activityValue': activityValue,
         'locationValue': locationValue,
@@ -33,6 +35,8 @@ class WorkoutConfigurationHarmonized {
   final int value;
   final String unit;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'value': value,
         'unit': unit,

@@ -33,10 +33,14 @@ class Correlation extends Sample<CorrelationHarmonized> {
           harmonized,
         );
 
+  /// General constructor from JSON payload
+  ///
   Correlation.fromJson(Map<String, dynamic> json)
       : super.fromJson(json,
             harmonized: CorrelationHarmonized.fromJson(json['harmonized']));
 
+  /// General map representation
+  ///
   @override
   Map<String, dynamic> get map => {
         'identifier': identifier,
@@ -67,12 +71,16 @@ class CorrelationHarmonized {
   final List<Category> categorySamples;
   final Map<String, dynamic> metadata;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'quantitySamples': quantitySamples.map((e) => e.map),
         'categorySamples': categorySamples.map((e) => e.map),
         'metadata': metadata,
       };
 
+  /// General constructor from JSON payload
+  ///
   CorrelationHarmonized.fromJson(Map<String, dynamic> json)
       : quantitySamples = Quantity.collect(json['quantitySamples']),
         categorySamples = Category.collect(json['categorySamples']),

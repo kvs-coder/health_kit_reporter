@@ -35,6 +35,8 @@ class Characteristic {
         'skinType': skinType.string,
       };
 
+  /// General constructor from JSON payload
+  ///
   Characteristic.fromJson(Map<String, dynamic> json)
       : biologicalSex = BiologicalSexFactory.from(json['biologicalSex']),
         birthday = json['birthday']?.toString()?.date,

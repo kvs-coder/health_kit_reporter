@@ -18,6 +18,8 @@ class Predicate {
   final DateTime startDate;
   final DateTime endDate;
 
+  /// General map representation
+  ///
   Map<String, int> get map => {
         'startTimestamp': startDate.millisecondsSinceEpoch,
         'endTimestamp': endDate.millisecondsSinceEpoch,

@@ -200,6 +200,26 @@ This call is a subscription for EventChannel of the plugin, so don't forget to c
 According to [Observing Query](https://developer.apple.com/documentation/healthkit/hkobserverquery) and [Background Delivery](https://developer.apple.com/documentation/healthkit/hkhealthstore/1614175-enablebackgrounddelivery)
 you might create an App which will be called every time by HealthKit, even if the app is in background, to notify, that some data was changed in HealthKit depending on frequency. But keep in mind that sometimes the desired frequency you set cannot be fulfilled by HealthKit. 
 
+Since **ObservingQuery** and other long-running queries are event channel based, you need to set up listeners for desired events in **AppDelegate.swift** file of your iOS part of the app inside **didFinishLaunchingWithOptions** method.
+
+```swift
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    GeneratedPluginRegistrant.register(with: self)
+    if let rootViewController = window.rootViewController {
+        let handler = HealthKitReporterStreamHandler(viewController: rootViewController)
+        handler.setStreamHandler(for: .observerQuery)
+        handler.setStreamHandler(for: .anchoredObjectQuery)
+        handler.setStreamHandler(for: .heartbeatSeriesQuery)
+        handler.setStreamHandler(for: .queryActivitySummary)
+        handler.setStreamHandler(for: .statisticsCollectionQuery)
+        handler.setStreamHandler(for: .workoutRouteQuery)
+    }
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+```
 
 ## Requirements
 The library supports minimum iOS 12. 

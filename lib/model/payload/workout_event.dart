@@ -24,6 +24,8 @@ class WorkoutEvent {
     this.harmonized,
   );
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'type': type,
         'startTimestamp': startTimestamp,
@@ -32,6 +34,8 @@ class WorkoutEvent {
         'harmonized': harmonized.map,
       };
 
+  /// General constructor from JSON payload
+  ///
   WorkoutEvent.fromJson(Map<String, dynamic> json)
       : type = json['type'],
         startTimestamp = json['startTimestamp'],
@@ -39,6 +43,8 @@ class WorkoutEvent {
         duration = json['duration'],
         harmonized = WorkoutEventHarmonized.fromJson(json['harmonized']);
 
+  /// Simplifies creating a list of objects from JSON payload.
+  ///
   static List<WorkoutEvent> collect(List<dynamic> list) {
     final samples = <WorkoutEvent>[];
     for (final Map<String, dynamic> map in list) {
@@ -66,11 +72,15 @@ class WorkoutEventHarmonized {
   final int value;
   final Map<String, dynamic> metadata;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'value': value,
         'metadata': metadata,
       };
 
+  /// General constructor from JSON payload
+  ///
   WorkoutEventHarmonized.fromJson(Map<String, dynamic> json)
       : value = json['value'],
         metadata = json['metadata'];

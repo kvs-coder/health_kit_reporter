@@ -1,3 +1,7 @@
+## [1.0.1] - 25.11.2020
+
+* Better code documentation
+
 ## [1.0.0] - 25.11.2020
 
 * Initial release.

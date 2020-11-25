@@ -26,6 +26,8 @@ class Statistics {
   final List<Source> sources;
   final StatisticsHarmonized harmonized;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'identifier': identifier,
         'startTimestamp': startTimestamp,
@@ -64,6 +66,8 @@ class StatisticsHarmonized {
   final num recent;
   final String unit;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'summary': summary,
         'average': average,
@@ -71,6 +75,8 @@ class StatisticsHarmonized {
         'unit': unit,
       };
 
+  /// General constructor from JSON payload
+  ///
   StatisticsHarmonized.fromJson(Map<String, dynamic> json)
       : summary = json['summary'],
         average = json['average'],

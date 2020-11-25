@@ -195,6 +195,8 @@ extension QuantityTypeFactory on QuantityType {
     throw InvalidValueException('Unknown identifier: $identifier');
   }
 
+  /// The [from] exception handling
+  ///
   static QuantityType tryFrom(String identifier) {
     try {
       return from(identifier);

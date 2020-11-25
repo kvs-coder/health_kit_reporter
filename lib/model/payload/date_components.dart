@@ -35,6 +35,8 @@ class DateComponents {
   final int weekOfYear;
   final int yearForWeekOfYear;
 
+  /// General map representation
+  ///
   Map<String, int> get map => {
         'era': era,
         'year': year,

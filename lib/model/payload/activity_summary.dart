@@ -23,12 +23,16 @@ class ActivitySummary {
   final DateTime date;
   final ActivitySummaryHarmonized harmonized;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'identifier': identifier,
         'date': date.toIso8601String(),
         'harmonized': harmonized.map,
       };
 
+  /// General constructor from JSON payload
+  ///
   ActivitySummary.fromJson(Map<String, dynamic> json)
       : identifier = json['identifier'],
         date = json['date']?.toString()?.date,
@@ -66,6 +70,8 @@ class ActivitySummaryHarmonized {
   final num appleStandHoursGoal;
   final String appleStandHoursUnit;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'activeEnergyBurned': activeEnergyBurned,
         'activeEnergyBurnedGoal': activeEnergyBurnedGoal,
@@ -78,6 +84,8 @@ class ActivitySummaryHarmonized {
         'appleStandHoursUnit': appleStandHoursUnit,
       };
 
+  /// General constructor from JSON payload
+  ///
   ActivitySummaryHarmonized.fromJson(Map<String, dynamic> json)
       : activeEnergyBurned = json['activeEnergyBurned'],
         activeEnergyBurnedGoal = json['activeEnergyBurnedGoal'],

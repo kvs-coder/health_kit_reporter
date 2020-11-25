@@ -30,6 +30,8 @@ class Quantity extends Sample<QuantityHarmonized> {
           harmonized,
         );
 
+  /// General map representation
+  ///
   @override
   Map<String, dynamic> get map => {
         'identifier': identifier,
@@ -40,10 +42,14 @@ class Quantity extends Sample<QuantityHarmonized> {
         'harmonized': harmonized.map,
       };
 
+  /// General constructor from JSON payload
+  ///
   Quantity.fromJson(Map<String, dynamic> json)
       : super.fromJson(json,
             harmonized: QuantityHarmonized.fromJson(json['harmonized']));
 
+  /// Simplifies creating a list of objects from JSON payload.
+  ///
   static List<Quantity> collect(List<dynamic> list) {
     final samples = <Quantity>[];
     for (final Map<String, dynamic> map in list) {
@@ -73,12 +79,16 @@ class QuantityHarmonized {
   final String unit;
   final Map<String, dynamic> metadata;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'value': value,
         'unit': unit,
         'metadata': metadata,
       };
 
+  /// General constructor from JSON payload
+  ///
   QuantityHarmonized.fromJson(Map<String, dynamic> json)
       : value = json['value'],
         unit = json['unit'],

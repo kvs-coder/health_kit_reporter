@@ -38,6 +38,8 @@ class Workout extends Sample<WorkoutHarmonized> {
   final num duration;
   final List<WorkoutEvent> workoutEvents;
 
+  /// General map representation
+  ///
   @override
   Map<String, dynamic> get map => {
         'identifier': identifier,
@@ -51,6 +53,8 @@ class Workout extends Sample<WorkoutHarmonized> {
         'harmonized': harmonized.map,
       };
 
+  /// General constructor from JSON payload
+  ///
   Workout.fromJson(Map<String, dynamic> json)
       : workoutName = json['workoutName'],
         duration = json['duration'],
@@ -92,6 +96,8 @@ class WorkoutHarmonized {
   final String totalFlightsClimbedUnit;
   final Map<String, dynamic> metadata;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'value': value,
         'totalEnergyBurned': totalEnergyBurned,
@@ -105,6 +111,8 @@ class WorkoutHarmonized {
         'metadata': metadata
       };
 
+  /// General constructor from JSON payload
+  ///
   WorkoutHarmonized.fromJson(Map<String, dynamic> json)
       : value = json['value'],
         totalEnergyBurned = json['totalEnergyBurned'],

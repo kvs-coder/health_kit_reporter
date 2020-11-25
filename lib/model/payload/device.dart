@@ -38,6 +38,8 @@ class Device {
         'udiDeviceIdentifier': udiDeviceIdentifier,
       };
 
+  /// General constructor from JSON payload
+  ///
   Device.fromJson(Map<String, dynamic> json)
       : name = json['name'],
         manufacturer = json['manufacturer'],

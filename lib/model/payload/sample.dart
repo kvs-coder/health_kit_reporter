@@ -1,3 +1,5 @@
+import 'package:health_kit_reporter/health_kit_reporter.dart';
+
 import '../type/category_type.dart';
 import '../type/correlation_type.dart';
 import '../type/electrocardiogram_type.dart';
@@ -56,8 +58,12 @@ abstract class Sample<Harmonized> {
   final SourceRevision sourceRevision;
   final Harmonized harmonized;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map;
 
+  /// General constructor from JSON payload
+  ///
   Sample.fromJson(Map<String, dynamic> json, {Harmonized harmonized})
       : identifier = json['identifier'],
         startTimestamp = json['startTimestamp'],
@@ -67,6 +73,9 @@ abstract class Sample<Harmonized> {
         sourceRevision = SourceRevision.fromJson(json['sourceRevision']),
         harmonized = harmonized;
 
+  /// For saving data, prepares appropriate map
+  /// for [HealthKitReporter.save]
+  ///
   Map<String, dynamic> parsed() {
     final arguments = <String, dynamic>{};
     if (this is Quantity) arguments['quantity'] = map;
@@ -75,6 +84,9 @@ abstract class Sample<Harmonized> {
     return arguments;
   }
 
+  /// Factory method to create instances as a result of
+  /// [HealthKitReporter.sampleQuery]
+  ///
   static Sample factory(Map<String, dynamic> json) {
     final identifier = json['identifier'];
     final quantityType = QuantityTypeFactory.tryFrom(identifier);

@@ -30,6 +30,8 @@ extension WorkoutTypeFactory on WorkoutType {
     throw InvalidValueException('Unknown identifier: $identifier');
   }
 
+  /// The [from] exception handling
+  ///
   static WorkoutType tryFrom(String identifier) {
     try {
       return from(identifier);

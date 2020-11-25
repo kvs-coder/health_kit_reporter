@@ -30,6 +30,8 @@ class Category extends Sample<CategoryHarmonized> {
           harmonized,
         );
 
+  /// General map representation
+  ///
   @override
   Map<String, dynamic> get map => {
         'identifier': identifier,
@@ -40,10 +42,14 @@ class Category extends Sample<CategoryHarmonized> {
         'harmonized': harmonized.map,
       };
 
+  /// General constructor from JSON payload
+  ///
   Category.fromJson(Map<String, dynamic> json)
       : super.fromJson(json,
             harmonized: CategoryHarmonized.fromJson(json['harmonized']));
 
+  /// Simplifies creating a list of objects from JSON payload.
+  ///
   static List<Category> collect(List<dynamic> list) {
     final samples = <Category>[];
     for (final Map<String, dynamic> map in list) {
@@ -73,12 +79,16 @@ class CategoryHarmonized {
   final String description;
   final Map<String, dynamic> metadata;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'value': value,
         'description': description,
         'metadata': metadata,
       };
 
+  /// General constructor from JSON payload
+  ///
   CategoryHarmonized.fromJson(Map<String, dynamic> json)
       : value = json['value'],
         description = json['description'],

@@ -23,6 +23,8 @@ class SourceRevision {
   final String systemVersion;
   final OperatingSystem operatingSystem;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'source': source.map,
         'version': version,
@@ -31,6 +33,8 @@ class SourceRevision {
         'operatingSystem': operatingSystem.map,
       };
 
+  /// General constructor from JSON payload
+  ///
   SourceRevision.fromJson(Map<String, dynamic> json)
       : source = Source.fromJson(json['source']),
         version = json['version'],
@@ -58,12 +62,16 @@ class OperatingSystem {
   final int minorVersion;
   final int patchVersion;
 
+  /// General map representation
+  ///
   Map<String, int> get map => {
         'majorVersion': majorVersion,
         'minorVersion': minorVersion,
         'patchVersion': patchVersion,
       };
 
+  /// General constructor from JSON payload
+  ///
   OperatingSystem.fromJson(Map<String, dynamic> json)
       : majorVersion = json['majorVersion'],
         minorVersion = json['minorVersion'],

@@ -17,11 +17,15 @@ class WorkoutRoute {
   final List<WorkoutRouteLocation> locations;
   final bool done;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'locations': locations.map((e) => e.map),
         'done': done,
       };
 
+  /// General constructor from JSON payload
+  ///
   WorkoutRoute.fromJson(Map<String, dynamic> json)
       : locations = WorkoutRouteLocation.collect(json['timeSinceSeriesStart']),
         done = json['done'];
@@ -65,6 +69,8 @@ class WorkoutRouteLocation {
   final num timestamp;
   final num verticalAccuracy;
 
+  /// General map representation
+  ///
   Map<String, dynamic> get map => {
         'latitude': latitude,
         'longitude': longitude,
@@ -79,6 +85,8 @@ class WorkoutRouteLocation {
         'verticalAccuracy': verticalAccuracy,
       };
 
+  /// General constructor from JSON payload
+  ///
   WorkoutRouteLocation.fromJson(Map<String, dynamic> json)
       : latitude = json['latitude'],
         longitude = json['longitude'],
@@ -92,6 +100,8 @@ class WorkoutRouteLocation {
         timestamp = json['timestamp'],
         verticalAccuracy = json['verticalAccuracy'];
 
+  /// Simplifies creating a list of objects from JSON payload.
+  ///
   static List<WorkoutRouteLocation> collect(List<dynamic> list) {
     final samples = <WorkoutRouteLocation>[];
     for (final Map<String, dynamic> map in list) {

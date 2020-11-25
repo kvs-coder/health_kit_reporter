@@ -33,6 +33,8 @@ extension ElectrocardiogramTypeFactory on ElectrocardiogramType {
     throw InvalidValueException('Unknown identifier: $identifier');
   }
 
+  /// The [from] exception handling
+  ///
   static ElectrocardiogramType tryFrom(String identifier) {
     try {
       return from(identifier);

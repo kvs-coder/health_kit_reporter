@@ -36,6 +36,8 @@ extension CorrelationTypeFactory on CorrelationType {
     throw InvalidValueException('Unknown identifier: $identifier');
   }
 
+  /// The [from] exception handling
+  ///
   static CorrelationType tryFrom(String identifier) {
     try {
       return from(identifier);
