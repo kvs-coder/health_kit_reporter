@@ -13,6 +13,7 @@ import 'package:health_kit_reporter/model/type/activity_summary_type.dart';
 import 'package:health_kit_reporter/model/type/category_type.dart';
 import 'package:health_kit_reporter/model/type/characteristic_type.dart';
 import 'package:health_kit_reporter/model/type/correlation_type.dart';
+import 'package:health_kit_reporter/model/type/electrocardiogram_type.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
 import 'package:health_kit_reporter/model/type/series_type.dart';
 import 'package:health_kit_reporter/model/type/workout_type.dart';
@@ -112,6 +113,7 @@ class MyApp extends StatelessWidget {
       readTypes.addAll(QuantityType.values.map((e) => e.identifier));
       readTypes.addAll(WorkoutType.values.map((e) => e.identifier));
       readTypes.addAll(SeriesType.values.map((e) => e.identifier));
+      readTypes.addAll(ElectrocardiogramType.values.map((e) => e.identifier));
       final writeTypes = <String>[
         QuantityType.stepCount.identifier,
       ];
@@ -152,6 +154,9 @@ class MyApp extends StatelessWidget {
         final correlations = await HealthKitReporter.correlationQuery(
             CorrelationType.bloodPressure.identifier, _predicate);
         print('correlations: ${correlations.map((e) => e.map)}');
+        final electrocardiograms =
+            await HealthKitReporter.electrocardiogramQuery(_predicate);
+        print('electrocardiograms: ${electrocardiograms.map((e) => e.map)}');
       } else {
         print('error isRequested: $isRequested');
       }

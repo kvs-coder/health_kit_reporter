@@ -1,3 +1,7 @@
+## [1.0.2] - 25.11.2020
+
+* Example app add Electrocardiogram read
+
 ## [1.0.1] - 25.11.2020
 
 * Better code documentation
