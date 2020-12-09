@@ -18,6 +18,7 @@ import 'package:health_kit_reporter/model/type/electrocardiogram_type.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
 import 'package:health_kit_reporter/model/type/series_type.dart';
 import 'package:health_kit_reporter/model/type/workout_type.dart';
+import 'package:health_kit_reporter/model/update_frequency.dart';
 
 void main() {
   runApp(MyApp());
@@ -187,7 +188,7 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void observerQuery() {
+  void observerQuery() async {
     final identifier = QuantityType.stepCount.identifier;
     final sub = HealthKitReporter.observerQuery(identifier, _predicate,
         onUpdate: (identifier) async {
@@ -199,6 +200,9 @@ class _MyAppState extends State<MyApp> {
           0, 'Observer', identifier, details);
     });
     print('observerQuerySub: $sub');
+    final isSet = await HealthKitReporter.enableBackgroundDelivery(
+        identifier, UpdateFrequency.immediate);
+    print('enableBackgroundDelivery: $isSet');
   }
 
   void heartbeatSeriesQuery() {

@@ -16,7 +16,7 @@ A Flutter wrapper for [HealthKitReporter](https://cocoapods.org/pods/HealthKitRe
 - Add this to your package's pubspec.yaml file: 
 ``` Dart
 dependencies:
-     health_kit_reporter: ^1.0.4
+     health_kit_reporter: ^1.0.5
 ```
 - Get dependencies
 
@@ -186,44 +186,36 @@ Try simple **observerQuery** to get notifications if something is changed.
 This call is a subscription for EventChannel of the plugin, so don't forget to cancel it as soon as you don't need it anymore.
 
 ```dart
-  void observerQuery() {
+  void observerQuery() async {
     final identifier = QuantityType.stepCount.identifier;
     final sub = HealthKitReporter.observerQuery(identifier, _predicate,
-        onUpdate: (identifier) {
+        onUpdate: (identifier) async {
       print('Updates for observerQuerySub');
       print(identifier);
+      final iOSDetails = IOSNotificationDetails();
+      final details = NotificationDetails(iOS: iOSDetails);
+      await flutterLocalNotificationsPlugin.show(
+          0, 'Observer', identifier, details);
     });
     print('observerQuerySub: $sub');
+    final isSet = await HealthKitReporter.enableBackgroundDelivery(
+        identifier, UpdateFrequency.immediate);
+    print('enableBackgroundDelivery: $isSet');
   }
 ```
 
 According to [Observing Query](https://developer.apple.com/documentation/healthkit/hkobserverquery) and [Background Delivery](https://developer.apple.com/documentation/healthkit/hkhealthstore/1614175-enablebackgrounddelivery)
 you might create an App which will be called every time by HealthKit, even if the app is in background, to notify, that some data was changed in HealthKit depending on frequency. But keep in mind that sometimes the desired frequency you set cannot be fulfilled by HealthKit. 
 
-Warning: to run **observerQuery** when the app is killed by the system, provide an additional capability **Background Mode** and select **Background fetch**
+To receive notifications when the app is killed by the system or in background:
+- provide an additional capability **Background Mode** and select **Background fetch**
+- with calling **observerQuery**, you need to call **enableBackgroundDelivery** function as well
 
-You can to set up the subscription inside **initState** or **build** methods of your widget.
+As a recommendation set up the subscription inside **initState** or **build** methods of your widget or as more preferred in **main** function of your app.
 
-As a recomendation: inside **main** function of your app.
-
-```swift
-  override func application(
-    _ application: UIApplication,
-    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-  ) -> Bool {
-    GeneratedPluginRegistrant.register(with: self)
-    if let rootViewController = window.rootViewController {
-        let handler = HealthKitReporterStreamHandler(viewController: rootViewController)
-        handler.setStreamHandler(for: .observerQuery)
-        handler.setStreamHandler(for: .anchoredObjectQuery)
-        handler.setStreamHandler(for: .heartbeatSeriesQuery)
-        handler.setStreamHandler(for: .queryActivitySummary)
-        handler.setStreamHandler(for: .statisticsCollectionQuery)
-        handler.setStreamHandler(for: .workoutRouteQuery)
-    }
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
-  }
-```
+If you want to stop observation, you need to:
+- remove the subscription for **observerQuery**
+- call **disableBackgroundDelivery** or **disableAllBackgroundDelivery**
 
 ## Requirements
 The library supports minimum iOS 12. 

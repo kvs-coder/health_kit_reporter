@@ -231,7 +231,7 @@ extension SwiftHealthKitReporterPlugin {
                 result: result
             )
         case .enableBackgroundDelivery:
-            guard let arguments = call.arguments as? [String: String] else {
+            guard let arguments = call.arguments as? [String: Any] else {
                 throwNoArgumentsError(result: result)
                 return
             }
@@ -1047,12 +1047,12 @@ extension SwiftHealthKitReporterPlugin {
     }
     private func enableBackgroundDelivery(
         reporter: HealthKitReporter,
-        arguments: [String: String],
+        arguments: [String: Any],
         result: @escaping FlutterResult
     ) {
         guard
-            let identifier = arguments["identifier"],
-            let frequency = arguments["frequency"]?.integer
+            let identifier = arguments["identifier"] as? String,
+            let frequency = arguments["frequency"] as? Int
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return

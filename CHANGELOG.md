@@ -1,3 +1,8 @@
+## [1.0.5] - 09.12.2020
+
+* Add background delivery in the sample app
+* Fix with enable background delivery
+
 ## [1.0.4] - 09.12.2020
 
 * Event channels fix for long-running queries
