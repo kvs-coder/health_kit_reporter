@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:health_kit_reporter/health_kit_reporter.dart';
 import 'package:health_kit_reporter/model/payload/date_components.dart';
 import 'package:health_kit_reporter/model/payload/device.dart';
@@ -22,20 +23,39 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   final _predicate = Predicate(
     DateTime.utc(2020, 1, 1, 12, 30, 30),
     DateTime.utc(2020, 12, 31, 12, 30, 30),
   );
 
+  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  @override
+  void initState() {
+    super.initState();
+    observerQuery();
+    anchoredObjectQuery();
+    queryActivitySummaryUpdates();
+    statisticsCollectionQuery();
+    heartbeatSeriesQuery();
+    workoutRouteQuery();
+    var initializationSettingsIOs = IOSInitializationSettings();
+    var initSettings = InitializationSettings(iOS: initializationSettingsIOs);
+    flutterLocalNotificationsPlugin.initialize(initSettings,
+        onSelectNotification: (string) {
+      print(string);
+      return Future.value(string);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-//    observerQuery();
-//    anchoredObjectQuery();
-//    queryActivitySummaryUpdates();
-//    statisticsCollectionQuery();
-//    heartbeatSeriesQuery();
-//    workoutRouteQuery();
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -170,9 +190,13 @@ class MyApp extends StatelessWidget {
   void observerQuery() {
     final identifier = QuantityType.stepCount.identifier;
     final sub = HealthKitReporter.observerQuery(identifier, _predicate,
-        onUpdate: (identifier) {
+        onUpdate: (identifier) async {
       print('Updates for observerQuerySub');
       print(identifier);
+      final iOSDetails = IOSNotificationDetails();
+      final details = NotificationDetails(iOS: iOSDetails);
+      await flutterLocalNotificationsPlugin.show(
+          0, 'Observer', identifier, details);
     });
     print('observerQuerySub: $sub');
   }
