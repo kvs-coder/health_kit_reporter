@@ -30,12 +30,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    observerQuery();
-    anchoredObjectQuery();
-    queryActivitySummaryUpdates();
-    statisticsCollectionQuery();
-    heartbeatSeriesQuery();
-    workoutRouteQuery();
+//    observerQuery();
+//    anchoredObjectQuery();
+//    queryActivitySummaryUpdates();
+//    statisticsCollectionQuery();
+//    heartbeatSeriesQuery();
+//    workoutRouteQuery();
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
