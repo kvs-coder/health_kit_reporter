@@ -1,3 +1,7 @@
+## [1.0.4] - 09.12.2020
+
+* Event channels fix for long-running queries
+
 ## [1.0.2] - 25.11.2020
 
 * Example app add Electrocardiogram read
