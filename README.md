@@ -192,10 +192,6 @@ This call is a subscription for EventChannel of the plugin, so don't forget to c
         onUpdate: (identifier) async {
       print('Updates for observerQuerySub');
       print(identifier);
-      final iOSDetails = IOSNotificationDetails();
-      final details = NotificationDetails(iOS: iOSDetails);
-      await flutterLocalNotificationsPlugin.show(
-          0, 'Observer', identifier, details);
     });
     print('observerQuerySub: $sub');
     final isSet = await HealthKitReporter.enableBackgroundDelivery(
