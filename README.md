@@ -16,7 +16,7 @@ A Flutter wrapper for [HealthKitReporter](https://cocoapods.org/pods/HealthKitRe
 - Add this to your package's pubspec.yaml file: 
 ``` Dart
 dependencies:
-     health_kit_reporter: ^1.0.2
+     health_kit_reporter: ^1.0.4
 ```
 - Get dependencies
 
@@ -200,7 +200,11 @@ This call is a subscription for EventChannel of the plugin, so don't forget to c
 According to [Observing Query](https://developer.apple.com/documentation/healthkit/hkobserverquery) and [Background Delivery](https://developer.apple.com/documentation/healthkit/hkhealthstore/1614175-enablebackgrounddelivery)
 you might create an App which will be called every time by HealthKit, even if the app is in background, to notify, that some data was changed in HealthKit depending on frequency. But keep in mind that sometimes the desired frequency you set cannot be fulfilled by HealthKit. 
 
-Since **ObservingQuery** and other long-running queries are event channel based, you need to set up listeners for desired events in **AppDelegate.swift** file of your iOS part of the app inside **didFinishLaunchingWithOptions** method.
+Warning: to run **observerQuery** when the app is killed by the system, provide an additional capability **Background Mode** and select **Background fetch**
+
+You can to set up the subscription inside **initState** or **build** methods of your widget.
+
+As a recomendation: inside **main** function of your app.
 
 ```swift
   override func application(
