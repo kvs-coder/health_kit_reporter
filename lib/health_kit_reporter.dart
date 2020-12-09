@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
-import 'model/event_method.dart';
 import 'model/payload/activity_summary.dart';
 import 'model/payload/category.dart';
 import 'model/payload/characteristic/characteristic.dart';
@@ -109,6 +108,42 @@ class HealthKitReporter {
   static const MethodChannel _methodChannel =
       MethodChannel('health_kit_reporter_method_channel');
 
+  /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
+  /// Will invoke a bridge function of the plugin.
+  ///
+  static const EventChannel _observerQueryChannel =
+      EventChannel('health_kit_reporter_event_channel_observer_query');
+
+  /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
+  /// Will handle event exchanges of the plugin.
+  ///
+  static const EventChannel _statisticsCollectionQueryChannel = EventChannel(
+      'health_kit_reporter_event_channel_statistics_collection_query');
+
+  /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
+  /// Will handle event exchanges of the plugin.
+  ///
+  static const EventChannel _queryActivitySummaryChannel =
+      EventChannel('health_kit_reporter_event_channel_query_activity_summary');
+
+  /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
+  /// Will handle event exchanges of the plugin.
+  ///
+  static const EventChannel _anchoredObjectQueryChannel =
+      EventChannel('health_kit_reporter_event_channel_anchored_object_query');
+
+  /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
+  /// Will handle event exchanges of the plugin.
+  ///
+  static const EventChannel _heartbeatSeriesQueryChannel =
+      EventChannel('health_kit_reporter_event_channel_heartbeat_series_query');
+
+  /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
+  /// Will handle event exchanges of the plugin.
+  ///
+  static const EventChannel _workoutRouteQueryChannel =
+      EventChannel('health_kit_reporter_event_channel_workout_route_query');
+
   /// Sets subscription for [HeartbeatSerie] series.
   /// Will call [onUpdate] callback, if
   /// there were new series came from enumeration block until it is done.
@@ -116,12 +151,10 @@ class HealthKitReporter {
   ///
   static StreamSubscription<dynamic> heartbeatSeriesQuery(Predicate predicate,
       {Function(HeartbeatSerie) onUpdate}) {
-    final channel = EventMethod.heartbeatSeriesQuery.channel;
-    final arguments = <String, dynamic>{
-      'eventMethod': channel.eventName,
-    };
-    arguments.addAll(predicate.map);
-    return channel.receiveBroadcastStream(arguments).listen((event) {
+    final arguments = predicate.map;
+    return _heartbeatSeriesQueryChannel
+        .receiveBroadcastStream(arguments)
+        .listen((event) {
       final json = jsonDecode(event);
       final heartbeatSerie = HeartbeatSerie.fromJson(json);
       onUpdate(heartbeatSerie);
@@ -135,12 +168,10 @@ class HealthKitReporter {
   ///
   static StreamSubscription<dynamic> workoutRouteQuery(Predicate predicate,
       {Function(WorkoutRoute) onUpdate}) {
-    final channel = EventMethod.workoutRouteQuery.channel;
-    final arguments = <String, dynamic>{
-      'eventMethod': channel.eventName,
-    };
-    arguments.addAll(predicate.map);
-    return channel.receiveBroadcastStream(arguments).listen((event) {
+    final arguments = predicate.map;
+    return _workoutRouteQueryChannel
+        .receiveBroadcastStream(arguments)
+        .listen((event) {
       final json = jsonDecode(event);
       final workoutRoute = WorkoutRoute.fromJson(json);
       onUpdate(workoutRoute);
@@ -156,15 +187,15 @@ class HealthKitReporter {
   static StreamSubscription<dynamic> observerQuery(
       String identifier, Predicate predicate,
       {Function(String) onUpdate}) {
-    final channel = EventMethod.observerQuery.channel;
     final arguments = <String, dynamic>{
       'identifier': identifier,
-      'eventMethod': channel.eventName,
     };
     arguments.addAll(predicate.map);
-    return channel.receiveBroadcastStream(arguments).listen((event) {
+    return _observerQueryChannel
+        .receiveBroadcastStream(arguments)
+        .listen((event) {
       final map = Map<String, dynamic>.from(event);
-      final identifier = map['observingTypeIdentifier'];
+      final identifier = map['identifier'];
       onUpdate(identifier);
     });
   }
@@ -179,13 +210,13 @@ class HealthKitReporter {
   static StreamSubscription<dynamic> anchoredObjectQuery(
       String identifier, Predicate predicate,
       {Function(List<Sample>) onUpdate}) {
-    final channel = EventMethod.anchoredObjectQuery.channel;
     final arguments = <String, dynamic>{
       'identifier': identifier,
-      'eventMethod': channel.eventName,
     };
     arguments.addAll(predicate.map);
-    return channel.receiveBroadcastStream(arguments).listen((event) {
+    return _anchoredObjectQueryChannel
+        .receiveBroadcastStream(arguments)
+        .listen((event) {
       final list = List.from(event);
       final samples = <Sample>[];
       for (final String element in list) {
@@ -207,12 +238,10 @@ class HealthKitReporter {
   static StreamSubscription<dynamic> queryActivitySummaryUpdates(
       Predicate predicate,
       {Function(List<ActivitySummary>) onUpdate}) {
-    final channel = EventMethod.queryActivitySummary.channel;
-    final arguments = <String, dynamic>{
-      'eventMethod': channel.eventName,
-    };
-    arguments.addAll(predicate.map);
-    return channel.receiveBroadcastStream(arguments).listen((event) {
+    final arguments = predicate.map;
+    return _queryActivitySummaryChannel
+        .receiveBroadcastStream(arguments)
+        .listen((event) {
       final List<dynamic> list = jsonDecode(event);
       final activitySummaries = <ActivitySummary>[];
       for (final Map<String, dynamic> map in list) {
@@ -243,18 +272,18 @@ class HealthKitReporter {
       DateTime enumerateTo,
       DateComponents intervalComponents,
       {Function(Statistics) onUpdate}) {
-    final channel = EventMethod.statisticsCollectionQuery.channel;
     final arguments = {
       'identifier': type.identifier,
       'unit': unit.unit,
       'anchorTimestamp': anchorDate.millisecondsSinceEpoch,
       'enumerateFrom': enumerateFrom.millisecondsSinceEpoch,
       'enumerateTo': enumerateTo.millisecondsSinceEpoch,
-      'eventMethod': channel.eventName,
       'intervalComponents': intervalComponents.map,
     };
     arguments.addAll(predicate.map);
-    return channel.receiveBroadcastStream(arguments).listen((event) {
+    return _statisticsCollectionQueryChannel
+        .receiveBroadcastStream(arguments)
+        .listen((event) {
       final json = jsonDecode(event);
       final statistics = Statistics.fromJson(json);
       onUpdate(statistics);

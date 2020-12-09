@@ -26,6 +26,10 @@
 	<string>Share your data with our super cool app</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>This super cool app wants to write some data</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
