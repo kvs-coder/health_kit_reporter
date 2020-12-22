@@ -5,3 +5,6 @@
 .pub/
 
 build/
+.idea/
+.idea/libraries/Dart_SDK.xml
+.idea/libraries/Flutter_Plugins.xml
