@@ -265,7 +265,7 @@ class HealthKitReporter {
   ///
   static StreamSubscription<dynamic> statisticsCollectionQuery(
       QuantityType type,
-      PreferredUnit unit,
+      String unit,
       Predicate predicate,
       DateTime anchorDate,
       DateTime enumerateFrom,
@@ -274,7 +274,7 @@ class HealthKitReporter {
       {Function(Statistics) onUpdate}) {
     final arguments = {
       'identifier': type.identifier,
-      'unit': unit.unit,
+      'unit': unit,
       'anchorTimestamp': anchorDate.millisecondsSinceEpoch,
       'enumerateFrom': enumerateFrom.millisecondsSinceEpoch,
       'enumerateTo': enumerateTo.millisecondsSinceEpoch,
@@ -347,10 +347,10 @@ class HealthKitReporter {
   /// Warning: The [unit] should be valid. See [preferredUnits].
   ///
   static Future<List<Quantity>> quantityQuery(
-      QuantityType type, PreferredUnit unit, Predicate predicate) async {
+      QuantityType type, String unit, Predicate predicate) async {
     final arguments = <String, dynamic>{
       'identifier': type.identifier,
-      'unit': unit.unit,
+      'unit': unit,
     };
     arguments.addAll(predicate.map);
     final result =
@@ -447,10 +447,10 @@ class HealthKitReporter {
   /// Warning: The [unit] should be valid. See [preferredUnits].
   ///
   static Future<Statistics> statisticsQuery(
-      QuantityType type, PreferredUnit unit, Predicate predicate) async {
+      QuantityType type, String unit, Predicate predicate) async {
     final arguments = <String, dynamic>{
       'identifier': type.identifier,
-      'unit': unit.unit,
+      'unit': unit,
     };
     arguments.addAll(predicate.map);
     final result =

@@ -13,6 +13,13 @@ class PreferredUnit {
   final String identifier;
   final String unit;
 
+  /// General map representation
+  ///
+  Map<String, String> get map => {
+        'identifier': identifier,
+        'unit': unit,
+      };
+
   /// General constructor from JSON payload
   ///
   PreferredUnit.fromJson(Map<String, dynamic> json)
