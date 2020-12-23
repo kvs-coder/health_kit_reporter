@@ -47,8 +47,8 @@ class _MyAppState extends State<MyApp> {
     statisticsCollectionQuery();
     heartbeatSeriesQuery();
     workoutRouteQuery();
-    var initializationSettingsIOs = IOSInitializationSettings();
-    var initSettings = InitializationSettings(iOS: initializationSettingsIOs);
+    final initializationSettingsIOs = IOSInitializationSettings();
+    final initSettings = InitializationSettings(iOS: initializationSettingsIOs);
     flutterLocalNotificationsPlugin.initialize(initSettings,
         onSelectNotification: (string) {
       print(string);
