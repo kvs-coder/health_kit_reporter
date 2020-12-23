@@ -38,9 +38,6 @@ extension StatisticsCollectionQueryStreamHandler: StreamHandlerProtocol {
             startDate: Date.make(from: startTimestamp),
             endDate: Date.make(from: endTimestamp)
         )
-        let monitorUpdates = (
-            arguments["monitorUpdates"] as? String
-        )?.boolean ?? true
         query = try reporter.reader.statisticsCollectionQuery(
             type: type,
             unit: unit,
@@ -51,7 +48,7 @@ extension StatisticsCollectionQueryStreamHandler: StreamHandlerProtocol {
             intervalComponents: DateComponents.make(
                 from: intervalComponents
             ),
-            monitorUpdates: monitorUpdates
+            monitorUpdates: true
         ) { (statistics, error) in
             guard
                 error == nil,

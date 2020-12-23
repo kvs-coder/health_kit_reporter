@@ -25,14 +25,26 @@ extension QueryActivitySummaryStreamHandler: StreamHandlerProtocol {
         else {
             return
         }
-        let predicate = NSPredicate.samplesPredicate(
-            startDate: Date.make(from: startTimestamp),
-            endDate: Date.make(from: endTimestamp)
+        let startDate = Date.make(from: startTimestamp)
+        let endDate = Date.make(from: endTimestamp)
+        let units: Set<Calendar.Component> = [
+            .day,
+            .month,
+            .year,
+            .era
+        ]
+        let calendar = Calendar.current
+        var startDateComponents = calendar.dateComponents(units, from: startDate)
+        startDateComponents.calendar = calendar
+        var endDateComponents = calendar.dateComponents(units, from: endDate)
+        endDateComponents.calendar = calendar
+        let predicate = NSPredicate.activitySummaryPredicateBetween(
+            start: startDateComponents,
+            end: endDateComponents
         )
-        let monitorUpdates = (arguments["monitorUpdates"] as? String)?.boolean ?? true
         query = reporter.reader.queryActivitySummary(
             predicate: predicate,
-            monitorUpdates: monitorUpdates
+            monitorUpdates: true
         ) { (activitySummaries, error) in
             guard error == nil else {
                 return
