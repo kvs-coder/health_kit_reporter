@@ -1,3 +1,7 @@
+## [1.0.6] - 23.12.2020
+
+* Fix with HKActivitySummaryType
+
 ## [1.0.5] - 09.12.2020
 
 * Add background delivery in the sample app

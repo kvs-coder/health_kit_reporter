@@ -29,7 +29,6 @@ extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
         guard let type = identifier.objectType as? SampleType else {
             return
         }
-        let monitorUpdates = (arguments["monitorUpdates"] as? String)?.boolean ?? true
         let predicate = NSPredicate.samplesPredicate(
             startDate: Date.make(from: startTimestamp),
             endDate: Date.make(from: endTimestamp)
@@ -37,7 +36,7 @@ extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
         query = try reporter.reader.anchoredObjectQuery(
             type: type,
             predicate: predicate,
-            monitorUpdates: monitorUpdates
+            monitorUpdates: true
         ) { (_, samples, error) in
             guard error == nil else {
                 return

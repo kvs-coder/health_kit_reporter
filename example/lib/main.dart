@@ -37,6 +37,8 @@ class _MyAppState extends State<MyApp> {
 
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
+  bool _isAuthorizationRequested = false;
+
   @override
   void initState() {
     super.initState();
@@ -60,132 +62,200 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Health Kit Reporter'),
         ),
-        body: Center(
-          child: Text('HK'),
-        ),
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          onPressed: () {
-            runHealthKitReporter();
-          },
+        body: ListView(
+          children: [
+            FlatButton(
+                onPressed: () async {
+                  try {
+                    final readTypes = <String>[];
+                    readTypes.addAll(
+                        ActivitySummaryType.values.map((e) => e.identifier));
+                    readTypes
+                        .addAll(CategoryType.values.map((e) => e.identifier));
+                    readTypes.addAll(
+                        CharacteristicType.values.map((e) => e.identifier));
+                    readTypes
+                        .addAll(QuantityType.values.map((e) => e.identifier));
+                    readTypes
+                        .addAll(WorkoutType.values.map((e) => e.identifier));
+                    readTypes
+                        .addAll(SeriesType.values.map((e) => e.identifier));
+                    readTypes.addAll(
+                        ElectrocardiogramType.values.map((e) => e.identifier));
+                    final writeTypes = <String>[
+                      QuantityType.stepCount.identifier,
+                    ];
+                    final isRequested =
+                        await HealthKitReporter.requestAuthorization(
+                            readTypes, writeTypes);
+                    setState(() => _isAuthorizationRequested = isRequested);
+                  } catch (e) {
+                    print(e);
+                  }
+                },
+                child: Text('requestAuthorization')),
+            _isAuthorizationRequested
+                ? Column(
+                    children: [
+                      FlatButton(
+                          onPressed: () async {
+                            final preferredUnits =
+                                await HealthKitReporter.preferredUnits(
+                                    [QuantityType.stepCount]);
+                            preferredUnits.forEach((preferredUnit) async {
+                              print(
+                                  'preferredUnit: ${preferredUnit.identifier}');
+                              final type = QuantityTypeFactory.from(
+                                  preferredUnit.identifier);
+                              final quantities =
+                                  await HealthKitReporter.quantityQuery(
+                                      type, preferredUnit, _predicate);
+                              print(
+                                  'quantity: ${quantities.map((e) => e.map)}');
+                              final statistics =
+                                  await HealthKitReporter.statisticsQuery(
+                                      type, preferredUnit, _predicate);
+                              print('statistics: ${statistics.map}');
+                            });
+                          },
+                          child: Text('preferredUnit:quantity:statistics')),
+                      FlatButton(
+                          onPressed: () async {
+                            final characteristics =
+                                await HealthKitReporter.characteristicsQuery();
+                            print('characteristics: ${characteristics.map}');
+                          },
+                          child: Text('characteristics')),
+                      FlatButton(
+                          onPressed: () async {
+                            final categories =
+                                await HealthKitReporter.categoryQuery(
+                                    CategoryType.sleepAnalysis, _predicate);
+                            print(
+                                'categories: ${categories.map((e) => e.map)}');
+                          },
+                          child: Text('categories')),
+                      FlatButton(
+                          onPressed: () async {
+                            final samples = await HealthKitReporter.sampleQuery(
+                                QuantityType.stepCount.identifier, _predicate);
+                            print('samples: ${samples.map((e) => e.map)}');
+                          },
+                          child: Text('samples')),
+                      FlatButton(
+                          onPressed: () async {
+                            final canWrite =
+                                await HealthKitReporter.isAuthorizedToWrite(
+                                    QuantityType.stepCount.identifier);
+                            if (canWrite) {
+                              final now = DateTime.now();
+                              final minuteAgo = now.add(Duration(minutes: -1));
+                              final device = Device(
+                                  'FlutterTracker',
+                                  'kvs',
+                                  'T-800',
+                                  '3',
+                                  '3.0',
+                                  '1.1.1',
+                                  'kvs.f.t',
+                                  '444-888-555');
+                              final source = Source('maApp',
+                                  'com.kvs.health_kit_reporter_example');
+                              final operatingSystem = OperatingSystem(1, 2, 3);
+                              final sourceRevision = SourceRevision(
+                                  source, '5', 'fit', '4', operatingSystem);
+                              final harmonized =
+                                  QuantityHarmonized(100, 'count', null);
+                              final steps = Quantity(
+                                  QuantityType.stepCount.identifier,
+                                  minuteAgo.millisecondsSinceEpoch,
+                                  now.millisecondsSinceEpoch,
+                                  device,
+                                  sourceRevision,
+                                  harmonized);
+                              print('try to save: ${steps.map}');
+                              final stepsSaved =
+                                  await HealthKitReporter.save(steps);
+                              print('stepsSaved: $stepsSaved');
+                            } else {
+                              print('error canWrite: $canWrite');
+                            }
+                          },
+                          child: Text('saveSteps')),
+                      FlatButton(
+                          onPressed: () async {
+                            final sources = await HealthKitReporter.sourceQuery(
+                                QuantityType.stepCount.identifier, _predicate);
+                            print('sources: ${sources.map((e) => e.map)}');
+                          },
+                          child: Text('sources')),
+                      FlatButton(
+                          onPressed: () async {
+                            final correlations =
+                                await HealthKitReporter.correlationQuery(
+                                    CorrelationType.bloodPressure.identifier,
+                                    _predicate);
+                            print(
+                                'correlations: ${correlations.map((e) => e.map)}');
+                          },
+                          child: Text('correlations')),
+                      FlatButton(
+                          onPressed: () async {
+                            final electrocardiograms =
+                                await HealthKitReporter.electrocardiogramQuery(
+                                    _predicate);
+                            print(
+                                'electrocardiograms: ${electrocardiograms.map((e) => e.map)}');
+                          },
+                          child: Text('electrocardiograms')),
+                      FlatButton(
+                          onPressed: () async {
+                            final activitySummary =
+                                await HealthKitReporter.queryActivitySummary(
+                                    _predicate);
+                            print(
+                                'activitySummary: ${activitySummary.map((e) => e.map)}');
+                          },
+                          child: Text('activitySummary')),
+                      FlatButton(
+                          onPressed: () {
+                            observerQuery();
+                          },
+                          child: Text('observerQuery')),
+                      FlatButton(
+                          onPressed: () {
+                            anchoredObjectQuery();
+                          },
+                          child: Text('anchoredObjectQuery')),
+                      FlatButton(
+                          onPressed: () {
+                            queryActivitySummaryUpdates();
+                          },
+                          child: Text('queryActivitySummaryUpdates')),
+                      FlatButton(
+                          onPressed: () {
+                            statisticsCollectionQuery();
+                          },
+                          child: Text('statisticsCollectionQuery')),
+                      FlatButton(
+                          onPressed: () {
+                            heartbeatSeriesQuery();
+                          },
+                          child: Text('heartbeatSeriesQuery')),
+                      FlatButton(
+                          onPressed: () {
+                            workoutRouteQuery();
+                          },
+                          child: Text('workoutRouteQuery')),
+                    ],
+                  )
+                : Container(),
+          ],
         ),
       ),
     );
-  }
-
-  void requestAuthorization() async {
-    try {
-      final readTypes = <String>[];
-      readTypes.addAll(QuantityType.values.map((e) => e.identifier));
-      final writeTypes = <String>[
-        QuantityType.stepCount.identifier,
-      ];
-      final isRequested =
-          await HealthKitReporter.requestAuthorization(readTypes, writeTypes);
-      if (isRequested) {
-        // read data/write data/observe data
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  void read(bool isRequested) async {
-    if (isRequested) {
-      final preferredUnits =
-          await HealthKitReporter.preferredUnits([QuantityType.stepCount]);
-      preferredUnits.forEach((preferredUnit) async {
-        print('preferredUnit: ${preferredUnit.identifier}');
-        final type = QuantityTypeFactory.from(preferredUnit.identifier);
-        final quantities = await HealthKitReporter.quantityQuery(
-            type, preferredUnit, _predicate);
-        print('quantity: ${quantities.map((e) => e.map)}');
-        final statistics = await HealthKitReporter.statisticsQuery(
-            type, preferredUnit, _predicate);
-        print('statistics: ${statistics.map}');
-      });
-      final characteristics = await HealthKitReporter.characteristicsQuery();
-      print('characteristics: ${characteristics.map}');
-      final categories = await HealthKitReporter.categoryQuery(
-          CategoryType.sleepAnalysis, _predicate);
-      print('categories: ${categories.map((e) => e.map)}');
-      final samples = await HealthKitReporter.sampleQuery(
-          QuantityType.stepCount.identifier, _predicate);
-      print('samples: ${samples.map((e) => e.map)}');
-      final sources = await HealthKitReporter.sourceQuery(
-          QuantityType.stepCount.identifier, _predicate);
-      print('sources: ${sources.map((e) => e.map)}');
-      final correlations = await HealthKitReporter.correlationQuery(
-          CorrelationType.bloodPressure.identifier, _predicate);
-      print('correlations: ${correlations.map((e) => e.map)}');
-    } else {
-      print('error isRequested: $isRequested');
-    }
-  }
-
-  Future<void> runHealthKitReporter() async {
-    try {
-      final readTypes = <String>[];
-      readTypes.addAll(ActivitySummaryType.values.map((e) => e.identifier));
-      readTypes.addAll(CategoryType.values.map((e) => e.identifier));
-      readTypes.addAll(CharacteristicType.values.map((e) => e.identifier));
-      readTypes.addAll(QuantityType.values.map((e) => e.identifier));
-      readTypes.addAll(WorkoutType.values.map((e) => e.identifier));
-      readTypes.addAll(SeriesType.values.map((e) => e.identifier));
-      readTypes.addAll(ElectrocardiogramType.values.map((e) => e.identifier));
-      final writeTypes = <String>[
-        QuantityType.stepCount.identifier,
-      ];
-      final isRequested =
-          await HealthKitReporter.requestAuthorization(readTypes, writeTypes);
-      if (isRequested) {
-        final preferredUnits =
-            await HealthKitReporter.preferredUnits([QuantityType.stepCount]);
-        preferredUnits.forEach((preferredUnit) async {
-          print('preferredUnit: ${preferredUnit.identifier}');
-          final type = QuantityTypeFactory.from(preferredUnit.identifier);
-          final quantities = await HealthKitReporter.quantityQuery(
-              type, preferredUnit, _predicate);
-          print('quantity: ${quantities.map((e) => e.map)}');
-          final statistics = await HealthKitReporter.statisticsQuery(
-              type, preferredUnit, _predicate);
-          print('statistics: ${statistics.map}');
-        });
-        final characteristics = await HealthKitReporter.characteristicsQuery();
-        print('characteristics: ${characteristics.map}');
-        final categories = await HealthKitReporter.categoryQuery(
-            CategoryType.sleepAnalysis, _predicate);
-        print('categories: ${categories.map((e) => e.map)}');
-        final samples = await HealthKitReporter.sampleQuery(
-            QuantityType.stepCount.identifier, _predicate);
-        print('samples: ${samples.map((e) => e.map)}');
-        final canWrite = await HealthKitReporter.isAuthorizedToWrite(
-            QuantityType.stepCount.identifier);
-        if (canWrite) {
-          final stepsSaved = await saveSteps();
-          print('stepsSaved: $stepsSaved');
-        } else {
-          print('error canWrite: $canWrite');
-        }
-        final sources = await HealthKitReporter.sourceQuery(
-            QuantityType.stepCount.identifier, _predicate);
-        print('sources: ${sources.map((e) => e.map)}');
-        final correlations = await HealthKitReporter.correlationQuery(
-            CorrelationType.bloodPressure.identifier, _predicate);
-        print('correlations: ${correlations.map((e) => e.map)}');
-        final electrocardiograms =
-            await HealthKitReporter.electrocardiogramQuery(_predicate);
-        print('electrocardiograms: ${electrocardiograms.map((e) => e.map)}');
-      } else {
-        print('error isRequested: $isRequested');
-      }
-    } catch (exception) {
-      print('general exception: $exception');
-    } finally {
-      print('HealthKitReporter is done');
-    }
   }
 
   void observerQuery() async {
@@ -259,37 +329,5 @@ class _MyAppState extends State<MyApp> {
       print(statistics.map);
     });
     print('statisticsCollectionQuery: $sub');
-  }
-
-  Future<bool> saveSteps() {
-    final now = DateTime.now();
-    final minuteAgo = now.add(Duration(minutes: -1));
-    final device = Device('FlutterTracker', 'kvs', 'T-800', '3', '3.0', '1.1.1',
-        'kvs.f.t', '444-888-555');
-    final source = Source('maApp', 'com.kvs.health_kit_reporter_example');
-    final operatingSystem = OperatingSystem(1, 2, 3);
-    final sourceRevision =
-        SourceRevision(source, '5', 'fit', '4', operatingSystem);
-    final harmonized = QuantityHarmonized(100, 'count', null);
-    final steps = Quantity(
-        QuantityType.stepCount.identifier,
-        minuteAgo.millisecondsSinceEpoch,
-        now.millisecondsSinceEpoch,
-        device,
-        sourceRevision,
-        harmonized);
-    print(steps.map);
-    return HealthKitReporter.save(steps);
-  }
-
-  void write() async {
-    final canWrite = await HealthKitReporter.isAuthorizedToWrite(
-        QuantityType.stepCount.identifier);
-    if (canWrite) {
-      final stepsSaved = await saveSteps();
-      print('stepsSaved: $stepsSaved');
-    } else {
-      print('error canWrite: $canWrite');
-    }
   }
 }
