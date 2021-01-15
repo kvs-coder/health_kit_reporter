@@ -223,5 +223,5 @@ Under <a href=https://github.com/VictorKachalov/localized/blob/master/LICENSE>MI
 ## Donation
 If you think that this repo helped you to solve the issues you struggle with, please don't be shy and donate :-)
 
-[![Buy me a coffee ☕️](https://www.buymeacoffee.com/victorkachalov)
+[![Buy me a coffee]☕️](https://www.buymeacoffee.com/victorkachalov)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/paypalme/VictorKachalov/5EUR)
