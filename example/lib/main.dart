@@ -30,8 +30,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _predicate = Predicate(
-    DateTime.utc(2020, 1, 1, 12, 30, 30),
-    DateTime.utc(2020, 12, 31, 12, 30, 30),
+    DateTime.now().add(Duration(days: -1)),
+    DateTime.now(),
   );
 
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
