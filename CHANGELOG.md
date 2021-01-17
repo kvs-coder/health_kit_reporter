@@ -1,3 +1,7 @@
+## [1.0.7] - 17.01.2021
+
+* Fix with PreferredUnit
+
 ## [1.0.6] - 23.12.2020
 
 * Fix with HKActivitySummaryType
