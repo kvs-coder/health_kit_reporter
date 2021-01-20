@@ -135,6 +135,8 @@ void read(bool isRequested) async {
 
 In the example above, there is a call of **preferredUnits** function. You can provide identifiers to get preferred units for them and eventually receive properly calculated values from queries. The units will be chosen automatically based on you current localization. This is only required for **QuantityTypes**. If you will try to provide invalid unit for a type, you will get an error.
 
+The usage of **sampleQuery** for quantity types will return nearly the same result as **quantityQuery**, but the units for the values will be used according to SI, while **quantityQuery** together with **preferredUnits** will handle values units according to thee current localization.
+
 ### Writing Data
 
 Before writing data, you may need to check if writing is allowed by calling **isAuthorizedToWrite**.
