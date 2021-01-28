@@ -11,6 +11,8 @@ enum CharacteristicType {
   dateOfBirth,
   bloodType,
   biologicalSex,
+  wheelchairUse,
+  activityMoveMode,
 }
 
 extension CharacteristicTypeIdentifier on CharacteristicType {
@@ -24,6 +26,10 @@ extension CharacteristicTypeIdentifier on CharacteristicType {
         return 'HKCharacteristicTypeIdentifierBloodType';
       case CharacteristicType.biologicalSex:
         return 'HKCharacteristicTypeIdentifierBiologicalSex';
+      case CharacteristicType.wheelchairUse:
+        return 'HKCharacteristicTypeIdentifierWheelchairUse';
+      case CharacteristicType.activityMoveMode:
+        return 'HKCharacteristicTypeIdentifierActivityMoveMode';
     }
     throw InvalidValueException('Unknown case: $this');
   }

@@ -10,61 +10,96 @@ import 'package:health_kit_reporter/exceptions.dart';
 /// Creating from [String]
 ///
 enum QuantityType {
-  heartRateVariabilitySDNN,
   bodyMassIndex,
   bodyFatPercentage,
+  height,
+  bodyMass,
+  leanBodyMass,
+  waistCircumference,
+  stepCount,
+  distanceWalkingRunning,
+  distanceCycling,
+  distanceWheelchair,
+  basalEnergyBurned,
+  activeEnergyBurned,
+  flightsClimbed,
+  nikeFuel,
+  appleExerciseTime,
+  pushCount,
+  distanceSwimming,
+  swimmingStrokeCount,
+  vo2Max,
+  distanceDownhillSnowSports,
+  appleStandTime,
+  walkingSpeed,
+  walkingDoubleSupportPercentage,
+  walkingAsymmetryPercentage,
+  walkingStepLength,
+  sixMinuteWalkTestDistance,
+  stairAscentSpeed,
+  stairDescentSpeed,
   heartRate,
-  respiratoryRate,
-  oxygenSaturation,
   bodyTemperature,
   basalBodyTemperature,
   bloodPressureSystolic,
   bloodPressureDiastolic,
-  bloodGlucose,
-  height,
-  bodyMass,
+  respiratoryRate,
   restingHeartRate,
-  vo2Max,
-  waistCircumference,
-  stepCount,
-  distanceSwimming,
-  distanceWalkingRunning,
-  distanceCycling,
-  basalEnergyBurned,
-  activeEnergyBurned,
-  flightsClimbed,
-  appleExerciseTime,
-  dietaryEnergyConsumed,
+  walkingHeartRateAverage,
+  heartRateVariabilitySDNN,
+  oxygenSaturation,
+  peripheralPerfusionIndex,
+  bloodGlucose,
+  numberOfTimesFallen,
+  electrodermalActivity,
+  inhalerUsage,
+  insulinDelivery,
+  bloodAlcoholContent,
+  forcedVitalCapacity,
+  forcedExpiratoryVolume1,
+  peakExpiratoryFlowRate,
+  environmentalAudioExposure,
+  headphoneAudioExposure,
+  dietaryFatTotal,
+  dietaryFatPolyunsaturated,
+  dietaryFatMonounsaturated,
+  dietaryFatSaturated,
+  dietaryCholesterol,
+  dietarySodium,
   dietaryCarbohydrates,
   dietaryFiber,
   dietarySugar,
-  dietaryFatTotal,
-  dietaryFatSaturated,
+  dietaryEnergyConsumed,
   dietaryProtein,
   dietaryVitaminA,
-  dietaryThiamin,
-  dietaryRiboflavin,
-  dietaryNiacin,
-  dietaryPantothenicAcid,
   dietaryVitaminB6,
   dietaryVitaminB12,
   dietaryVitaminC,
   dietaryVitaminD,
   dietaryVitaminE,
   dietaryVitaminK,
-  dietaryFolate,
   dietaryCalcium,
   dietaryIron,
-  dietaryMagnesium,
+  dietaryThiamin,
+  dietaryRiboflavin,
+  dietaryNiacin,
+  dietaryFolate,
+  dietaryBiotin,
+  dietaryPantothenicAcid,
   dietaryPhosphorus,
-  dietaryPotassium,
-  dietarySodium,
-  dietaryZinc,
   dietaryIodine,
+  dietaryMagnesium,
+  dietaryZinc,
+  dietarySelenium,
+  dietaryCopper,
   dietaryManganese,
+  dietaryChromium,
+  dietaryMolybdenum,
+  dietaryChloride,
+  dietaryPotassium,
+  dietaryCaffeine,
   dietaryWater,
-  environmentalAudioExposure,
-  headphoneAudioExposure,
+  uvExposure,
 }
 
 extension QuantityTypeIdentifier on QuantityType {
@@ -180,6 +215,76 @@ extension QuantityTypeIdentifier on QuantityType {
         return 'HKQuantityTypeIdentifierEnvironmentalAudioExposure';
       case QuantityType.headphoneAudioExposure:
         return 'HKQuantityTypeIdentifierHeadphoneAudioExposure';
+      case QuantityType.leanBodyMass:
+        return 'HKQuantityTypeIdentifierLeanBodyMass';
+      case QuantityType.distanceWheelchair:
+        return 'HKQuantityTypeIdentifierDistanceWheelchair';
+      case QuantityType.nikeFuel:
+        return 'HKQuantityTypeIdentifierNikeFuel';
+      case QuantityType.pushCount:
+        return 'HKQuantityTypeIdentifierPushCount';
+      case QuantityType.swimmingStrokeCount:
+        return 'HKQuantityTypeIdentifierSwimmingStrokeCount';
+      case QuantityType.distanceDownhillSnowSports:
+        return 'HKQuantityTypeIdentifierDistanceDownhillSnowSports';
+      case QuantityType.appleStandTime:
+        return 'HKQuantityTypeIdentifierAppleStandTime';
+      case QuantityType.walkingSpeed:
+        return 'HKQuantityTypeIdentifierWalkingSpeed';
+      case QuantityType.walkingDoubleSupportPercentage:
+        return 'HKQuantityTypeIdentifierWalkingDoubleSupportPercentage';
+      case QuantityType.walkingAsymmetryPercentage:
+        return 'HKQuantityTypeIdentifierWalkingAsymmetryPercentage';
+      case QuantityType.walkingStepLength:
+        return 'HKQuantityTypeIdentifierWalkingStepLength';
+      case QuantityType.sixMinuteWalkTestDistance:
+        return 'HKQuantityTypeIdentifierSixMinuteWalkTestDistance';
+      case QuantityType.stairAscentSpeed:
+        return 'HKQuantityTypeIdentifierStairAscentSpeed';
+      case QuantityType.stairDescentSpeed:
+        return 'HKQuantityTypeIdentifierStairDescentSpeed';
+      case QuantityType.walkingHeartRateAverage:
+        return 'HKQuantityTypeIdentifierWalkingHeartRateAverage';
+      case QuantityType.peripheralPerfusionIndex:
+        return 'HKQuantityTypeIdentifierPeripheralPerfusionIndex';
+      case QuantityType.numberOfTimesFallen:
+        return 'HKQuantityTypeIdentifierNumberOfTimesFallen';
+      case QuantityType.electrodermalActivity:
+        return 'HKQuantityTypeIdentifierElectrodermalActivity';
+      case QuantityType.inhalerUsage:
+        return 'HKQuantityTypeIdentifierInhalerUsage';
+      case QuantityType.insulinDelivery:
+        return 'HKQuantityTypeIdentifierInsulinDelivery';
+      case QuantityType.bloodAlcoholContent:
+        return 'HKQuantityTypeIdentifierBloodAlcoholContent';
+      case QuantityType.forcedVitalCapacity:
+        return 'HKQuantityTypeIdentifierForcedVitalCapacity';
+      case QuantityType.forcedExpiratoryVolume1:
+        return 'HKQuantityTypeIdentifierForcedExpiratoryVolume1';
+      case QuantityType.peakExpiratoryFlowRate:
+        return 'HKQuantityTypeIdentifierPeakExpiratoryFlowRate';
+      case QuantityType.dietaryFatPolyunsaturated:
+        return 'HKQuantityTypeIdentifierDietaryFatPolyunsaturated';
+      case QuantityType.dietaryFatMonounsaturated:
+        return 'HKQuantityTypeIdentifierDietaryFatMonounsaturated';
+      case QuantityType.dietaryCholesterol:
+        return 'HKQuantityTypeIdentifierDietaryCholesterol';
+      case QuantityType.dietaryBiotin:
+        return 'HKQuantityTypeIdentifierDietaryBiotin';
+      case QuantityType.dietarySelenium:
+        return 'HKQuantityTypeIdentifierDietarySelenium';
+      case QuantityType.dietaryCopper:
+        return 'HKQuantityTypeIdentifierDietaryCopper';
+      case QuantityType.dietaryChromium:
+        return 'HKQuantityTypeIdentifierDietaryChromium';
+      case QuantityType.dietaryMolybdenum:
+        return 'HKQuantityTypeIdentifierDietaryMolybdenum';
+      case QuantityType.dietaryChloride:
+        return 'HKQuantityTypeIdentifierDietaryChloride';
+      case QuantityType.dietaryCaffeine:
+        return 'HKQuantityTypeIdentifierDietaryCaffeine';
+      case QuantityType.uvExposure:
+        return 'HKQuantityTypeIdentifierUVExposure';
     }
     throw InvalidValueException('Unknown case: $this');
   }
