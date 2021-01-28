@@ -15,6 +15,7 @@ import 'source_revision.dart';
 ///
 class Category extends Sample<CategoryHarmonized> {
   const Category(
+    String uuid,
     String identifier,
     num startTimestamp,
     num endTimestamp,
@@ -22,6 +23,7 @@ class Category extends Sample<CategoryHarmonized> {
     SourceRevision sourceRevision,
     CategoryHarmonized harmonized,
   ) : super(
+          uuid,
           identifier,
           startTimestamp,
           endTimestamp,
@@ -34,6 +36,7 @@ class Category extends Sample<CategoryHarmonized> {
   ///
   @override
   Map<String, dynamic> get map => {
+        'uuid': uuid,
         'identifier': identifier,
         'startTimestamp': startTimestamp,
         'endTimestamp': endTimestamp,

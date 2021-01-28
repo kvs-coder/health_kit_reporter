@@ -16,6 +16,7 @@ import 'workout_event.dart';
 ///
 class Workout extends Sample<WorkoutHarmonized> {
   const Workout(
+    String uuid,
     String identifier,
     num startTimestamp,
     num endTimestamp,
@@ -26,6 +27,7 @@ class Workout extends Sample<WorkoutHarmonized> {
     this.duration,
     this.workoutEvents,
   ) : super(
+          uuid,
           identifier,
           startTimestamp,
           endTimestamp,
@@ -42,6 +44,7 @@ class Workout extends Sample<WorkoutHarmonized> {
   ///
   @override
   Map<String, dynamic> get map => {
+        'uuid': uuid,
         'identifier': identifier,
         'startTimestamp': startTimestamp,
         'endTimestamp': endTimestamp,

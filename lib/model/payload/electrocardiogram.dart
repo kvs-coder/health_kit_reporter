@@ -16,6 +16,7 @@ import 'source_revision.dart';
 ///
 class Electrocardiogram extends Sample<ElectrocardiogramHarmonized> {
   const Electrocardiogram(
+    String uuid,
     String identifier,
     num startTimestamp,
     num endTimestamp,
@@ -24,6 +25,7 @@ class Electrocardiogram extends Sample<ElectrocardiogramHarmonized> {
     ElectrocardiogramHarmonized harmonized,
     this.numberOfMeasurements,
   ) : super(
+          uuid,
           identifier,
           startTimestamp,
           endTimestamp,
@@ -38,6 +40,7 @@ class Electrocardiogram extends Sample<ElectrocardiogramHarmonized> {
   ///
   @override
   Map<String, dynamic> get map => {
+        'uuid': uuid,
         'identifier': identifier,
         'startTimestamp': startTimestamp,
         'endTimestamp': endTimestamp,

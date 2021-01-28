@@ -15,6 +15,7 @@ import 'source_revision.dart';
 ///
 class Quantity extends Sample<QuantityHarmonized> {
   const Quantity(
+    String uuid,
     String identifier,
     num startTimestamp,
     num endTimestamp,
@@ -22,6 +23,7 @@ class Quantity extends Sample<QuantityHarmonized> {
     SourceRevision sourceRevision,
     QuantityHarmonized harmonized,
   ) : super(
+          uuid,
           identifier,
           startTimestamp,
           endTimestamp,
@@ -34,6 +36,7 @@ class Quantity extends Sample<QuantityHarmonized> {
   ///
   @override
   Map<String, dynamic> get map => {
+        'uuid': uuid,
         'identifier': identifier,
         'startTimestamp': startTimestamp,
         'endTimestamp': endTimestamp,
