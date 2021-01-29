@@ -1,3 +1,7 @@
+## [1.0.8] - 28.01.2021
+
+* Extended enum cases for Characteristic, Quantity and Category types
+
 ## [1.0.7] - 17.01.2021
 
 * Fix with PreferredUnit
