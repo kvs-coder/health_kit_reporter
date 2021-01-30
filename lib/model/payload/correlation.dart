@@ -18,6 +18,7 @@ import 'source_revision.dart';
 ///
 class Correlation extends Sample<CorrelationHarmonized> {
   const Correlation(
+    String uuid,
     String identifier,
     num startTimestamp,
     num endTimestamp,
@@ -25,6 +26,7 @@ class Correlation extends Sample<CorrelationHarmonized> {
     SourceRevision sourceRevision,
     CorrelationHarmonized harmonized,
   ) : super(
+          uuid,
           identifier,
           startTimestamp,
           endTimestamp,
@@ -43,6 +45,7 @@ class Correlation extends Sample<CorrelationHarmonized> {
   ///
   @override
   Map<String, dynamic> get map => {
+        'uuid': uuid,
         'identifier': identifier,
         'startTimestamp': startTimestamp,
         'endTimestamp': endTimestamp,

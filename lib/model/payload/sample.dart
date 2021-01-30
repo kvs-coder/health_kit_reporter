@@ -43,6 +43,7 @@ import 'workout.dart';
 ///
 abstract class Sample<Harmonized> {
   const Sample(
+    this.uuid,
     this.identifier,
     this.startTimestamp,
     this.endTimestamp,
@@ -51,6 +52,7 @@ abstract class Sample<Harmonized> {
     this.harmonized,
   );
 
+  final String uuid;
   final String identifier;
   final num startTimestamp;
   final num endTimestamp;
@@ -65,7 +67,8 @@ abstract class Sample<Harmonized> {
   /// General constructor from JSON payload
   ///
   Sample.fromJson(Map<String, dynamic> json, {Harmonized harmonized})
-      : identifier = json['identifier'],
+      : uuid = json['uuid'],
+        identifier = json['identifier'],
         startTimestamp = json['startTimestamp'],
         endTimestamp = json['endTimestamp'],
         device =
