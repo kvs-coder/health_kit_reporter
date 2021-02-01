@@ -179,6 +179,8 @@ If it is ok to write, you need to create a **Sample** object and call a **save**
 
 **Recommendation: As well as for reading, here will better as well to call preferredUnits first, to know what unit is valid for a type.**
 
+**Warning: PLease be sure to provide valid values for the appropriate types. For example, HealthKit will not allow to save Quantity value for the QuantityType.stepCount if the value is 0**
+
 ## Observing Data
 
 If you want to know, that something was changed in HealthKit, you can observe the repository.
