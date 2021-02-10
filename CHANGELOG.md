@@ -1,3 +1,7 @@
+## [1.0.10] - 01.02.2021
+
+* Fix issue with saving Workout
+
 ## [1.0.9] - 01.02.2021
 
 * Added UUID property for Wrappers of original HKObjectTypes

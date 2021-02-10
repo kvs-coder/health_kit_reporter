@@ -16,7 +16,7 @@ A Flutter wrapper for [HealthKitReporter](https://cocoapods.org/pods/HealthKitRe
 - Add this to your package's pubspec.yaml file: 
 ``` Dart
 dependencies:
-     health_kit_reporter: ^1.0.9
+     health_kit_reporter: ^1.0.10
 ```
 - Get dependencies
 
@@ -108,7 +108,7 @@ void read(bool isRequested) async {
         final type = QuantityTypeFactory.from(preferredUnit.identifier);
         final quantities = await HealthKitReporter.quantityQuery(
             type, preferredUnit, _predicate);
-        print('quantity: ${quantities.map((e) => e.map)}');
+        print('quantity: ${quantities.map((e) => e.map).toList()}');
         final statistics = await HealthKitReporter.statisticsQuery(
             type, preferredUnit, _predicate);
         print('statistics: ${statistics.map}');
@@ -117,16 +117,16 @@ void read(bool isRequested) async {
       print('characteristics: ${characteristics.map}');
       final categories = await HealthKitReporter.categoryQuery(
           CategoryType.sleepAnalysis, _predicate);
-      print('categories: ${categories.map((e) => e.map)}');
+      print('categories: ${categories.map((e) => e.map).toList()}');
       final samples = await HealthKitReporter.sampleQuery(
           QuantityType.stepCount.identifier, _predicate);
-      print('samples: ${samples.map((e) => e.map)}');
+      print('samples: ${samples.map((e) => e.map).toList()}');
       final sources = await HealthKitReporter.sourceQuery(
           QuantityType.stepCount.identifier, _predicate);
-      print('sources: ${sources.map((e) => e.map)}');
+      print('sources: ${sources.map((e) => e.map).toList()}');
       final correlations = await HealthKitReporter.correlationQuery(
           CorrelationType.bloodPressure.identifier, _predicate);
-      print('correlations: ${correlations.map((e) => e.map)}');
+      print('correlations: ${correlations.map((e) => e.map).toList()}');
     } else {
       print('error isRequested: $isRequested');
     }

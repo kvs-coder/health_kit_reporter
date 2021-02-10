@@ -52,7 +52,7 @@ class Workout extends Sample<WorkoutHarmonized> {
         'device': device.map,
         'sourceRevision': sourceRevision.map,
         'duration': duration,
-        'workoutEvents': workoutEvents.map((e) => e.map),
+        'workoutEvents': workoutEvents.map((e) => e.map).toList(),
         'harmonized': harmonized.map,
       };
 

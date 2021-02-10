@@ -20,7 +20,7 @@ class WorkoutRoute {
   /// General map representation
   ///
   Map<String, dynamic> get map => {
-        'locations': locations.map((e) => e.map),
+        'locations': locations.map((e) => e.map).toList(),
         'done': done,
       };
 

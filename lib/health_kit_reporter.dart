@@ -590,7 +590,7 @@ class HealthKitReporter {
   static Future<bool> addCategory(List<Category> categories, Workout workout,
       {Device device}) async {
     final arguments = {
-      'categories': categories.map((e) => e.map),
+      'categories': categories.map((e) => e.map).toList(),
       'workout': workout.map,
     };
     if (device != null) arguments['device'] = device.map;
@@ -603,7 +603,7 @@ class HealthKitReporter {
   static Future<bool> addQuantity(List<Quantity> quantities, Workout workout,
       {Device device}) async {
     final arguments = {
-      'categories': quantities.map((e) => e.map),
+      'quantities': quantities.map((e) => e.map).toList(),
       'workout': workout.map,
     };
     if (device != null) arguments['device'] = device.map;
@@ -632,6 +632,7 @@ class HealthKitReporter {
   ///
   static Future<bool> save(Sample sample) async {
     final arguments = sample.parsed();
+    print(arguments);
     return await _methodChannel.invokeMethod('save', arguments);
   }
 }

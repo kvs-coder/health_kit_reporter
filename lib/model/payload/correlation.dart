@@ -77,8 +77,8 @@ class CorrelationHarmonized {
   /// General map representation
   ///
   Map<String, dynamic> get map => {
-        'quantitySamples': quantitySamples.map((e) => e.map),
-        'categorySamples': categorySamples.map((e) => e.map),
+        'quantitySamples': quantitySamples.map((e) => e.map).toList(),
+        'categorySamples': categorySamples.map((e) => e.map).toList(),
         'metadata': metadata,
       };
 
