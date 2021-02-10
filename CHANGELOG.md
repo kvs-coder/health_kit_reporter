@@ -1,3 +1,7 @@
+## [1.0.9] - 01.02.2021
+
+* Added UUID property for Wrappers of original HKObjectTypes
+
 ## [1.0.8] - 28.01.2021
 
 * Extended enum cases for Characteristic, Quantity and Category types
