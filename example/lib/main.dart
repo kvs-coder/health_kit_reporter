@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:health_kit_reporter/health_kit_reporter.dart';
+import 'package:health_kit_reporter/model/payload/category.dart';
 import 'package:health_kit_reporter/model/payload/date_components.dart';
 import 'package:health_kit_reporter/model/payload/device.dart';
 import 'package:health_kit_reporter/model/payload/quantity.dart';
@@ -110,6 +111,8 @@ class _MyAppState extends State<MyApp> {
                   final writeTypes = <String>[
                     QuantityType.stepCount.identifier,
                     WorkoutType.workoutType.identifier,
+                    CategoryType.sleepAnalysis.identifier,
+                    CategoryType.mindfulSession.identifier,
                   ];
                   final isRequested =
                       await HealthKitReporter.requestAuthorization(
@@ -187,6 +190,12 @@ class _MyAppState extends State<MyApp> {
                               saveSteps();
                             },
                             child: Text('saveSteps'),
+                          ),
+                          RaisedButton(
+                            onPressed: () {
+                              saveMindfulMinutes();
+                            },
+                            child: Text('saveMindfulMinutes'),
                           ),
                         ],
                       ),
@@ -352,6 +361,38 @@ class _MyAppState extends State<MyApp> {
         print('workoutSaved: $saved');
       } else {
         print('error canWrite workout: $canWrite');
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void saveMindfulMinutes() async {
+    try {
+      final canWrite = await HealthKitReporter.isAuthorizedToWrite(
+          CategoryType.mindfulSession.identifier);
+      if (canWrite) {
+        final now = DateTime.now();
+        final minuteAgo = now.add(Duration(minutes: -1));
+        final harmonized = CategoryHarmonized(
+          0,
+          'Breath Meditation',
+          {},
+        );
+        final mindfulMinutes = Category(
+          'testMindfulMinutesUUID',
+          CategoryType.mindfulSession.identifier,
+          minuteAgo.millisecondsSinceEpoch,
+          now.millisecondsSinceEpoch,
+          _device,
+          _sourceRevision,
+          harmonized,
+        );
+        print('try to save: ${mindfulMinutes.map}');
+        final saved = await HealthKitReporter.save(mindfulMinutes);
+        print('mindfulMinutesSaved: $saved');
+      } else {
+        print('error canWrite mindfulMinutes: $canWrite');
       }
     } catch (e) {
       print(e);
