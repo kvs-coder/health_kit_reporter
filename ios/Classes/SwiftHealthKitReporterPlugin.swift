@@ -326,7 +326,6 @@ extension SwiftHealthKitReporterPlugin {
                 result: result
             )
         }
-        
     }
 }
 // MARK: - Method Call methods
