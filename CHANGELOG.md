@@ -1,3 +1,9 @@
+## [1.1.0] - 25.02.2021
+
+* iOS 9.0 support
+* FIx with workout values
+* Fix with UUID of Samples
+
 ## [1.0.10] - 01.02.2021
 
 * Fix issue with saving Workout
