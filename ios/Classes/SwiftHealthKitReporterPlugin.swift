@@ -213,6 +213,8 @@ extension SwiftHealthKitReporterPlugin {
                     arguments: arguments,
                     result: result
                 )
+            } else {
+                throwSystemVersionError(result: result)
             }
         case .sourceQuery:
             guard let arguments = call.arguments as? [String: Any] else {
@@ -270,6 +272,8 @@ extension SwiftHealthKitReporterPlugin {
                     arguments: arguments,
                     result: result
                 )
+            } else {
+                throwSystemVersionError(result: result)
             }
         case .isAuthorizedToWrite:
             guard let arguments = call.arguments as? [String: String] else {
@@ -1464,6 +1468,15 @@ extension SwiftHealthKitReporterPlugin {
                 code: className,
                 message: "Error in platform method.",
                 details: error
+            )
+        )
+    }
+    private func throwSystemVersionError(result: FlutterResult) {
+        result(
+            FlutterError(
+                code: className,
+                message: "The current system version does not support method",
+                details: nil
             )
         )
     }
