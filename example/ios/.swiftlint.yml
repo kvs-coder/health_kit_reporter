@@ -10,6 +10,7 @@ included: # paths to include during linting. `--path` is ignored if present.
   - HealthKitReporter
 excluded: # paths to ignore during linting. Takes precedence over `included`.
   - Carthage
+  - Pods
 analyzer_rules: # Rules run by `swiftlint analyze` (experimental)
   - explicit_self
 
