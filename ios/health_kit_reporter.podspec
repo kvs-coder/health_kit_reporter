@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name                  = 'health_kit_reporter'
-  s.version               = '1.0.2'
+  s.version               = '1.1.0'
   s.summary               = 'HealthKitReporter. A wrapper for HealthKit framework. A Flutter plugin'
   s.swift_versions        = '5.3'
   s.description           = 'Helps to write or read data from Apple Health via HealthKit framework using Flutter.'
@@ -13,9 +13,9 @@ Pod::Spec.new do |s|
   s.author                = { 'Victor Kachalov' => 'victorkachalov@gmail.com' }
   s.source                = { :path => '.' }
   s.social_media_url      = 'https://twitter.com/Victor_Kachalov'
-  s.ios.deployment_target = '12.0'
+  s.ios.deployment_target = '9.0'
   s.source_files          = 'Classes/**/*'
-  s.platform              = :ios, '12.0'
+  s.platform              = :ios, '9.0'
 
   s.dependency 'Flutter'
   s.dependency 'HealthKitReporter'

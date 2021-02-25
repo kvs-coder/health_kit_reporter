@@ -8,6 +8,7 @@
 import Foundation
 import HealthKitReporter
 
+@available(iOS 9.3, *)
 public class QueryActivitySummaryStreamHandler: NSObject {
     let reporter: HealthKitReporter
     var query: ActivitySummaryQuery?
@@ -17,6 +18,7 @@ public class QueryActivitySummaryStreamHandler: NSObject {
     }
 }
 // MARK: - StreamHandlerProtocol
+@available(iOS 9.3, *)
 extension QueryActivitySummaryStreamHandler: StreamHandlerProtocol {
     func setQuery(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
         guard
@@ -58,6 +60,7 @@ extension QueryActivitySummaryStreamHandler: StreamHandlerProtocol {
     }
 }
 // MARK: - FlutterStreamHandler
+@available(iOS 9.3, *)
 extension QueryActivitySummaryStreamHandler: FlutterStreamHandler {
     public func onListen(
         withArguments arguments: Any?,
