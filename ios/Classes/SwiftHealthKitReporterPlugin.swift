@@ -57,8 +57,10 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
                     name: "health_kit_reporter_event_channel_query_activity_summary",
                     binaryMessenger: binaryMessenger
                 )
-                let queryActivitySummaryStreamHandler = QueryActivitySummaryStreamHandler(reporter: reporter)
-                queryActivitySummaryEventChannel.setStreamHandler(queryActivitySummaryStreamHandler)
+                if #available(iOS 9.3, *) {
+                    let queryActivitySummaryStreamHandler = QueryActivitySummaryStreamHandler(reporter: reporter)
+                    queryActivitySummaryEventChannel.setStreamHandler(queryActivitySummaryStreamHandler)
+                }
                 let anchoredObjectQueryEventChannel = FlutterEventChannel(
                     name: "health_kit_reporter_event_channel_anchored_object_query",
                     binaryMessenger: binaryMessenger
@@ -201,15 +203,17 @@ extension SwiftHealthKitReporterPlugin {
                 result: result
             )
         case .queryActivitySummary:
-            guard let arguments = call.arguments as? [String: Double] else {
-                throwNoArgumentsError(result: result)
-                return
+            if #available(iOS 9.3, *) {
+                guard let arguments = call.arguments as? [String: Double] else {
+                    throwNoArgumentsError(result: result)
+                    return
+                }
+                queryActivitySummary(
+                    reporter: reporter,
+                    arguments: arguments,
+                    result: result
+                )
             }
-            queryActivitySummary(
-                reporter: reporter,
-                arguments: arguments,
-                result: result
-            )
         case .sourceQuery:
             guard let arguments = call.arguments as? [String: Any] else {
                 throwNoArgumentsError(result: result)
@@ -256,15 +260,17 @@ extension SwiftHealthKitReporterPlugin {
                 result: result
             )
         case .startWatchApp:
-            guard let arguments = call.arguments as? [String: Any] else {
-                throwNoArgumentsError(result: result)
-                return
+            if #available(iOS 10.0, *) {
+                guard let arguments = call.arguments as? [String: Any] else {
+                    throwNoArgumentsError(result: result)
+                    return
+                }
+                startWatchApp(
+                    reporter: reporter,
+                    arguments: arguments,
+                    result: result
+                )
             }
-            startWatchApp(
-                reporter: reporter,
-                arguments: arguments,
-                result: result
-            )
         case .isAuthorizedToWrite:
             guard let arguments = call.arguments as? [String: String] else {
                 throwNoArgumentsError(result: result)
@@ -853,6 +859,7 @@ extension SwiftHealthKitReporterPlugin {
             )
         }
     }
+    @available(iOS 9.3, *)
     private func queryActivitySummary(
         reporter: HealthKitReporter,
         arguments: [String: Double],
@@ -1158,6 +1165,7 @@ extension SwiftHealthKitReporterPlugin {
             result(success)
         }
     }
+    @available(iOS 10.0, *)
     private func startWatchApp(
         reporter: HealthKitReporter,
         arguments: [String: Any],
