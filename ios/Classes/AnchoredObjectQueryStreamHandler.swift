@@ -37,10 +37,11 @@ extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
             type: type,
             predicate: predicate,
             monitorUpdates: true
-        ) { (_, samples, error) in
+        ) { (query, samples, deletedObjects, anchor, error) in
             guard error == nil else {
                 return
             }
+            var jsonDictionary: [String: Any] = [:]
             var jsonArray: [String] = []
             for sample in samples {
                 do {
@@ -50,7 +51,9 @@ extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
                     continue
                 }
             }
-            events(jsonArray)
+            jsonDictionary["samples"] = jsonArray
+            jsonDictionary["deletedObjects"] = try? deletedObjects.encoded()
+            events(jsonDictionary)
         }
     }
 }
