@@ -151,6 +151,11 @@ class _MyAppState extends State<MyApp> {
                               child: Text('categories')),
                           RaisedButton(
                               onPressed: () {
+                                queryWorkout();
+                              },
+                              child: Text('workouts')),
+                          RaisedButton(
+                              onPressed: () {
                                 querySamples();
                               },
                               child: Text('samples')),
@@ -414,6 +419,15 @@ class _MyAppState extends State<MyApp> {
       final categories = await HealthKitReporter.categoryQuery(
           CategoryType.sleepAnalysis, _predicate);
       print('categories: ${categories.map((e) => e.map).toList()}');
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void queryWorkout() async {
+    try {
+      final workouts = await HealthKitReporter.workoutQuery(_predicate);
+      print('workouts: ${workouts.map((e) => e.map).toList()}');
     } catch (e) {
       print(e);
     }
