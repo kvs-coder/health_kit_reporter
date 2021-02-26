@@ -218,7 +218,7 @@ If you want to stop observation, you need to:
 - call **disableBackgroundDelivery** or **disableAllBackgroundDelivery**
 
 ## Requirements
-The library supports minimum iOS 12. 
+The library supports minimum iOS 9. 
 Some features like **HeartbeatSeries** are available only starting with iOS 13.0 and like **Electrocardiogramm** starting with iOS 14.0.
 
 ## License
