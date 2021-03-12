@@ -19,7 +19,7 @@ class Category extends Sample<CategoryHarmonized> {
     String identifier,
     num startTimestamp,
     num endTimestamp,
-    Device device,
+    Device? device,
     SourceRevision sourceRevision,
     CategoryHarmonized harmonized,
   ) : super(
@@ -40,7 +40,7 @@ class Category extends Sample<CategoryHarmonized> {
         'identifier': identifier,
         'startTimestamp': startTimestamp,
         'endTimestamp': endTimestamp,
-        'device': device.map,
+        'device': device?.map,
         'sourceRevision': sourceRevision.map,
         'harmonized': harmonized.map,
       };
@@ -48,8 +48,7 @@ class Category extends Sample<CategoryHarmonized> {
   /// General constructor from JSON payload
   ///
   Category.fromJson(Map<String, dynamic> json)
-      : super.fromJson(json,
-            harmonized: CategoryHarmonized.fromJson(json['harmonized']));
+      : super.from(json, CategoryHarmonized.fromJson(json['harmonized']));
 
   /// Simplifies creating a list of objects from JSON payload.
   ///
@@ -80,7 +79,7 @@ class CategoryHarmonized {
 
   final num value;
   final String description;
-  final Map<String, dynamic> metadata;
+  final Map<String, dynamic>? metadata;
 
   /// General map representation
   ///

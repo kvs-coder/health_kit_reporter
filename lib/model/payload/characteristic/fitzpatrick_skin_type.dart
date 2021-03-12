@@ -37,7 +37,6 @@ extension Description on FitzpatrickSkinType {
       case FitzpatrickSkinType.VI:
         return 'VI';
     }
-    throw InvalidValueException('Unknown case: $this');
   }
 }
 
@@ -59,7 +58,7 @@ extension FitzpatrickSkinTypeFactory on FitzpatrickSkinType {
       case 'VI':
         return FitzpatrickSkinType.VI;
       default:
-        return null;
+        throw InvalidValueException('Unknown case: $string');
     }
   }
 }

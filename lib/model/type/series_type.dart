@@ -1,5 +1,3 @@
-import '../../exceptions.dart';
-
 /// Equivalent of [SeriesType]
 /// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
 ///
@@ -19,6 +17,5 @@ extension SeriesTypeIdentifier on SeriesType {
       case SeriesType.route:
         return 'HKWorkoutRouteTypeIdentifier';
     }
-    throw InvalidValueException('Unknown case: $this');
   }
 }

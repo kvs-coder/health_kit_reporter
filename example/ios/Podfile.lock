@@ -2,7 +2,7 @@ PODS:
   - Flutter (1.0.0)
   - flutter_local_notifications (0.0.1):
     - Flutter
-  - health_kit_reporter (1.1.0):
+  - health_kit_reporter (1.1.1):
     - Flutter
     - HealthKitReporter
   - HealthKitReporter (1.4.0)
@@ -27,7 +27,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
-  health_kit_reporter: 4f07356cf70fff8d50b92b76ee9beacf7e3d70f9
+  health_kit_reporter: 9ac0e8b9d1933d67b23f1ee8e4d45eb4611bfe84
   HealthKitReporter: 1bd60f53111044cc3a0d575d57dc4b23767c8ac6
 
 PODFILE CHECKSUM: a75497545d4391e2d394c3668e20cfb1c2bbd4aa

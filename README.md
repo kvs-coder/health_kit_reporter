@@ -18,6 +18,11 @@ A Flutter wrapper for [HealthKitReporter](https://cocoapods.org/pods/HealthKitRe
 dependencies:
      health_kit_reporter: ^1.1.1
 ```
+or with null safety:
+``` Dart
+dependencies:
+     health_kit_reporter: ^1.2.0-nullsafety.0
+```
 - Get dependencies
 
 ``` shell

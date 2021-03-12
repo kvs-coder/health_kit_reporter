@@ -22,7 +22,6 @@ extension CorrelationTypeIdentifier on CorrelationType {
       case CorrelationType.food:
         return 'HKCorrelationTypeIdentifierFood';
     }
-    throw InvalidValueException('Unknown case: $this');
   }
 }
 
@@ -38,7 +37,7 @@ extension CorrelationTypeFactory on CorrelationType {
 
   /// The [from] exception handling
   ///
-  static CorrelationType tryFrom(String identifier) {
+  static CorrelationType? tryFrom(String identifier) {
     try {
       return from(identifier);
     } on InvalidValueException {

@@ -10,7 +10,7 @@ class DeletedObject {
   const DeletedObject(this.uuid, this.metadata);
 
   final String uuid;
-  final Map<String, dynamic> metadata;
+  final Map<String, dynamic>? metadata;
 
   /// General map representation
   ///
