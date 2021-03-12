@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
@@ -8,6 +9,7 @@ import 'model/payload/category.dart';
 import 'model/payload/characteristic/characteristic.dart';
 import 'model/payload/correlation.dart';
 import 'model/payload/date_components.dart';
+import 'model/payload/deleted_object.dart';
 import 'model/payload/device.dart';
 import 'model/payload/electrocardiogram.dart';
 import 'model/payload/heartbeat_serie.dart';
@@ -209,7 +211,7 @@ class HealthKitReporter {
   ///
   static StreamSubscription<dynamic> anchoredObjectQuery(
       String identifier, Predicate predicate,
-      {Function(List<Sample>) onUpdate}) {
+      {Function(List<Sample>, List<DeletedObject>) onUpdate}) {
     final arguments = <String, dynamic>{
       'identifier': identifier,
     };
@@ -217,14 +219,22 @@ class HealthKitReporter {
     return _anchoredObjectQueryChannel
         .receiveBroadcastStream(arguments)
         .listen((event) {
-      final list = List.from(event);
+      final map = LinkedHashMap<String, dynamic>.from(event);
+      final samplesList = List.from(map['samples']);
       final samples = <Sample>[];
-      for (final String element in list) {
+      for (final String element in samplesList) {
         final json = jsonDecode(element);
         final sample = Sample.factory(json);
         samples.add(sample);
       }
-      onUpdate(samples);
+      final deletedObjectsList = List.from(map['deletedObjects']);
+      final deletedObjects = <DeletedObject>[];
+      for (final String element in deletedObjectsList) {
+        final json = jsonDecode(element);
+        final deletedObject = DeletedObject.fromJson(json);
+        deletedObjects.add(deletedObject);
+      }
+      onUpdate(samples, deletedObjects);
     });
   }
 

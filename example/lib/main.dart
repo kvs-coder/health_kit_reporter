@@ -34,7 +34,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   final _predicate = Predicate(
-    DateTime.now().add(Duration(days: -1)),
+    DateTime.now().add(Duration(days: -365)),
     DateTime.now(),
   );
   final _device = Device(
@@ -134,47 +134,47 @@ class _MyAppState extends State<MyApp> {
                       Column(
                         children: [
                           Text('READ'),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 handleQuantitiySamples();
                               },
                               child: Text('preferredUnit:quantity:statistics')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 queryCharacteristics();
                               },
                               child: Text('characteristics')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 queryCategory();
                               },
                               child: Text('categories')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 queryWorkout();
                               },
                               child: Text('workouts')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 querySamples();
                               },
                               child: Text('samples')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 querySources();
                               },
                               child: Text('sources')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 queryCorrelations();
                               },
                               child: Text('correlations')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 queryElectrocardiograms();
                               },
                               child: Text('electrocardiograms')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 queryActivitySummary();
                               },
@@ -184,19 +184,19 @@ class _MyAppState extends State<MyApp> {
                       Column(
                         children: [
                           Text('WRITE'),
-                          RaisedButton(
+                          ElevatedButton(
                             onPressed: () {
                               saveWorkout();
                             },
                             child: Text('saveWorkout'),
                           ),
-                          RaisedButton(
+                          ElevatedButton(
                             onPressed: () {
                               saveSteps();
                             },
                             child: Text('saveSteps'),
                           ),
-                          RaisedButton(
+                          ElevatedButton(
                             onPressed: () {
                               saveMindfulMinutes();
                             },
@@ -207,32 +207,32 @@ class _MyAppState extends State<MyApp> {
                       Column(
                         children: [
                           Text('OBSERVE'),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 observerQuery();
                               },
                               child: Text('observerQuery')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 anchoredObjectQuery();
                               },
                               child: Text('anchoredObjectQuery')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 queryActivitySummaryUpdates();
                               },
                               child: Text('queryActivitySummaryUpdates')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 statisticsCollectionQuery();
                               },
                               child: Text('statisticsCollectionQuery')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 heartbeatSeriesQuery();
                               },
                               child: Text('heartbeatSeriesQuery')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 workoutRouteQuery();
                               },
@@ -502,9 +502,10 @@ class _MyAppState extends State<MyApp> {
   void anchoredObjectQuery() {
     final identifier = QuantityType.stepCount.identifier;
     final sub = HealthKitReporter.anchoredObjectQuery(identifier, _predicate,
-        onUpdate: (samples) {
+        onUpdate: (samples, deletedObjects) {
       print('Updates for anchoredObjectQuerySub');
       print(samples.map((e) => e.map).toList());
+      print(deletedObjects.map((e) => e.map).toList());
     });
     print('anchoredObjectQuerySub: $sub');
   }
