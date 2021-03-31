@@ -1,3 +1,7 @@
+## [1.2.0-nullsafety.0] - 12.03.2021
+
+* Null safety support
+
 ## [1.1.1] - 12.03.2021
 
 * Anchored Query fix with deleted objects
