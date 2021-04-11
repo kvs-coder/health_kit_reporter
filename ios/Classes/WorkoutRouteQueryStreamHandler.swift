@@ -2,23 +2,23 @@
 //  WorkoutRouteQueryStreamHandler.swift
 //  health_kit_reporter
 //
-//  Created by Florian on 09.12.20.
+//  Created by Victor Kachalov on 09.12.20.
 //
 
 import Foundation
 import HealthKitReporter
 
-public class WorkoutRouteQueryStreamHandler: NSObject {
-    let reporter: HealthKitReporter
-    var query: SampleQuery?
+public final class WorkoutRouteQueryStreamHandler: NSObject {
+    public let reporter: HealthKitReporter
+    public var query: Query?
 
-    public init(reporter: HealthKitReporter) {
+    init(reporter: HealthKitReporter) {
         self.reporter = reporter
     }
 }
 // MARK: - StreamHandlerProtocol
 extension WorkoutRouteQueryStreamHandler: StreamHandlerProtocol {
-    func setQuery(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
+    public func setQuery(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
         guard
             let startTimestamp = arguments["startTimestamp"] as? Double,
             let endTimestamp = arguments["endTimestamp"] as? Double
@@ -49,7 +49,12 @@ extension WorkoutRouteQueryStreamHandler: StreamHandlerProtocol {
             events(nil)
         }
     }
+    
+    public static func make(with reporter: HealthKitReporter) -> WorkoutRouteQueryStreamHandler {
+        WorkoutRouteQueryStreamHandler(reporter: reporter)
+    }
 }
+
 // MARK: - FlutterStreamHandler
 extension WorkoutRouteQueryStreamHandler: FlutterStreamHandler {
     public func onListen(
@@ -62,4 +67,3 @@ extension WorkoutRouteQueryStreamHandler: FlutterStreamHandler {
         handleOnCancel(withArguments: arguments)
     }
 }
-

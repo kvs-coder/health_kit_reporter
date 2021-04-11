@@ -70,12 +70,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    observerQuery();
-    anchoredObjectQuery();
-    queryActivitySummaryUpdates();
-    statisticsCollectionQuery();
-    heartbeatSeriesQuery();
-    workoutRouteQuery();
     final initializationSettingsIOs = IOSInitializationSettings();
     final initSettings = InitializationSettings(iOS: initializationSettingsIOs);
     _flutterLocalNotificationsPlugin.initialize(initSettings,
@@ -209,12 +203,18 @@ class _MyAppState extends State<MyApp> {
                           Text('OBSERVE'),
                           ElevatedButton(
                               onPressed: () {
-                                observerQuery();
+                                observerQuery(
+                                    QuantityType.stepCount.identifier);
+                                observerQuery(
+                                    QuantityType.heartRate.identifier);
                               },
                               child: Text('observerQuery')),
                           ElevatedButton(
                               onPressed: () {
-                                anchoredObjectQuery();
+                                anchoredObjectQuery(
+                                    QuantityType.stepCount.identifier);
+                                anchoredObjectQuery(
+                                    QuantityType.heartRate.identifier);
                               },
                               child: Text('anchoredObjectQuery')),
                           ElevatedButton(
@@ -464,21 +464,20 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void observerQuery() async {
-    final identifier = QuantityType.stepCount.identifier;
+  void observerQuery(String identifier) async {
     final sub = HealthKitReporter.observerQuery(identifier, _predicate,
         onUpdate: (identifier) async {
-      print('Updates for observerQuerySub');
+      print('Updates for observerQuerySub - $identifier');
       print(identifier);
       final iOSDetails = IOSNotificationDetails();
       final details = NotificationDetails(iOS: iOSDetails);
       await _flutterLocalNotificationsPlugin.show(
           0, 'Observer', identifier, details);
     });
-    print('observerQuerySub: $sub');
+    print('$identifier observerQuerySub: $sub');
     final isSet = await HealthKitReporter.enableBackgroundDelivery(
         identifier, UpdateFrequency.immediate);
-    print('enableBackgroundDelivery: $isSet');
+    print('$identifier enableBackgroundDelivery: $isSet');
   }
 
   void heartbeatSeriesQuery() {
@@ -499,15 +498,14 @@ class _MyAppState extends State<MyApp> {
     print('workoutRouteQuery: $sub');
   }
 
-  void anchoredObjectQuery() {
-    final identifier = QuantityType.stepCount.identifier;
+  void anchoredObjectQuery(String identifier) {
     final sub = HealthKitReporter.anchoredObjectQuery(identifier, _predicate,
         onUpdate: (samples, deletedObjects) {
-      print('Updates for anchoredObjectQuerySub');
+      print('Updates for anchoredObjectQuerySub - $identifier');
       print(samples.map((e) => e.map).toList());
       print(deletedObjects.map((e) => e.map).toList());
     });
-    print('anchoredObjectQuerySub: $sub');
+    print('$identifier anchoredObjectQuerySub: $sub');
   }
 
   void queryActivitySummaryUpdates() {

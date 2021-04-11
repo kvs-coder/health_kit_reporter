@@ -36,53 +36,45 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
             instance.reporter = try HealthKitReporter()
             if let reporter = instance.reporter {
                 let binaryMessenger = registrar.messenger()
-                let methodChannel = FlutterMethodChannel(
-                    name: "health_kit_reporter_method_channel",
-                    binaryMessenger: binaryMessenger
+                registerMethodChannel(
+                    registrar: registrar,
+                    binaryMessenger: binaryMessenger,
+                    instance: instance
                 )
-                registrar.addMethodCallDelegate(instance, channel: methodChannel)
-                let observerQueryEventChannel = FlutterEventChannel(
-                    name: "health_kit_reporter_event_channel_observer_query",
-                    binaryMessenger: binaryMessenger
+                try registerEventChannel(
+                    binaryMessenger: binaryMessenger,
+                    reporter: reporter
                 )
-                let observerQueryStreamHandler = ObserverQueryStreamHandler(reporter: reporter)
-                observerQueryEventChannel.setStreamHandler(observerQueryStreamHandler)
-                let statisticsCollectionQueryEventChannel = FlutterEventChannel(
-                    name: "health_kit_reporter_event_channel_statistics_collection_query",
-                    binaryMessenger: binaryMessenger
-                )
-                let statisticsCollectionQueryStreamHandler = StatisticsCollectionQueryStreamHandler(reporter: reporter)
-                statisticsCollectionQueryEventChannel.setStreamHandler(statisticsCollectionQueryStreamHandler)
-                let queryActivitySummaryEventChannel = FlutterEventChannel(
-                    name: "health_kit_reporter_event_channel_query_activity_summary",
-                    binaryMessenger: binaryMessenger
-                )
-                if #available(iOS 9.3, *) {
-                    let queryActivitySummaryStreamHandler = QueryActivitySummaryStreamHandler(reporter: reporter)
-                    queryActivitySummaryEventChannel.setStreamHandler(queryActivitySummaryStreamHandler)
-                }
-                let anchoredObjectQueryEventChannel = FlutterEventChannel(
-                    name: "health_kit_reporter_event_channel_anchored_object_query",
-                    binaryMessenger: binaryMessenger
-                )
-                let anchoredObjectQueryStreamHandler = AnchoredObjectQueryStreamHandler(reporter: reporter)
-                anchoredObjectQueryEventChannel.setStreamHandler(anchoredObjectQueryStreamHandler)
-                let heartbeatSeriesQueryEventChannel = FlutterEventChannel(
-                    name: "health_kit_reporter_event_channel_heartbeat_series_query",
-                    binaryMessenger: binaryMessenger
-                )
-                let heartbeatSeriesQueryStreamHandler = HeartbeatSeriesQueryStreamHandler(reporter: reporter)
-                heartbeatSeriesQueryEventChannel.setStreamHandler(heartbeatSeriesQueryStreamHandler)
-
-                let workoutRouteQueryEventChannel = FlutterEventChannel(
-                    name: "health_kit_reporter_event_channel_workout_route_query",
-                    binaryMessenger: binaryMessenger
-                )
-                let workoutRouteQueryStreamHandler = WorkoutRouteQueryStreamHandler(reporter: reporter)
-                workoutRouteQueryEventChannel.setStreamHandler(workoutRouteQueryStreamHandler)
             }
         } catch {
             print(error)
+        }
+    }
+    
+    private static func registerMethodChannel(
+        registrar: FlutterPluginRegistrar,
+        binaryMessenger: FlutterBinaryMessenger,
+        instance: SwiftHealthKitReporterPlugin
+    ) {
+        for method in MethodChannel.allCases {
+            let methodChannel = FlutterMethodChannel(
+                name: method.rawValue,
+                binaryMessenger: binaryMessenger
+            )
+            registrar.addMethodCallDelegate(instance, channel: methodChannel)
+        }
+    }
+    private static func registerEventChannel(
+        binaryMessenger: FlutterBinaryMessenger,
+        reporter: HealthKitReporter
+    ) throws {
+        for event in EventChannel.allCases {
+            let eventChannel = FlutterEventChannel(
+                name: event.rawValue,
+                binaryMessenger: binaryMessenger
+            )
+            let streamHandler = try StreamHandlerFactory.make(with: reporter, for: event)
+            eventChannel.setStreamHandler(streamHandler)
         }
     }
 }

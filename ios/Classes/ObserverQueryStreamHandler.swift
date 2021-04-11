@@ -2,23 +2,23 @@
 //  ObserverQueryStreamHandler.swift
 //  health_kit_reporter
 //
-//  Created by Florian on 08.12.20.
+//  Created by Victor Kachalov on 08.12.20.
 //
 
 import Foundation
 import HealthKitReporter
 
-public class ObserverQueryStreamHandler: NSObject {
-    let reporter: HealthKitReporter
-    var query: ObserverQuery?
+public final class ObserverQueryStreamHandler: NSObject {
+    public let reporter: HealthKitReporter
+    public var query: Query?
 
-    public init(reporter: HealthKitReporter) {
+    init(reporter: HealthKitReporter) {
         self.reporter = reporter
     }
 }
 // MARK: - StreamHandlerProtocol
 extension ObserverQueryStreamHandler: StreamHandlerProtocol {
-    func setQuery(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
+    public func setQuery(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
         guard
             let identifier = arguments["identifier"] as? String,
             let startTimestamp = arguments["startTimestamp"] as? Double,
@@ -45,6 +45,10 @@ extension ObserverQueryStreamHandler: StreamHandlerProtocol {
             }
             events(["identifier": identifier])
         }
+    }
+
+    public static func make(with reporter: HealthKitReporter) -> ObserverQueryStreamHandler {
+        ObserverQueryStreamHandler(reporter: reporter)
     }
 }
 // MARK: - FlutterStreamHandler

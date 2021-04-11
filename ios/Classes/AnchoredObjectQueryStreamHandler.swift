@@ -2,23 +2,23 @@
 //  AnchoredObjectQueryStreamHandler.swift
 //  health_kit_reporter
 //
-//  Created by Florian on 09.12.20.
+//  Created by Victor Kachalov on 09.12.20.
 //
 
 import Foundation
 import HealthKitReporter
 
-public class AnchoredObjectQueryStreamHandler: NSObject {
-    let reporter: HealthKitReporter
-    var query: AnchoredObjectQuery?
+public final class AnchoredObjectQueryStreamHandler: NSObject {
+    public let reporter: HealthKitReporter
+    public var query: Query?
 
-    public init(reporter: HealthKitReporter) {
+    init(reporter: HealthKitReporter) {
         self.reporter = reporter
     }
 }
 // MARK: - StreamHandlerProtocol
 extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
-    func setQuery(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
+    public func setQuery(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
         guard
             let identifier = arguments["identifier"] as? String,
             let startTimestamp = arguments["startTimestamp"] as? Double,
@@ -64,6 +64,10 @@ extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
             jsonDictionary["deletedObjects"] = deletedObjectsArray
             events(jsonDictionary)
         }
+    }
+
+    public static func make(with reporter: HealthKitReporter) -> AnchoredObjectQueryStreamHandler {
+        AnchoredObjectQueryStreamHandler(reporter: reporter)
     }
 }
 // MARK: - FlutterStreamHandler
