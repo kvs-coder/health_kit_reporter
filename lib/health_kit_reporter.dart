@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:streams_channel/streams_channel.dart';
 
 import 'model/payload/activity_summary.dart';
 import 'model/payload/category.dart';
@@ -131,8 +132,8 @@ class HealthKitReporter {
   /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
   /// Will handle event exchanges of the plugin.
   ///
-  static const EventChannel _anchoredObjectQueryChannel =
-      EventChannel('health_kit_reporter_event_channel_anchored_object_query');
+  static final StreamsChannel _anchoredObjectQueryChannel =
+      StreamsChannel('health_kit_reporter_event_channel_anchored_object_query');
 
   /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
   /// Will handle event exchanges of the plugin.

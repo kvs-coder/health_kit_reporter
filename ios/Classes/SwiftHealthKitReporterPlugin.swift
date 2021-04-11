@@ -1,5 +1,6 @@
 import Flutter
 import HealthKitReporter
+import streams_channel
 
 public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
     private enum Method: String {
@@ -61,12 +62,11 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
                     let queryActivitySummaryStreamHandler = QueryActivitySummaryStreamHandler(reporter: reporter)
                     queryActivitySummaryEventChannel.setStreamHandler(queryActivitySummaryStreamHandler)
                 }
-                let anchoredObjectQueryEventChannel = FlutterEventChannel(
+                let anchoredObjectQueryEventChannel = FlutterStreamsChannel(
                     name: "health_kit_reporter_event_channel_anchored_object_query",
                     binaryMessenger: binaryMessenger
                 )
-                let anchoredObjectQueryStreamHandler = AnchoredObjectQueryStreamHandler(reporter: reporter)
-                anchoredObjectQueryEventChannel.setStreamHandler(anchoredObjectQueryStreamHandler)
+                anchoredObjectQueryEventChannel.setStreamHandlerFactory { _ in AnchoredObjectQueryStreamHandler(reporter: reporter) }
                 let heartbeatSeriesQueryEventChannel = FlutterEventChannel(
                     name: "health_kit_reporter_event_channel_heartbeat_series_query",
                     binaryMessenger: binaryMessenger
