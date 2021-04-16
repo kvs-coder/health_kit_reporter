@@ -104,7 +104,7 @@ extension SwiftHealthKitReporterPlugin {
                 FlutterError(
                     code: className,
                     message: "Please check the method",
-                    details: "Provied method: \(call.method)"
+                    details: "Provided method: \(call.method)"
                 )
             )
             return
@@ -379,7 +379,7 @@ extension SwiftHealthKitReporterPlugin {
                 result(
                     FlutterError(
                         code: className,
-                        message: "Error in parsing quantitiy type",
+                        message: "Error in parsing quantity type",
                         details: "Identifier unknown: \(argument)"
                     )
                 )
@@ -394,7 +394,7 @@ extension SwiftHealthKitReporterPlugin {
                 result(
                     FlutterError(
                         code: "PreferredUnits",
-                        message: "Error in getting preffered units",
+                        message: "Error in getting preferred units",
                         details: error
                     )
                 )
@@ -406,7 +406,7 @@ extension SwiftHealthKitReporterPlugin {
                 result(
                     FlutterError(
                         code: "PreferredUnits",
-                        message: "Error in json encoding of preffered units: \(preferredUnits)",
+                        message: "Error in json encoding of preferred units: \(preferredUnits)",
                         details: error
                     )
                 )
@@ -1296,8 +1296,8 @@ extension SwiftHealthKitReporterPlugin {
                 guard error == nil else {
                     result(
                         FlutterError(
-                            code: "AddQuantitiy",
-                            message: "Error in addQuantitiy",
+                            code: "AddQuantity",
+                            message: "Error in addQuantity",
                             details: error
                         )
                     )
