@@ -1322,7 +1322,7 @@ extension SwiftHealthKitReporterPlugin {
                         FlutterError(
                             code: "Delete",
                             message: "Error in delete",
-                            details: error
+                            details: error.debugDescription
                         )
                     )
                     return
