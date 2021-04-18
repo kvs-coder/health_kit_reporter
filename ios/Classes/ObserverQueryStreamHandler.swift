@@ -10,7 +10,8 @@ import HealthKitReporter
 
 public final class ObserverQueryStreamHandler: NSObject {
     public let reporter: HealthKitReporter
-    public var query: Query?
+    public var activeQueries = Set<Query>()
+    public var plannedQueries = Set<Query>()
 
     init(reporter: HealthKitReporter) {
         self.reporter = reporter
@@ -18,7 +19,7 @@ public final class ObserverQueryStreamHandler: NSObject {
 }
 // MARK: - StreamHandlerProtocol
 extension ObserverQueryStreamHandler: StreamHandlerProtocol {
-    public func setQuery(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
+    public func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
         guard
             let identifier = arguments["identifier"] as? String,
             let startTimestamp = arguments["startTimestamp"] as? Double,
@@ -33,7 +34,7 @@ extension ObserverQueryStreamHandler: StreamHandlerProtocol {
             startDate: Date.make(from: startTimestamp),
             endDate: Date.make(from: endTimestamp)
         )
-        query = try reporter.observer.observerQuery(
+        let query = try reporter.observer.observerQuery(
             type: type,
             predicate: predicate
         ) { (query, identifier, error) in
@@ -45,6 +46,7 @@ extension ObserverQueryStreamHandler: StreamHandlerProtocol {
             }
             events(["identifier": identifier])
         }
+        plannedQueries.insert(query)
     }
 
     public static func make(with reporter: HealthKitReporter) -> ObserverQueryStreamHandler {

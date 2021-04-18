@@ -10,7 +10,8 @@ import HealthKitReporter
 
 public final class WorkoutRouteQueryStreamHandler: NSObject {
     public let reporter: HealthKitReporter
-    public var query: Query?
+    public var activeQueries = Set<Query>()
+    public var plannedQueries = Set<Query>()
 
     init(reporter: HealthKitReporter) {
         self.reporter = reporter
@@ -18,7 +19,7 @@ public final class WorkoutRouteQueryStreamHandler: NSObject {
 }
 // MARK: - StreamHandlerProtocol
 extension WorkoutRouteQueryStreamHandler: StreamHandlerProtocol {
-    public func setQuery(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
+    public func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
         guard
             let startTimestamp = arguments["startTimestamp"] as? Double,
             let endTimestamp = arguments["endTimestamp"] as? Double
@@ -30,7 +31,7 @@ extension WorkoutRouteQueryStreamHandler: StreamHandlerProtocol {
             endDate: Date.make(from: endTimestamp)
         )
         if #available(iOS 13.0, *) {
-            query = try reporter.reader.workoutRouteQuery(
+            let query = try reporter.reader.workoutRouteQuery(
                 predicate: predicate
             ) { (workoutRoute, error) in
                 guard
@@ -45,6 +46,7 @@ extension WorkoutRouteQueryStreamHandler: StreamHandlerProtocol {
                     events(nil)
                 }
             }
+            plannedQueries.insert(query)
         } else {
             events(nil)
         }

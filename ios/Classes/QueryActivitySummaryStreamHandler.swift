@@ -11,7 +11,8 @@ import HealthKitReporter
 @available(iOS 9.3, *)
 public final class QueryActivitySummaryStreamHandler: NSObject {
     public let reporter: HealthKitReporter
-    public var query: Query?
+    public var activeQueries = Set<Query>()
+    public var plannedQueries = Set<Query>()
 
     init(reporter: HealthKitReporter) {
         self.reporter = reporter
@@ -20,7 +21,7 @@ public final class QueryActivitySummaryStreamHandler: NSObject {
 // MARK: - StreamHandlerProtocol
 @available(iOS 9.3, *)
 extension QueryActivitySummaryStreamHandler: StreamHandlerProtocol {
-    public func setQuery(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
+    public func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
         guard
             let startTimestamp = arguments["startTimestamp"] as? Double,
             let endTimestamp = arguments["endTimestamp"] as? Double
@@ -44,7 +45,7 @@ extension QueryActivitySummaryStreamHandler: StreamHandlerProtocol {
             start: startDateComponents,
             end: endDateComponents
         )
-        query = reporter.reader.queryActivitySummary(
+        let query = reporter.reader.queryActivitySummary(
             predicate: predicate,
             monitorUpdates: true
         ) { (activitySummaries, error) in
@@ -57,6 +58,7 @@ extension QueryActivitySummaryStreamHandler: StreamHandlerProtocol {
                 events(nil)
             }
         }
+        plannedQueries.insert(query)
     }
 
     public static func make(with reporter: HealthKitReporter) -> QueryActivitySummaryStreamHandler {

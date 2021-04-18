@@ -205,18 +205,26 @@ class _MyAppState extends State<MyApp> {
                               onPressed: () {
                                 observerQuery(
                                     QuantityType.stepCount.identifier);
+                              },
+                              child: Text('observerQuery - STEPS')),
+                          ElevatedButton(
+                              onPressed: () {
                                 observerQuery(
                                     QuantityType.heartRate.identifier);
                               },
-                              child: Text('observerQuery')),
+                              child: Text('observerQuery - HR')),
                           ElevatedButton(
                               onPressed: () {
                                 anchoredObjectQuery(
                                     QuantityType.stepCount.identifier);
+                              },
+                              child: Text('anchoredObjectQuery - STEPS')),
+                          ElevatedButton(
+                              onPressed: () {
                                 anchoredObjectQuery(
                                     QuantityType.heartRate.identifier);
                               },
-                              child: Text('anchoredObjectQuery')),
+                              child: Text('anchoredObjectQuery - HR')),
                           ElevatedButton(
                               onPressed: () {
                                 queryActivitySummaryUpdates();

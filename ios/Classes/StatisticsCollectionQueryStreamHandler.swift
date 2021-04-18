@@ -10,7 +10,8 @@ import HealthKitReporter
 
 public final class StatisticsCollectionQueryStreamHandler: NSObject {
     public let reporter: HealthKitReporter
-    public var query: Query?
+    public var activeQueries = Set<Query>()
+    public var plannedQueries = Set<Query>()
 
     init(reporter: HealthKitReporter) {
         self.reporter = reporter
@@ -18,7 +19,7 @@ public final class StatisticsCollectionQueryStreamHandler: NSObject {
 }
 // MARK: - StreamHandlerProtocol
 extension StatisticsCollectionQueryStreamHandler: StreamHandlerProtocol {
-    public func setQuery(arguments: [String : Any], events: @escaping FlutterEventSink) throws {
+    public func setQueries(arguments: [String : Any], events: @escaping FlutterEventSink) throws {
         guard
             let identifier = arguments["identifier"] as? String,
             let unit = arguments["unit"] as? String,
@@ -38,7 +39,7 @@ extension StatisticsCollectionQueryStreamHandler: StreamHandlerProtocol {
             startDate: Date.make(from: startTimestamp),
             endDate: Date.make(from: endTimestamp)
         )
-        query = try reporter.reader.statisticsCollectionQuery(
+        let query = try reporter.reader.statisticsCollectionQuery(
             type: type,
             unit: unit,
             quantitySamplePredicate: predicate,
@@ -62,6 +63,7 @@ extension StatisticsCollectionQueryStreamHandler: StreamHandlerProtocol {
                 events(nil)
             }
         }
+        plannedQueries.insert(query)
     }
 
     public static func make(with reporter: HealthKitReporter) -> StatisticsCollectionQueryStreamHandler {

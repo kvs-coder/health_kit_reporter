@@ -10,7 +10,8 @@ import HealthKitReporter
 
 public final class AnchoredObjectQueryStreamHandler: NSObject {
     public let reporter: HealthKitReporter
-    public var query: Query?
+    public var activeQueries = Set<Query>()
+    public var plannedQueries = Set<Query>()
 
     init(reporter: HealthKitReporter) {
         self.reporter = reporter
@@ -18,7 +19,7 @@ public final class AnchoredObjectQueryStreamHandler: NSObject {
 }
 // MARK: - StreamHandlerProtocol
 extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
-    public func setQuery(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
+    public func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
         guard
             let identifier = arguments["identifier"] as? String,
             let startTimestamp = arguments["startTimestamp"] as? Double,
@@ -33,7 +34,7 @@ extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
             startDate: Date.make(from: startTimestamp),
             endDate: Date.make(from: endTimestamp)
         )
-        query = try reporter.reader.anchoredObjectQuery(
+        let query = try reporter.reader.anchoredObjectQuery(
             type: type,
             predicate: predicate,
             monitorUpdates: true
@@ -64,6 +65,7 @@ extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
             jsonDictionary["deletedObjects"] = deletedObjectsArray
             events(jsonDictionary)
         }
+        plannedQueries.insert(query)
     }
 
     public static func make(with reporter: HealthKitReporter) -> AnchoredObjectQueryStreamHandler {

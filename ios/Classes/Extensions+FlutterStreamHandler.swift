@@ -8,6 +8,15 @@
 import Foundation
 
 extension FlutterStreamHandler where Self: NSObject & StreamHandlerProtocol {
+    private func hasAlreadyActiveQuery(with identifier: String) -> Bool {
+        for activeQuery in activeQueries {
+            if activeQuery.identifier == identifier {
+                return true
+            }
+        }
+        return false
+    }
+
     func handleOnListen(
         withArguments arguments: Any?,
         eventSink events: @escaping FlutterEventSink
@@ -20,12 +29,30 @@ extension FlutterStreamHandler where Self: NSObject & StreamHandlerProtocol {
             )
         }
         do {
-            try setQuery(
+            try setQueries(
                 arguments: arguments,
                 events: events
             )
-            if let query = self.query {
-                reporter.manager.executeQuery(query)
+            guard let identifier = arguments["identifier"] as? String else {
+                return FlutterError(
+                    code: className,
+                    message: "Error call arguments.",
+                    details: "No identifier."
+                )
+            }
+            let isActive = hasAlreadyActiveQuery(with: identifier)
+            if isActive {
+                return FlutterError(
+                    code: className,
+                    message: "Error setting query.",
+                    details: "Query is already running."
+                )
+            } else {
+                for plannedQuery in plannedQueries {
+                    reporter.manager.executeQuery(plannedQuery)
+                    activeQueries.insert(plannedQuery)
+                }
+                plannedQueries.removeAll()
             }
         } catch {
             return FlutterError(
@@ -37,14 +64,7 @@ extension FlutterStreamHandler where Self: NSObject & StreamHandlerProtocol {
         return nil
     }
     func handleOnCancel(withArguments arguments: Any?) -> FlutterError? {
-        guard let query = self.query else {
-            return FlutterError(
-                code: className,
-                message: "Error setting query.",
-                details: "Query was null"
-            )
-        }
-        reporter.manager.stopQuery(query)
+        activeQueries.forEach { reporter.manager.stopQuery($0) }
         return nil
     }
 }
