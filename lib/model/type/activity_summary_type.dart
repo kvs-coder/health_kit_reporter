@@ -1,5 +1,3 @@
-import '../../exceptions.dart';
-
 /// Equivalent of [ActivitySummaryType]
 /// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
 ///
@@ -16,6 +14,5 @@ extension ActivitySummaryTypeIdentifier on ActivitySummaryType {
       case ActivitySummaryType.activitySummaryType:
         return 'HKActivitySummaryTypeIdentifier';
     }
-    throw InvalidValueException('Unknown case: $this');
   }
 }

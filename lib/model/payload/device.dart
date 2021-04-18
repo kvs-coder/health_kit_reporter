@@ -18,16 +18,16 @@ class Device {
     this.udiDeviceIdentifier,
   );
 
-  final String name;
-  final String manufacturer;
-  final String model;
-  final String hardwareVersion;
-  final String firmwareVersion;
-  final String softwareVersion;
-  final String localIdentifier;
-  final String udiDeviceIdentifier;
+  final String? name;
+  final String? manufacturer;
+  final String? model;
+  final String? hardwareVersion;
+  final String? firmwareVersion;
+  final String? softwareVersion;
+  final String? localIdentifier;
+  final String? udiDeviceIdentifier;
 
-  Map<String, String> get map => {
+  Map<String, String?> get map => {
         'name': name,
         'manufacturer': manufacturer,
         'model': model,

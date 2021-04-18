@@ -1,5 +1,3 @@
-import '../exceptions.dart';
-
 /// Equivalent of [UpdateFrequency]
 /// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
 ///
@@ -25,6 +23,5 @@ extension Value on UpdateFrequency {
       case UpdateFrequency.weekly:
         return 4;
     }
-    throw InvalidValueException('Unknown case: $this');
   }
 }

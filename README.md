@@ -13,10 +13,10 @@ A Flutter wrapper for [HealthKitReporter](https://cocoapods.org/pods/HealthKitRe
 ## Getting Started
 
 - Go inside pubspec.yaml file
-- Add this to your package's pubspec.yaml file: 
+- Add this to your package's pubspec.yaml file:
 ``` Dart
 dependencies:
-     health_kit_reporter: ^1.1.1
+     health_kit_reporter: ^1.3.0
 ```
 - Get dependencies
 

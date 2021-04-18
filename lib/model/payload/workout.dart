@@ -20,7 +20,7 @@ class Workout extends Sample<WorkoutHarmonized> {
     String identifier,
     num startTimestamp,
     num endTimestamp,
-    Device device,
+    Device? device,
     SourceRevision sourceRevision,
     WorkoutHarmonized harmonized,
     this.workoutName,
@@ -49,7 +49,7 @@ class Workout extends Sample<WorkoutHarmonized> {
         'startTimestamp': startTimestamp,
         'endTimestamp': endTimestamp,
         'workoutName': workoutName,
-        'device': device.map,
+        'device': device?.map,
         'sourceRevision': sourceRevision.map,
         'duration': duration,
         'workoutEvents': workoutEvents.map((e) => e.map).toList(),
@@ -62,8 +62,7 @@ class Workout extends Sample<WorkoutHarmonized> {
       : workoutName = json['workoutName'],
         duration = json['duration'],
         workoutEvents = WorkoutEvent.collect(json['workoutEvents']),
-        super.fromJson(json,
-            harmonized: WorkoutHarmonized.fromJson(json['harmonized']));
+        super.from(json, WorkoutHarmonized.fromJson(json['harmonized']));
 }
 
 /// Equivalent of [Workout.Harmonized]
@@ -89,15 +88,15 @@ class WorkoutHarmonized {
   );
 
   final int value;
-  final num totalEnergyBurned;
+  final num? totalEnergyBurned;
   final String totalEnergyBurnedUnit;
-  final num totalDistance;
+  final num? totalDistance;
   final String totalDistanceUnit;
-  final num totalSwimmingStrokeCount;
+  final num? totalSwimmingStrokeCount;
   final String totalSwimmingStrokeCountUnit;
-  final num totalFlightsClimbed;
+  final num? totalFlightsClimbed;
   final String totalFlightsClimbedUnit;
-  final Map<String, dynamic> metadata;
+  final Map<String, dynamic>? metadata;
 
   /// General map representation
   ///

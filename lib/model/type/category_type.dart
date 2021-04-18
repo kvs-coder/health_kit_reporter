@@ -193,7 +193,6 @@ extension CategoryTypeIdentifier on CategoryType {
       case CategoryType.wheezing:
         return 'HKCategoryTypeIdentifierWheezing';
     }
-    throw InvalidValueException('Unknown case: $this');
   }
 }
 
@@ -209,7 +208,7 @@ extension CategoryTypeFactory on CategoryType {
 
   /// The [from] exception handling
   ///
-  static CategoryType tryFrom(String identifier) {
+  static CategoryType? tryFrom(String identifier) {
     try {
       return from(identifier);
     } on InvalidValueException {

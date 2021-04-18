@@ -43,7 +43,6 @@ extension Description on BloodType {
       case BloodType.oNegative:
         return 'O-';
     }
-    throw InvalidValueException('Unknown case: $this');
   }
 }
 
@@ -69,7 +68,7 @@ extension BloodTypeFactory on BloodType {
       case 'O-':
         return BloodType.oNegative;
       default:
-        return null;
+        throw InvalidValueException('Unknown case: $string');
     }
   }
 }

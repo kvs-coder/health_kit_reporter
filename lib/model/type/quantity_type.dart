@@ -286,7 +286,6 @@ extension QuantityTypeIdentifier on QuantityType {
       case QuantityType.uvExposure:
         return 'HKQuantityTypeIdentifierUVExposure';
     }
-    throw InvalidValueException('Unknown case: $this');
   }
 }
 
@@ -302,7 +301,7 @@ extension QuantityTypeFactory on QuantityType {
 
   /// The [from] exception handling
   ///
-  static QuantityType tryFrom(String identifier) {
+  static QuantityType? tryFrom(String identifier) {
     try {
       return from(identifier);
     } on InvalidValueException {
