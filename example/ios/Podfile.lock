@@ -2,15 +2,19 @@ PODS:
   - Flutter (1.0.0)
   - flutter_local_notifications (0.0.1):
     - Flutter
-  - health_kit_reporter (1.1.0):
+  - health_kit_reporter (1.1.1):
     - Flutter
     - HealthKitReporter
+    - streams_channel
   - HealthKitReporter (1.4.0)
+  - streams_channel (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - health_kit_reporter (from `.symlinks/plugins/health_kit_reporter/ios`)
+  - streams_channel (from `.symlinks/plugins/streams_channel/ios`)
 
 SPEC REPOS:
   trunk:
@@ -23,12 +27,15 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   health_kit_reporter:
     :path: ".symlinks/plugins/health_kit_reporter/ios"
+  streams_channel:
+    :path: ".symlinks/plugins/streams_channel/ios"
 
 SPEC CHECKSUMS:
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
-  health_kit_reporter: 4f07356cf70fff8d50b92b76ee9beacf7e3d70f9
+  health_kit_reporter: 4be3a44d836d675ca09542df9a917101b75640d9
   HealthKitReporter: 1bd60f53111044cc3a0d575d57dc4b23767c8ac6
+  streams_channel: 16855ffd0568eded9563b2fec6a1bfa94420b353
 
 PODFILE CHECKSUM: a75497545d4391e2d394c3668e20cfb1c2bbd4aa
 

@@ -1,3 +1,7 @@
+## [1.1.2] - 18.04.2021
+
+* Fix with reinitilizing subscriptions for Events
+
 ## [1.1.1] - 12.03.2021
 
 * Anchored Query fix with deleted objects
