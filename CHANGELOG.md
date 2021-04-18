@@ -1,3 +1,7 @@
+## [1.1.1] - 12.03.2021
+
+* Anchored Query fix with deleted objects
+
 ## [1.1.0] - 25.02.2021
 
 * iOS 9.0 support

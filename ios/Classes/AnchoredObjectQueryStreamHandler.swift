@@ -42,17 +42,26 @@ extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
                 return
             }
             var jsonDictionary: [String: Any] = [:]
-            var jsonArray: [String] = []
+            var samplesArray: [String] = []
             for sample in samples {
                 do {
                     let encoded = try sample.encoded()
-                    jsonArray.append(encoded)
+                    samplesArray.append(encoded)
                 } catch {
                     continue
                 }
             }
-            jsonDictionary["samples"] = jsonArray
-            jsonDictionary["deletedObjects"] = try? deletedObjects.encoded()
+            var deletedObjectsArray: [String] = []
+            for deletedObject in deletedObjects {
+                do {
+                    let encoded = try deletedObject.encoded()
+                    deletedObjectsArray.append(encoded)
+                } catch {
+                    continue
+                }
+            }
+            jsonDictionary["samples"] = samplesArray
+            jsonDictionary["deletedObjects"] = deletedObjectsArray
             events(jsonDictionary)
         }
     }

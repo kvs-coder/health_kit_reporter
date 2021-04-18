@@ -25,7 +25,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/health_kit_reporter/ios"
 
 SPEC CHECKSUMS:
-  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   health_kit_reporter: 4f07356cf70fff8d50b92b76ee9beacf7e3d70f9
   HealthKitReporter: 1bd60f53111044cc3a0d575d57dc4b23767c8ac6

@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name                  = 'health_kit_reporter'
-  s.version               = '1.1.0'
+  s.version               = '1.1.1'
   s.summary               = 'HealthKitReporter. A wrapper for HealthKit framework. A Flutter plugin'
   s.swift_versions        = '5.3'
   s.description           = 'Helps to write or read data from Apple Health via HealthKit framework using Flutter.'
@@ -19,6 +19,7 @@ Pod::Spec.new do |s|
 
   s.dependency 'Flutter'
   s.dependency 'HealthKitReporter'
+  s.dependency 'streams_channel'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
