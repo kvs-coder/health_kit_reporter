@@ -16,6 +16,13 @@ extension FlutterStreamHandler where Self: NSObject & StreamHandlerProtocol {
         }
         return false
     }
+    private func executePlannedQueries() {
+        for plannedQuery in plannedQueries {
+            reporter.manager.executeQuery(plannedQuery)
+            activeQueries.insert(plannedQuery)
+        }
+        plannedQueries.removeAll()
+    }
 
     func handleOnListen(
         withArguments arguments: Any?,
@@ -33,27 +40,17 @@ extension FlutterStreamHandler where Self: NSObject & StreamHandlerProtocol {
                 arguments: arguments,
                 events: events
             )
-            guard let identifier = arguments["identifier"] as? String else {
-                return FlutterError(
-                    code: className,
-                    message: "Error call arguments.",
-                    details: "No identifier."
-                )
-            }
-            let isActive = hasAlreadyActiveQuery(with: identifier)
-            if isActive {
-                return FlutterError(
-                    code: className,
-                    message: "Error setting query.",
-                    details: "Query is already running."
-                )
-            } else {
-                for plannedQuery in plannedQueries {
-                    reporter.manager.executeQuery(plannedQuery)
-                    activeQueries.insert(plannedQuery)
+            if let identifier = arguments["identifier"] as? String {
+                let isActive = hasAlreadyActiveQuery(with: identifier)
+                if isActive {
+                    return FlutterError(
+                        code: className,
+                        message: "Error setting query.",
+                        details: "Query is already running."
+                    )
                 }
-                plannedQueries.removeAll()
             }
+            executePlannedQueries()
         } catch {
             return FlutterError(
                 code: className,
