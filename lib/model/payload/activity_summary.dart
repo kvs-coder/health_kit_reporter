@@ -35,7 +35,7 @@ class ActivitySummary {
   ///
   ActivitySummary.fromJson(Map<String, dynamic> json)
       : identifier = json['identifier'],
-        date = json['date']?.toString()?.date,
+        date = json['date'].toString().date,
         harmonized = ActivitySummaryHarmonized.fromJson(json['harmonized']);
 }
 

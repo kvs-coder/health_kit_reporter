@@ -20,7 +20,7 @@ class Electrocardiogram extends Sample<ElectrocardiogramHarmonized> {
     String identifier,
     num startTimestamp,
     num endTimestamp,
-    Device device,
+    Device? device,
     SourceRevision sourceRevision,
     ElectrocardiogramHarmonized harmonized,
     this.numberOfMeasurements,
@@ -44,7 +44,7 @@ class Electrocardiogram extends Sample<ElectrocardiogramHarmonized> {
         'identifier': identifier,
         'startTimestamp': startTimestamp,
         'endTimestamp': endTimestamp,
-        'device': device.map,
+        'device': device?.map,
         'sourceRevision': sourceRevision.map,
         'harmonized': harmonized.map,
         'numberOfMeasurements': numberOfMeasurements,
@@ -54,9 +54,8 @@ class Electrocardiogram extends Sample<ElectrocardiogramHarmonized> {
   ///
   Electrocardiogram.fromJson(Map<String, dynamic> json)
       : numberOfMeasurements = json['numberOfMeasurements'],
-        super.fromJson(json,
-            harmonized:
-                ElectrocardiogramHarmonized.fromJson(json['harmonized']));
+        super.from(
+            json, ElectrocardiogramHarmonized.fromJson(json['harmonized']));
 }
 
 /// Equivalent of [Electrocardiogram.Harmonized]
@@ -84,7 +83,7 @@ class ElectrocardiogramHarmonized {
   final String samplingFrequencyUnit;
   final String classification;
   final String symptomsStatus;
-  final Map<String, dynamic> metadata;
+  final Map<String, dynamic>? metadata;
 
   /// General map representation
   ///

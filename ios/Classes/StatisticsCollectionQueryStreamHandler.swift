@@ -2,23 +2,24 @@
 //  StatisticsCollectionQueryStreamHandler.swift
 //  health_kit_reporter
 //
-//  Created by Florian on 09.12.20.
+//  Created by Victor Kachalov on 09.12.20.
 //
 
 import Foundation
 import HealthKitReporter
 
-public class StatisticsCollectionQueryStreamHandler: NSObject {
-    let reporter: HealthKitReporter
-    var query: StatisticsCollectionQuery?
+public final class StatisticsCollectionQueryStreamHandler: NSObject {
+    public let reporter: HealthKitReporter
+    public var activeQueries = Set<Query>()
+    public var plannedQueries = Set<Query>()
 
-    public init(reporter: HealthKitReporter) {
+    init(reporter: HealthKitReporter) {
         self.reporter = reporter
     }
 }
 // MARK: - StreamHandlerProtocol
 extension StatisticsCollectionQueryStreamHandler: StreamHandlerProtocol {
-    func setQuery(arguments: [String : Any], events: @escaping FlutterEventSink) throws {
+    public func setQueries(arguments: [String : Any], events: @escaping FlutterEventSink) throws {
         guard
             let identifier = arguments["identifier"] as? String,
             let unit = arguments["unit"] as? String,
@@ -38,7 +39,7 @@ extension StatisticsCollectionQueryStreamHandler: StreamHandlerProtocol {
             startDate: Date.make(from: startTimestamp),
             endDate: Date.make(from: endTimestamp)
         )
-        query = try reporter.reader.statisticsCollectionQuery(
+        let query = try reporter.reader.statisticsCollectionQuery(
             type: type,
             unit: unit,
             quantitySamplePredicate: predicate,
@@ -62,6 +63,11 @@ extension StatisticsCollectionQueryStreamHandler: StreamHandlerProtocol {
                 events(nil)
             }
         }
+        plannedQueries.insert(query)
+    }
+
+    public static func make(with reporter: HealthKitReporter) -> StatisticsCollectionQueryStreamHandler {
+        StatisticsCollectionQueryStreamHandler(reporter: reporter)
     }
 }
 // MARK: - FlutterStreamHandler

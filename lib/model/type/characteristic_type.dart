@@ -1,5 +1,3 @@
-import '../../exceptions.dart';
-
 /// Equivalent of [CharacteristicType]
 /// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
 ///
@@ -31,6 +29,5 @@ extension CharacteristicTypeIdentifier on CharacteristicType {
       case CharacteristicType.activityMoveMode:
         return 'HKCharacteristicTypeIdentifierActivityMoveMode';
     }
-    throw InvalidValueException('Unknown case: $this');
   }
 }

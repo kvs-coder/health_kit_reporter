@@ -18,8 +18,8 @@ import 'workout.dart';
 ///
 /// Supports [map] representation.
 ///
-/// Has a [Sample.fromJson] constructor
-/// to create instances from JSON payload coming from iOS native code.
+/// Has a [Sample.from] constructor
+/// to create instances from JSON payload coming from iOS native code and a generic Harmonized object.
 ///
 /// Has a [factory] method for creating a specific instance of types:
 /// - [Quantity]
@@ -56,7 +56,7 @@ abstract class Sample<Harmonized> {
   final String identifier;
   final num startTimestamp;
   final num endTimestamp;
-  final Device device;
+  final Device? device;
   final SourceRevision sourceRevision;
   final Harmonized harmonized;
 
@@ -66,13 +66,12 @@ abstract class Sample<Harmonized> {
 
   /// General constructor from JSON payload
   ///
-  Sample.fromJson(Map<String, dynamic> json, {Harmonized harmonized})
+  Sample.from(Map<String, dynamic> json, Harmonized harmonized)
       : uuid = json['uuid'],
         identifier = json['identifier'],
         startTimestamp = json['startTimestamp'],
         endTimestamp = json['endTimestamp'],
-        device =
-            json['device'] != null ? Device.fromJson(json['device']) : null,
+        device = Device.fromJson(json['device']),
         sourceRevision = SourceRevision.fromJson(json['sourceRevision']),
         harmonized = harmonized;
 
@@ -90,7 +89,7 @@ abstract class Sample<Harmonized> {
   /// Factory method to create instances as a result of
   /// [HealthKitReporter.sampleQuery]
   ///
-  static Sample factory(Map<String, dynamic> json) {
+  static Sample? factory(Map<String, dynamic> json) {
     final identifier = json['identifier'];
     final quantityType = QuantityTypeFactory.tryFrom(identifier);
     if (quantityType != null) {

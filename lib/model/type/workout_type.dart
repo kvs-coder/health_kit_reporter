@@ -16,7 +16,6 @@ extension WorkoutTypeIdentifier on WorkoutType {
       case WorkoutType.workoutType:
         return 'HKWorkoutTypeIdentifier';
     }
-    throw InvalidValueException('Unknown case: $this');
   }
 }
 
@@ -32,7 +31,7 @@ extension WorkoutTypeFactory on WorkoutType {
 
   /// The [from] exception handling
   ///
-  static WorkoutType tryFrom(String identifier) {
+  static WorkoutType? tryFrom(String identifier) {
     try {
       return from(identifier);
     } on InvalidValueException {

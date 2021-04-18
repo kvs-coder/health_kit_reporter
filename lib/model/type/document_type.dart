@@ -1,5 +1,3 @@
-import '../../exceptions.dart';
-
 /// Equivalent of [DocumentType]
 /// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
 ///
@@ -16,6 +14,5 @@ extension DocumentTypeIdentifier on DocumentType {
       case DocumentType.cda:
         return 'HKDocumentTypeIdentifierCDA';
     }
-    throw InvalidValueException('Unknown case: $this');
   }
 }

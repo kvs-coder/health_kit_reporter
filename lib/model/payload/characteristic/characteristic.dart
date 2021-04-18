@@ -23,23 +23,23 @@ class Characteristic {
     this.skinType,
   );
 
-  final BiologicalSex biologicalSex;
-  final DateTime birthday;
-  final BloodType bloodType;
-  final FitzpatrickSkinType skinType;
+  final BiologicalSex? biologicalSex;
+  final DateTime? birthday;
+  final BloodType? bloodType;
+  final FitzpatrickSkinType? skinType;
 
-  Map<String, String> get map => {
-        'biologicalSex': biologicalSex.string,
+  Map<String, String?> get map => {
+        'biologicalSex': biologicalSex?.string,
         'birthday': birthday?.toIso8601String(),
-        'bloodType': bloodType.string,
-        'skinType': skinType.string,
+        'bloodType': bloodType?.string,
+        'skinType': skinType?.string,
       };
 
   /// General constructor from JSON payload
   ///
   Characteristic.fromJson(Map<String, dynamic> json)
       : biologicalSex = BiologicalSexFactory.from(json['biologicalSex']),
-        birthday = json['birthday']?.toString()?.date,
+        birthday = json['birthday']?.toString().date,
         bloodType = BloodTypeFactory.from(json['bloodType']),
         skinType = FitzpatrickSkinTypeFactory.from(json['skinType']);
 }

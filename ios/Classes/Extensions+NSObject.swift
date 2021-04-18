@@ -2,7 +2,7 @@
 //  Extensions+NSObject.swift
 //  health_kit_reporter
 //
-//  Created by Florian on 09.12.20.
+//  Created by Victor Kachalov on 09.12.20.
 //
 
 import Foundation

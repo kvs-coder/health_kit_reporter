@@ -30,7 +30,6 @@ extension Description on BiologicalSex {
       case BiologicalSex.other:
         return 'Other';
     }
-    throw InvalidValueException('Unknown case: $this');
   }
 }
 
@@ -46,7 +45,7 @@ extension BiologicalSexFactory on BiologicalSex {
       case 'Other':
         return BiologicalSex.other;
       default:
-        return null;
+        throw InvalidValueException('Unknown case: $string');
     }
   }
 }
