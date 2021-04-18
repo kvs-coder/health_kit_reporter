@@ -1,3 +1,8 @@
+## [1.3.0] - 18.04.2021
+
+* Fix with reinitilizing subscriptions for Events
+* Remove Android support
+
 ## [1.2.0-nullsafety.0] - 12.03.2021
 
 * Null safety support
