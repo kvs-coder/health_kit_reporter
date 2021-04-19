@@ -360,7 +360,7 @@ extension SwiftHealthKitReporterPlugin {
                     FlutterError(
                         code: "RequestAuthorization",
                         message: "Error in displaying Apple Health permission screen",
-                        details: error
+                        details: error.debugDescription
                     )
                 )
                 return
@@ -395,7 +395,7 @@ extension SwiftHealthKitReporterPlugin {
                     FlutterError(
                         code: "PreferredUnits",
                         message: "Error in getting preferred units",
-                        details: error
+                        details: error.debugDescription
                     )
                 )
                 return
@@ -454,7 +454,7 @@ extension SwiftHealthKitReporterPlugin {
                         FlutterError(
                             code: "QuantityQuery",
                             message: "Error in quantityQuery for identifier: \(identifier)",
-                            details: error
+                            details: error.debugDescription
                         )
                     )
                     return
@@ -504,7 +504,7 @@ extension SwiftHealthKitReporterPlugin {
                         FlutterError(
                             code: "CategoryQuery",
                             message: "Error in categoryQuery for identifier: \(identifier)",
-                            details: error
+                            details: error.debugDescription
                         )
                     )
                     return
@@ -551,7 +551,7 @@ extension SwiftHealthKitReporterPlugin {
                         FlutterError(
                             code: "WorkoutQuery",
                             message: "Error in workoutQuery",
-                            details: error
+                            details: error.debugDescription
                         )
                     )
                     return
@@ -605,7 +605,7 @@ extension SwiftHealthKitReporterPlugin {
                             FlutterError(
                                 code: "ElectrocardiogramQuery",
                                 message: "Error in electrocardiogramQuery",
-                                details: error
+                                details: error.debugDescription
                             )
                         )
                         return
@@ -679,7 +679,7 @@ extension SwiftHealthKitReporterPlugin {
                         FlutterError(
                             code: "SampleQuery",
                             message: "Error in sampleQuery",
-                            details: error
+                            details: error.debugDescription
                         )
                     )
                     return
@@ -752,7 +752,7 @@ extension SwiftHealthKitReporterPlugin {
                         FlutterError(
                             code: "StatisticsQuery",
                             message: "Error in statisticsQuery",
-                            details: error
+                            details: error.debugDescription
                         )
                     )
                     return
@@ -816,7 +816,7 @@ extension SwiftHealthKitReporterPlugin {
                             FlutterError(
                                 code: "HeartbeatSeriesQuery",
                                 message: "Error in heartbeatSeriesQuery",
-                                details: error
+                                details: error.debugDescription
                             )
                         )
                         return
@@ -902,7 +902,7 @@ extension SwiftHealthKitReporterPlugin {
                     FlutterError(
                         code: "QueryActivitySummary",
                         message: "Error in queryActivitySummary",
-                        details: error
+                        details: error.debugDescription
                     )
                 )
                 return
@@ -958,7 +958,7 @@ extension SwiftHealthKitReporterPlugin {
                         FlutterError(
                             code: "SourceQuery",
                             message: "Error in sourceQuery",
-                            details: error
+                            details: error.debugDescription
                         )
                     )
                     return
@@ -1040,7 +1040,7 @@ extension SwiftHealthKitReporterPlugin {
                         FlutterError(
                             code: "CorrelationQuery",
                             message: "Error in correlationQuery",
-                            details: error
+                            details: error.debugDescription
                         )
                     )
                     return
@@ -1101,7 +1101,7 @@ extension SwiftHealthKitReporterPlugin {
                         FlutterError(
                             code: "EnableBackgroundDelivery",
                             message: "Error in enableBackgroundDelivery",
-                            details: error
+                            details: error.debugDescription
                         )
                     )
                     return
@@ -1128,7 +1128,7 @@ extension SwiftHealthKitReporterPlugin {
                     FlutterError(
                         code: "DisableAllBackgroundDelivery",
                         message: "Error in disableAllBackgroundDelivery",
-                        details: error
+                        details: error.debugDescription
                     )
                 )
                 return
@@ -1161,7 +1161,7 @@ extension SwiftHealthKitReporterPlugin {
                     FlutterError(
                         code: "DisableBackgroundDelivery",
                         message: "Error in disableBackgroundDelivery",
-                        details: error
+                        details: error.debugDescription
                     )
                 )
                 return
@@ -1183,7 +1183,7 @@ extension SwiftHealthKitReporterPlugin {
                         FlutterError(
                             code: "StartWatchApp",
                             message: "Error in startWatchApp",
-                            details: error
+                            details: error.debugDescription
                         )
                     )
                     return
@@ -1261,7 +1261,7 @@ extension SwiftHealthKitReporterPlugin {
                         FlutterError(
                             code: "AddCategory",
                             message: "\(#line). Error in addCategory",
-                            details: error
+                            details: error.debugDescription
                         )
                     )
                     return
@@ -1298,7 +1298,7 @@ extension SwiftHealthKitReporterPlugin {
                         FlutterError(
                             code: "AddQuantity",
                             message: "Error in addQuantity",
-                            details: error
+                            details: error.debugDescription
                         )
                     )
                     return
@@ -1369,7 +1369,7 @@ extension SwiftHealthKitReporterPlugin {
                     FlutterError(
                         code: "DeleteObjects",
                         message: "Error in delete",
-                        details: error
+                        details: error.debugDescription
                     )
                 )
                 return
@@ -1394,7 +1394,7 @@ extension SwiftHealthKitReporterPlugin {
                         FlutterError(
                             code: "Save",
                             message: "Error in save",
-                            details: error
+                            details: error.debugDescription
                         )
                     )
                     return
