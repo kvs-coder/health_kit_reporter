@@ -201,6 +201,7 @@ void saveSteps() async {
 ```
 
 **Recommendation: As well as for reading, here will better as well to call preferredUnits first, to know what unit is valid for a type.**
+**Please see [HKUnit.init](https://developer.apple.com/documentation/healthkit/hkunit/1615733-init/)**
 
 **Warning: PLease be sure to provide valid values for the appropriate types. For example, HealthKit will not allow to save Quantity value for the QuantityType.stepCount if the value is 0**
 
