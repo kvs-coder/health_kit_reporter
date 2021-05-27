@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
@@ -8,6 +9,7 @@ import 'model/payload/category.dart';
 import 'model/payload/characteristic/characteristic.dart';
 import 'model/payload/correlation.dart';
 import 'model/payload/date_components.dart';
+import 'model/payload/deleted_object.dart';
 import 'model/payload/device.dart';
 import 'model/payload/electrocardiogram.dart';
 import 'model/payload/heartbeat_serie.dart';
@@ -150,7 +152,7 @@ class HealthKitReporter {
   /// Provide the [predicate] to set the date interval.
   ///
   static StreamSubscription<dynamic> heartbeatSeriesQuery(Predicate predicate,
-      {Function(HeartbeatSerie) onUpdate}) {
+      {required Function(HeartbeatSerie) onUpdate}) {
     final arguments = predicate.map;
     return _heartbeatSeriesQueryChannel
         .receiveBroadcastStream(arguments)
@@ -167,7 +169,7 @@ class HealthKitReporter {
   /// Provide the [predicate] to set the date interval.
   ///
   static StreamSubscription<dynamic> workoutRouteQuery(Predicate predicate,
-      {Function(WorkoutRoute) onUpdate}) {
+      {required Function(WorkoutRoute) onUpdate}) {
     final arguments = predicate.map;
     return _workoutRouteQueryChannel
         .receiveBroadcastStream(arguments)
@@ -186,7 +188,7 @@ class HealthKitReporter {
   ///
   static StreamSubscription<dynamic> observerQuery(
       String identifier, Predicate predicate,
-      {Function(String) onUpdate}) {
+      {required Function(String) onUpdate}) {
     final arguments = <String, dynamic>{
       'identifier': identifier,
     };
@@ -209,7 +211,7 @@ class HealthKitReporter {
   ///
   static StreamSubscription<dynamic> anchoredObjectQuery(
       String identifier, Predicate predicate,
-      {Function(List<Sample>) onUpdate}) {
+      {required Function(List<Sample>, List<DeletedObject>) onUpdate}) {
     final arguments = <String, dynamic>{
       'identifier': identifier,
     };
@@ -217,14 +219,24 @@ class HealthKitReporter {
     return _anchoredObjectQueryChannel
         .receiveBroadcastStream(arguments)
         .listen((event) {
-      final list = List.from(event);
+      final map = LinkedHashMap<String, dynamic>.from(event);
+      final samplesList = List.from(map['samples']);
       final samples = <Sample>[];
-      for (final String element in list) {
+      for (final String element in samplesList) {
         final json = jsonDecode(element);
         final sample = Sample.factory(json);
-        samples.add(sample);
+        if (sample != null) {
+          samples.add(sample);
+        }
       }
-      onUpdate(samples);
+      final deletedObjectsList = List.from(map['deletedObjects']);
+      final deletedObjects = <DeletedObject>[];
+      for (final String element in deletedObjectsList) {
+        final json = jsonDecode(element);
+        final deletedObject = DeletedObject.fromJson(json);
+        deletedObjects.add(deletedObject);
+      }
+      onUpdate(samples, deletedObjects);
     });
   }
 
@@ -237,7 +249,7 @@ class HealthKitReporter {
   ///
   static StreamSubscription<dynamic> queryActivitySummaryUpdates(
       Predicate predicate,
-      {Function(List<ActivitySummary>) onUpdate}) {
+      {required Function(List<ActivitySummary>) onUpdate}) {
     final arguments = predicate.map;
     return _queryActivitySummaryChannel
         .receiveBroadcastStream(arguments)
@@ -271,7 +283,7 @@ class HealthKitReporter {
       DateTime enumerateFrom,
       DateTime enumerateTo,
       DateComponents intervalComponents,
-      {Function(Statistics) onUpdate}) {
+      {required Function(Statistics) onUpdate}) {
     final arguments = {
       'identifier': type.identifier,
       'unit': unit,
@@ -436,7 +448,9 @@ class HealthKitReporter {
     for (final String element in list) {
       final json = jsonDecode(element);
       final sample = Sample.factory(json);
-      samples.add(sample);
+      if (sample != null) {
+        samples.add(sample);
+      }
     }
     return samples;
   }
@@ -549,7 +563,7 @@ class HealthKitReporter {
   ///
   static Future<List<Correlation>> correlationQuery(
       String identifier, Predicate predicate,
-      {Map<String, Predicate> typePredicates}) async {
+      {Map<String, Predicate>? typePredicates}) async {
     final arguments = {
       'identifier': identifier,
       'typePredicates': typePredicates,
@@ -588,7 +602,7 @@ class HealthKitReporter {
   /// [device] is optional.
   ///
   static Future<bool> addCategory(List<Category> categories, Workout workout,
-      {Device device}) async {
+      {Device? device}) async {
     final arguments = {
       'categories': categories.map((e) => e.map).toList(),
       'workout': workout.map,
@@ -601,7 +615,7 @@ class HealthKitReporter {
   /// [device] is optional.
   ///
   static Future<bool> addQuantity(List<Quantity> quantities, Workout workout,
-      {Device device}) async {
+      {Device? device}) async {
     final arguments = {
       'quantities': quantities.map((e) => e.map).toList(),
       'workout': workout.map,

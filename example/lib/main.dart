@@ -34,7 +34,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   final _predicate = Predicate(
-    DateTime.now().add(Duration(days: -1)),
+    DateTime.now().add(Duration(days: -365)),
     DateTime.now(),
   );
   final _device = Device(
@@ -70,12 +70,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    observerQuery();
-    anchoredObjectQuery();
-    queryActivitySummaryUpdates();
-    statisticsCollectionQuery();
-    heartbeatSeriesQuery();
-    workoutRouteQuery();
     final initializationSettingsIOs = IOSInitializationSettings();
     final initSettings = InitializationSettings(iOS: initializationSettingsIOs);
     _flutterLocalNotificationsPlugin.initialize(initSettings,
@@ -134,47 +128,47 @@ class _MyAppState extends State<MyApp> {
                       Column(
                         children: [
                           Text('READ'),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 handleQuantitiySamples();
                               },
                               child: Text('preferredUnit:quantity:statistics')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 queryCharacteristics();
                               },
                               child: Text('characteristics')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 queryCategory();
                               },
                               child: Text('categories')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 queryWorkout();
                               },
                               child: Text('workouts')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 querySamples();
                               },
                               child: Text('samples')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 querySources();
                               },
                               child: Text('sources')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 queryCorrelations();
                               },
                               child: Text('correlations')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 queryElectrocardiograms();
                               },
                               child: Text('electrocardiograms')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 queryActivitySummary();
                               },
@@ -184,19 +178,19 @@ class _MyAppState extends State<MyApp> {
                       Column(
                         children: [
                           Text('WRITE'),
-                          RaisedButton(
+                          ElevatedButton(
                             onPressed: () {
                               saveWorkout();
                             },
                             child: Text('saveWorkout'),
                           ),
-                          RaisedButton(
+                          ElevatedButton(
                             onPressed: () {
                               saveSteps();
                             },
                             child: Text('saveSteps'),
                           ),
-                          RaisedButton(
+                          ElevatedButton(
                             onPressed: () {
                               saveMindfulMinutes();
                             },
@@ -207,32 +201,46 @@ class _MyAppState extends State<MyApp> {
                       Column(
                         children: [
                           Text('OBSERVE'),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
-                                observerQuery();
+                                observerQuery(
+                                    QuantityType.stepCount.identifier);
                               },
-                              child: Text('observerQuery')),
-                          RaisedButton(
+                              child: Text('observerQuery - STEPS')),
+                          ElevatedButton(
                               onPressed: () {
-                                anchoredObjectQuery();
+                                observerQuery(
+                                    QuantityType.heartRate.identifier);
                               },
-                              child: Text('anchoredObjectQuery')),
-                          RaisedButton(
+                              child: Text('observerQuery - HR')),
+                          ElevatedButton(
+                              onPressed: () {
+                                anchoredObjectQuery(
+                                    QuantityType.stepCount.identifier);
+                              },
+                              child: Text('anchoredObjectQuery - STEPS')),
+                          ElevatedButton(
+                              onPressed: () {
+                                anchoredObjectQuery(
+                                    QuantityType.heartRate.identifier);
+                              },
+                              child: Text('anchoredObjectQuery - HR')),
+                          ElevatedButton(
                               onPressed: () {
                                 queryActivitySummaryUpdates();
                               },
                               child: Text('queryActivitySummaryUpdates')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 statisticsCollectionQuery();
                               },
                               child: Text('statisticsCollectionQuery')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 heartbeatSeriesQuery();
                               },
                               child: Text('heartbeatSeriesQuery')),
-                          RaisedButton(
+                          ElevatedButton(
                               onPressed: () {
                                 workoutRouteQuery();
                               },
@@ -452,33 +460,36 @@ class _MyAppState extends State<MyApp> {
         final unit = preferredUnit.unit;
         print('preferredUnit: ${preferredUnit.map}');
         final type = QuantityTypeFactory.from(identifier);
-        final quantities =
-            await HealthKitReporter.quantityQuery(type, unit, _predicate);
-        print('quantity: ${quantities.map((e) => e.map).toList()}');
-        final statistics =
-            await HealthKitReporter.statisticsQuery(type, unit, _predicate);
-        print('statistics: ${statistics.map}');
+        try {
+          final quantities =
+              await HealthKitReporter.quantityQuery(type, unit, _predicate);
+          print('quantity: ${quantities.map((e) => e.map).toList()}');
+          final statistics =
+              await HealthKitReporter.statisticsQuery(type, unit, _predicate);
+          print('statistics: ${statistics.map}');
+        } catch (e) {
+          print(e);
+        }
       });
     } catch (e) {
       print(e);
     }
   }
 
-  void observerQuery() async {
-    final identifier = QuantityType.stepCount.identifier;
+  void observerQuery(String identifier) async {
     final sub = HealthKitReporter.observerQuery(identifier, _predicate,
         onUpdate: (identifier) async {
-      print('Updates for observerQuerySub');
+      print('Updates for observerQuerySub - $identifier');
       print(identifier);
       final iOSDetails = IOSNotificationDetails();
       final details = NotificationDetails(iOS: iOSDetails);
       await _flutterLocalNotificationsPlugin.show(
           0, 'Observer', identifier, details);
     });
-    print('observerQuerySub: $sub');
+    print('$identifier observerQuerySub: $sub');
     final isSet = await HealthKitReporter.enableBackgroundDelivery(
         identifier, UpdateFrequency.immediate);
-    print('enableBackgroundDelivery: $isSet');
+    print('$identifier enableBackgroundDelivery: $isSet');
   }
 
   void heartbeatSeriesQuery() {
@@ -499,14 +510,14 @@ class _MyAppState extends State<MyApp> {
     print('workoutRouteQuery: $sub');
   }
 
-  void anchoredObjectQuery() {
-    final identifier = QuantityType.stepCount.identifier;
+  void anchoredObjectQuery(String identifier) {
     final sub = HealthKitReporter.anchoredObjectQuery(identifier, _predicate,
-        onUpdate: (samples) {
-      print('Updates for anchoredObjectQuerySub');
+        onUpdate: (samples, deletedObjects) {
+      print('Updates for anchoredObjectQuerySub - $identifier');
       print(samples.map((e) => e.map).toList());
+      print(deletedObjects.map((e) => e.map).toList());
     });
-    print('anchoredObjectQuerySub: $sub');
+    print('$identifier anchoredObjectQuerySub: $sub');
   }
 
   void queryActivitySummaryUpdates() {

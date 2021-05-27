@@ -20,24 +20,24 @@ class DateComponents {
     this.weekOfYear,
     this.yearForWeekOfYear,
   });
-  final int era;
-  final int year;
-  final int month;
-  final int day;
-  final int hour;
-  final int minute;
-  final int second;
-  final int nanosecond;
-  final int weekday;
-  final int weekdayOrdinal;
-  final int quarter;
-  final int weekOfMonth;
-  final int weekOfYear;
-  final int yearForWeekOfYear;
+  final int? era;
+  final int? year;
+  final int? month;
+  final int? day;
+  final int? hour;
+  final int? minute;
+  final int? second;
+  final int? nanosecond;
+  final int? weekday;
+  final int? weekdayOrdinal;
+  final int? quarter;
+  final int? weekOfMonth;
+  final int? weekOfYear;
+  final int? yearForWeekOfYear;
 
   /// General map representation
   ///
-  Map<String, int> get map => {
+  Map<String, int?> get map => {
         'era': era,
         'year': year,
         'month': month,

@@ -2,23 +2,24 @@
 //  AnchoredObjectQueryStreamHandler.swift
 //  health_kit_reporter
 //
-//  Created by Florian on 09.12.20.
+//  Created by Victor Kachalov on 09.12.20.
 //
 
 import Foundation
 import HealthKitReporter
 
-public class AnchoredObjectQueryStreamHandler: NSObject {
-    let reporter: HealthKitReporter
-    var query: AnchoredObjectQuery?
+public final class AnchoredObjectQueryStreamHandler: NSObject {
+    public let reporter: HealthKitReporter
+    public var activeQueries = Set<Query>()
+    public var plannedQueries = Set<Query>()
 
-    public init(reporter: HealthKitReporter) {
+    init(reporter: HealthKitReporter) {
         self.reporter = reporter
     }
 }
 // MARK: - StreamHandlerProtocol
 extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
-    func setQuery(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
+    public func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
         guard
             let identifier = arguments["identifier"] as? String,
             let startTimestamp = arguments["startTimestamp"] as? Double,
@@ -33,7 +34,7 @@ extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
             startDate: Date.make(from: startTimestamp),
             endDate: Date.make(from: endTimestamp)
         )
-        query = try reporter.reader.anchoredObjectQuery(
+        let query = try reporter.reader.anchoredObjectQuery(
             type: type,
             predicate: predicate,
             monitorUpdates: true
@@ -42,19 +43,33 @@ extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
                 return
             }
             var jsonDictionary: [String: Any] = [:]
-            var jsonArray: [String] = []
+            var samplesArray: [String] = []
             for sample in samples {
                 do {
                     let encoded = try sample.encoded()
-                    jsonArray.append(encoded)
+                    samplesArray.append(encoded)
                 } catch {
                     continue
                 }
             }
-            jsonDictionary["samples"] = jsonArray
-            jsonDictionary["deletedObjects"] = try? deletedObjects.encoded()
+            var deletedObjectsArray: [String] = []
+            for deletedObject in deletedObjects {
+                do {
+                    let encoded = try deletedObject.encoded()
+                    deletedObjectsArray.append(encoded)
+                } catch {
+                    continue
+                }
+            }
+            jsonDictionary["samples"] = samplesArray
+            jsonDictionary["deletedObjects"] = deletedObjectsArray
             events(jsonDictionary)
         }
+        plannedQueries.insert(query)
+    }
+
+    public static func make(with reporter: HealthKitReporter) -> AnchoredObjectQueryStreamHandler {
+        AnchoredObjectQueryStreamHandler(reporter: reporter)
     }
 }
 // MARK: - FlutterStreamHandler

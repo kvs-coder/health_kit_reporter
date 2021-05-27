@@ -2,23 +2,24 @@
 //  HeartbeatSeriesQueryStreamHandler.swift
 //  health_kit_reporter
 //
-//  Created by Florian on 09.12.20.
+//  Created by Victor Kachalov on 09.12.20.
 //
 
 import Foundation
 import HealthKitReporter
 
-public class HeartbeatSeriesQueryStreamHandler: NSObject {
-    let reporter: HealthKitReporter
-    var query: SampleQuery?
+public final class HeartbeatSeriesQueryStreamHandler: NSObject {
+    public let reporter: HealthKitReporter
+    public var activeQueries = Set<Query>()
+    public var plannedQueries = Set<Query>()
 
-    public init(reporter: HealthKitReporter) {
+    init(reporter: HealthKitReporter) {
         self.reporter = reporter
     }
 }
 // MARK: - StreamHandlerProtocol
 extension HeartbeatSeriesQueryStreamHandler: StreamHandlerProtocol {
-    func setQuery(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
+    public func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
         guard
             let startTimestamp = arguments["startTimestamp"] as? Double,
             let endTimestamp = arguments["endTimestamp"] as? Double
@@ -30,7 +31,7 @@ extension HeartbeatSeriesQueryStreamHandler: StreamHandlerProtocol {
             endDate: Date.make(from: endTimestamp)
         )
         if #available(iOS 13.0, *) {
-            query = try reporter.reader.heartbeatSeriesQuery(
+            let query = try reporter.reader.heartbeatSeriesQuery(
                 predicate: predicate
             ) { (heartbeatSerie, error) in
                 guard
@@ -45,9 +46,14 @@ extension HeartbeatSeriesQueryStreamHandler: StreamHandlerProtocol {
                     events(nil)
                 }
             }
+            plannedQueries.insert(query)
         } else {
             events(nil)
         }
+    }
+
+    public static func make(with reporter: HealthKitReporter) -> HeartbeatSeriesQueryStreamHandler {
+        HeartbeatSeriesQueryStreamHandler(reporter: reporter)
     }
 }
 // MARK: - FlutterStreamHandler

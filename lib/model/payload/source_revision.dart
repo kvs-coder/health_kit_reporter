@@ -18,8 +18,8 @@ class SourceRevision {
   );
 
   final Source source;
-  final String version;
-  final String productType;
+  final String? version;
+  final String? productType;
   final String systemVersion;
   final OperatingSystem operatingSystem;
 

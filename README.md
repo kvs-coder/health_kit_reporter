@@ -13,10 +13,10 @@ A Flutter wrapper for [HealthKitReporter](https://cocoapods.org/pods/HealthKitRe
 ## Getting Started
 
 - Go inside pubspec.yaml file
-- Add this to your package's pubspec.yaml file: 
+- Add this to your package's pubspec.yaml file:
 ``` Dart
 dependencies:
-     health_kit_reporter: ^1.0.10
+     health_kit_reporter: ^1.3.0
 ```
 - Get dependencies
 
@@ -144,40 +144,64 @@ Before writing data, you may need to check if writing is allowed by calling **is
 If it is ok to write, you need to create a **Sample** object and call a **save** method.
 
 ```dart
-  Future<bool> saveSteps() {
-    final now = DateTime.now();
-    final minuteAgo = now.add(Duration(minutes: -1));
-    final device = Device('FlutterTracker', 'kvs', 'T-800', '3', '3.0', '1.1.1',
-        'kvs.f.t', '444-888-555');
-    final source = Source('maApp', 'com.kvs.health_kit_reporter_example');
-    final operatingSystem = OperatingSystem(1, 2, 3);
-    final sourceRevision =
-        SourceRevision(source, '5', 'fit', '4', operatingSystem);
-    final harmonized = QuantityHarmonized(100, 'count', null);
-    final steps = Quantity(
-        QuantityType.stepCount.identifier,
-        minuteAgo.millisecondsSinceEpoch,
-        now.millisecondsSinceEpoch,
-        device,
-        sourceRevision,
-        harmonized);
-    print(steps.map);
-    return HealthKitReporter.save(steps);
-  }
+final _device = Device(
+    'FlutterTracker',
+    'kvs',
+    'T-800',
+    '3',
+    '3.0',
+    '1.1.1',
+    'kvs.sample.app',
+    '444-888-555',
+  );
+final _source = Source(
+    'myApp',
+    'com.kvs.health_kit_reporter_example',
+  );
+final _operatingSystem = OperatingSystem(
+    1,
+    2,
+    3,
+  );
 
-  void write() async {
+SourceRevision get _sourceRevision => SourceRevision(
+    _source,
+   '5',
+   'fit',
+   '4',
+   _operatingSystem,
+  );
+
+void saveSteps() async {
+  try {
     final canWrite = await HealthKitReporter.isAuthorizedToWrite(
         QuantityType.stepCount.identifier);
     if (canWrite) {
-      final stepsSaved = await saveSteps();
-      print('stepsSaved: $stepsSaved');
+      final now = DateTime.now();
+      final minuteAgo = now.add(Duration(minutes: -1));
+      final harmonized = QuantityHarmonized(100, 'count', null);
+      final steps = Quantity(
+          'testStepsUUID',
+          QuantityType.stepCount.identifier,
+          minuteAgo.millisecondsSinceEpoch,
+          now.millisecondsSinceEpoch,
+          _device,
+          _sourceRevision,
+          harmonized);
+      print('try to save: ${steps.map}');
+      final saved = await HealthKitReporter.save(steps);
+      print('stepsSaved: $saved');
     } else {
-      print('error canWrite: $canWrite');
+      print('error canWrite steps: $canWrite');
     }
+  } catch (e) {
+    print(e);
   }
+}
 ```
 
 **Recommendation: As well as for reading, here will better as well to call preferredUnits first, to know what unit is valid for a type.**
+**Please see [HKUnit.init](https://developer.apple.com/documentation/healthkit/hkunit/1615733-init/)**
 
 **Warning: PLease be sure to provide valid values for the appropriate types. For example, HealthKit will not allow to save Quantity value for the QuantityType.stepCount if the value is 0**
 
@@ -218,7 +242,7 @@ If you want to stop observation, you need to:
 - call **disableBackgroundDelivery** or **disableAllBackgroundDelivery**
 
 ## Requirements
-The library supports minimum iOS 12. 
+The library supports minimum iOS 9. 
 Some features like **HeartbeatSeries** are available only starting with iOS 13.0 and like **Electrocardiogramm** starting with iOS 14.0.
 
 ## License

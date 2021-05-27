@@ -70,7 +70,7 @@ class WorkoutEventHarmonized {
   );
 
   final int value;
-  final Map<String, dynamic> metadata;
+  final Map<String, dynamic>? metadata;
 
   /// General map representation
   ///

@@ -19,7 +19,6 @@ extension ElectrocardiogramTypeIdentifier on ElectrocardiogramType {
       case ElectrocardiogramType.electrocardiogramType:
         return 'HKDataTypeIdentifierElectrocardiogram';
     }
-    throw InvalidValueException('Unknown case: $this');
   }
 }
 
@@ -35,7 +34,7 @@ extension ElectrocardiogramTypeFactory on ElectrocardiogramType {
 
   /// The [from] exception handling
   ///
-  static ElectrocardiogramType tryFrom(String identifier) {
+  static ElectrocardiogramType? tryFrom(String identifier) {
     try {
       return from(identifier);
     } on InvalidValueException {
