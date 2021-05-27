@@ -460,12 +460,16 @@ class _MyAppState extends State<MyApp> {
         final unit = preferredUnit.unit;
         print('preferredUnit: ${preferredUnit.map}');
         final type = QuantityTypeFactory.from(identifier);
-        final quantities =
-            await HealthKitReporter.quantityQuery(type, unit, _predicate);
-        print('quantity: ${quantities.map((e) => e.map).toList()}');
-        final statistics =
-            await HealthKitReporter.statisticsQuery(type, unit, _predicate);
-        print('statistics: ${statistics.map}');
+        try {
+          final quantities =
+              await HealthKitReporter.quantityQuery(type, unit, _predicate);
+          print('quantity: ${quantities.map((e) => e.map).toList()}');
+          final statistics =
+              await HealthKitReporter.statisticsQuery(type, unit, _predicate);
+          print('statistics: ${statistics.map}');
+        } catch (e) {
+          print(e);
+        }
       });
     } catch (e) {
       print(e);
