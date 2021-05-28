@@ -1,3 +1,7 @@
+## [1.3.1] - 28.05.2021
+
+* Fix with error objects coming from Swift
+
 ## [1.3.0] - 18.04.2021
 
 * Fix with reinitilizing subscriptions for Events
