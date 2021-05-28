@@ -1355,7 +1355,7 @@ extension SwiftHealthKitReporterPlugin {
         reporter.writer.deleteObjects(
             of: type,
             predicate: predicate
-        ) { (success, id, error) in
+        ) { (success, count, error) in
             guard error == nil else {
                 result(
                     FlutterError(
@@ -1368,7 +1368,7 @@ extension SwiftHealthKitReporterPlugin {
             }
             let resultDictionary: [String: Any] = [
                 "status": success,
-                "id": id
+                "count": count
             ]
             result(resultDictionary)
         }
