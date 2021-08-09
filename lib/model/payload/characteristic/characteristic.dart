@@ -40,6 +40,6 @@ class Characteristic {
   Characteristic.fromJson(Map<String, dynamic> json)
       : biologicalSex = BiologicalSexFactory.from(json['biologicalSex']),
         birthday = json['birthday']?.toString().date,
-        bloodType = BloodTypeFactory.from(json['bloodType']),
-        skinType = FitzpatrickSkinTypeFactory.from(json['skinType']);
+        bloodType = BloodTypeFactory.from(json['bloodType'] ?? 'na'),
+        skinType = FitzpatrickSkinTypeFactory.from(json['skinType'] ?? 'na');
 }
