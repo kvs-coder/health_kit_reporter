@@ -20,7 +20,8 @@ class WorkoutConfiguration {
         'activityValue': activityValue,
         'locationValue': locationValue,
         'swimmingValue': swimmingValue,
-        'harmonized': harmonized.map,
+        'value': harmonized.value,
+        'unit': harmonized.unit,
       };
 }
 
