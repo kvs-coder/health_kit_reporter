@@ -1,3 +1,5 @@
+import 'package:health_kit_reporter/model/payload/workout_activity_type.dart';
+
 import '../type/workout_type.dart';
 import 'device.dart';
 import 'sample.dart';
@@ -23,7 +25,6 @@ class Workout extends Sample<WorkoutHarmonized> {
     Device? device,
     SourceRevision sourceRevision,
     WorkoutHarmonized harmonized,
-    this.workoutName,
     this.duration,
     this.workoutEvents,
   ) : super(
@@ -36,7 +37,6 @@ class Workout extends Sample<WorkoutHarmonized> {
           harmonized,
         );
 
-  final String workoutName;
   final num duration;
   final List<WorkoutEvent> workoutEvents;
 
@@ -48,7 +48,6 @@ class Workout extends Sample<WorkoutHarmonized> {
         'identifier': identifier,
         'startTimestamp': startTimestamp,
         'endTimestamp': endTimestamp,
-        'workoutName': workoutName,
         'device': device?.map,
         'sourceRevision': sourceRevision.map,
         'duration': duration,
@@ -59,8 +58,7 @@ class Workout extends Sample<WorkoutHarmonized> {
   /// General constructor from JSON payload
   ///
   Workout.fromJson(Map<String, dynamic> json)
-      : workoutName = json['workoutName'],
-        duration = json['duration'],
+      : duration = json['duration'],
         workoutEvents = WorkoutEvent.collect(json['workoutEvents']),
         super.from(json, WorkoutHarmonized.fromJson(json['harmonized']));
 }
@@ -75,7 +73,7 @@ class Workout extends Sample<WorkoutHarmonized> {
 ///
 class WorkoutHarmonized {
   const WorkoutHarmonized(
-    this.value,
+    this.type,
     this.totalEnergyBurned,
     this.totalEnergyBurnedUnit,
     this.totalDistance,
@@ -87,7 +85,7 @@ class WorkoutHarmonized {
     this.metadata,
   );
 
-  final int value;
+  final WorkoutActivityType type;
   final num? totalEnergyBurned;
   final String totalEnergyBurnedUnit;
   final num? totalDistance;
@@ -101,7 +99,8 @@ class WorkoutHarmonized {
   /// General map representation
   ///
   Map<String, dynamic> get map => {
-        'value': value,
+        'value': type.value,
+        'description': type.description,
         'totalEnergyBurned': totalEnergyBurned,
         'totalEnergyBurnedUnit': totalEnergyBurnedUnit,
         'totalDistance': totalDistance,
@@ -116,7 +115,7 @@ class WorkoutHarmonized {
   /// General constructor from JSON payload
   ///
   WorkoutHarmonized.fromJson(Map<String, dynamic> json)
-      : value = json['value'],
+      : type = WorkoutActivityTypeFactory.from(json['value']),
         totalEnergyBurned = json['totalEnergyBurned'],
         totalEnergyBurnedUnit = json['totalEnergyBurnedUnit'],
         totalDistance = json['totalDistance'],

@@ -1,3 +1,5 @@
+import 'package:health_kit_reporter/model/payload/workout_event_type.dart';
+
 /// Equivalent of [WorkoutEvent]
 /// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
 ///
@@ -10,14 +12,12 @@
 /// Requires [WorkoutType] permissions provided.
 ///
 class WorkoutEvent {
-  final String type;
   final num startTimestamp;
   final num endTimestamp;
   final num duration;
   final WorkoutEventHarmonized harmonized;
 
   const WorkoutEvent(
-    this.type,
     this.startTimestamp,
     this.endTimestamp,
     this.duration,
@@ -27,7 +27,6 @@ class WorkoutEvent {
   /// General map representation
   ///
   Map<String, dynamic> get map => {
-        'type': type,
         'startTimestamp': startTimestamp,
         'endTimestamp': endTimestamp,
         'duration': duration,
@@ -37,8 +36,7 @@ class WorkoutEvent {
   /// General constructor from JSON payload
   ///
   WorkoutEvent.fromJson(Map<String, dynamic> json)
-      : type = json['type'],
-        startTimestamp = json['startTimestamp'],
+      : startTimestamp = json['startTimestamp'],
         endTimestamp = json['endTimestamp'],
         duration = json['duration'],
         harmonized = WorkoutEventHarmonized.fromJson(json['harmonized']);
@@ -65,23 +63,24 @@ class WorkoutEvent {
 ///
 class WorkoutEventHarmonized {
   const WorkoutEventHarmonized(
-    this.value,
+    this.type,
     this.metadata,
   );
 
-  final int value;
+  final WorkoutEventType type;
   final Map<String, dynamic>? metadata;
 
   /// General map representation
   ///
   Map<String, dynamic> get map => {
-        'value': value,
+        'value': type.value,
+        'description': type.description,
         'metadata': metadata,
       };
 
   /// General constructor from JSON payload
   ///
   WorkoutEventHarmonized.fromJson(Map<String, dynamic> json)
-      : value = json['value'],
+      : type = WorkoutEventTypeFactory.from(json['value']),
         metadata = json['metadata'];
 }

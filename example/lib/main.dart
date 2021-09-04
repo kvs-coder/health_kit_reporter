@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -10,7 +11,9 @@ import 'package:health_kit_reporter/model/payload/quantity.dart';
 import 'package:health_kit_reporter/model/payload/source.dart';
 import 'package:health_kit_reporter/model/payload/source_revision.dart';
 import 'package:health_kit_reporter/model/payload/workout.dart';
+import 'package:health_kit_reporter/model/payload/workout_activity_type.dart';
 import 'package:health_kit_reporter/model/payload/workout_event.dart';
+import 'package:health_kit_reporter/model/payload/workout_event_type.dart';
 import 'package:health_kit_reporter/model/predicate.dart';
 import 'package:health_kit_reporter/model/type/activity_summary_type.dart';
 import 'package:health_kit_reporter/model/type/category_type.dart';
@@ -330,7 +333,7 @@ class _MyAppState extends State<MyApp> {
           WorkoutType.workoutType.identifier);
       if (canWrite) {
         final harmonized = WorkoutHarmonized(
-          6,
+          WorkoutActivityType.badminton,
           1.2,
           'kcal',
           123,
@@ -344,12 +347,11 @@ class _MyAppState extends State<MyApp> {
         final now = DateTime.now();
         final duration = 60;
         final eventHarmonized = WorkoutEventHarmonized(
-          6,
+          WorkoutEventType.pause,
           null,
         );
         final events = [
           WorkoutEvent(
-            'basketball',
             now.millisecondsSinceEpoch,
             now.millisecondsSinceEpoch,
             duration,
@@ -365,7 +367,6 @@ class _MyAppState extends State<MyApp> {
           _device,
           _sourceRevision,
           harmonized,
-          'testWorkoutName',
           duration,
           events,
         );
@@ -436,6 +437,9 @@ class _MyAppState extends State<MyApp> {
     try {
       final workouts = await HealthKitReporter.workoutQuery(_predicate);
       print('workouts: ${workouts.map((e) => e.map).toList()}');
+      for (final q in workouts) {
+        print('q: ${json.encode(q.map)}');
+      }
     } catch (e) {
       print(e);
     }

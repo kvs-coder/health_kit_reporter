@@ -1,7 +1,5 @@
 import 'package:health_kit_reporter/health_kit_reporter.dart';
 
-import '../../../exceptions.dart';
-
 /// Equivalent of [BiologicalSex]
 /// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
 ///
@@ -34,7 +32,7 @@ extension Description on BiologicalSex {
 }
 
 extension BiologicalSexFactory on BiologicalSex {
-  static BiologicalSex from(String string) {
+  static BiologicalSex? from(String string) {
     switch (string) {
       case 'na':
         return BiologicalSex.notSet;
@@ -45,7 +43,7 @@ extension BiologicalSexFactory on BiologicalSex {
       case 'Other':
         return BiologicalSex.other;
       default:
-        throw InvalidValueException('Unknown case: $string');
+        return null;
     }
   }
 }

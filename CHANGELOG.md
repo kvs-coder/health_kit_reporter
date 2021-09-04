@@ -1,3 +1,10 @@
+## [1.4.0] - 28.05.2021
+
+* Activity Move mode added
+* Wheelchair use added
+* Workout activity type added
+* Workout configuration fix
+
 ## [1.3.1] - 28.05.2021
 
 * Fix with error objects coming from Swift

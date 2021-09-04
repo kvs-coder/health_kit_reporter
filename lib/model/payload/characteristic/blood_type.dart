@@ -1,5 +1,3 @@
-import '../../../exceptions.dart';
-
 /// Equivalent of [BloodType]
 /// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
 ///
@@ -47,7 +45,7 @@ extension Description on BloodType {
 }
 
 extension BloodTypeFactory on BloodType {
-  static BloodType from(String string) {
+  static BloodType? from(String string) {
     switch (string) {
       case 'na':
         return BloodType.notSet;
@@ -68,7 +66,7 @@ extension BloodTypeFactory on BloodType {
       case 'O-':
         return BloodType.oNegative;
       default:
-        throw InvalidValueException('Unknown case: $string');
+        return null;
     }
   }
 }
