@@ -16,29 +16,20 @@ import 'wheelchair_use.dart';
 /// Requires [CharacteristicType] permissions provided.
 ///
 class Characteristic {
-  const Characteristic(
-    this.biologicalSex,
-    this.birthday,
-    this.bloodType,
-    this.fitzpatrickSkinType,
-    this.wheelchairUseType,
-    this.activityMoveModeType,
-  );
-
   final BiologicalSex? biologicalSex;
   final DateTime? birthday;
   final BloodType? bloodType;
   final FitzpatrickSkinType? fitzpatrickSkinType;
-  final WheelchairUseType? wheelchairUseType;
-  final ActivityMoveModeType? activityMoveModeType;
+  final WheelchairUse? wheelchairUse;
+  final ActivityMoveMode? activityMoveMode;
 
   Map<String, String?> get map => {
-        'biologicalSex': biologicalSex?.string,
+        'biologicalSex': biologicalSex?.description,
         'birthday': birthday?.toIso8601String(),
-        'bloodType': bloodType?.string,
-        'fitzpatrickSkinType': fitzpatrickSkinType?.string,
-        'wheelchairUseType': wheelchairUseType?.string,
-        'activityMoveModeType': activityMoveModeType?.string,
+        'bloodType': bloodType?.description,
+        'fitzpatrickSkinType': fitzpatrickSkinType?.description,
+        'wheelchairUse': wheelchairUse?.description,
+        'activityMoveMode': activityMoveMode?.description,
       };
 
   /// General constructor from JSON payload
@@ -49,8 +40,7 @@ class Characteristic {
         bloodType = BloodTypeFactory.from(json['bloodType']),
         fitzpatrickSkinType =
             FitzpatrickSkinTypeFactory.from(json['fitzpatrickSkinType']),
-        wheelchairUseType =
-            WheelchairUseTypeFactory.from(json['wheelchairUse']),
-        activityMoveModeType =
-            ActivityMoveModeTypeFactory.from(json['activityMoveMode']);
+        wheelchairUse = WheelchairUseFactory.from(json['wheelchairUse']),
+        activityMoveMode =
+            ActivityMoveModeFactory.from(json['activityMoveMode']);
 }

@@ -71,7 +71,8 @@ abstract class Sample<Harmonized> {
         identifier = json['identifier'],
         startTimestamp = json['startTimestamp'],
         endTimestamp = json['endTimestamp'],
-        device = Device.fromJson(json['device']),
+        device =
+            json['device'] != null ? Device.fromJson(json['device']) : null,
         sourceRevision = SourceRevision.fromJson(json['sourceRevision']),
         harmonized = harmonized;
 

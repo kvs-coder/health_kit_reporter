@@ -471,6 +471,7 @@ class HealthKitReporter {
     final result =
         await _methodChannel.invokeMethod('statisticsQuery', arguments);
     final Map<String, dynamic> map = jsonDecode(result);
+    final q = json.encode(map);
     final statistics = Statistics.fromJson(map);
     return statistics;
   }

@@ -7,34 +7,34 @@
 /// Has a factory method [from]
 /// Creating from [String]
 ///
-enum WheelchairUseType {
+enum WheelchairUse {
   notSet,
   no,
   yes,
 }
 
-extension Description on WheelchairUseType {
-  String get string {
+extension Description on WheelchairUse {
+  String get description {
     switch (this) {
-      case WheelchairUseType.notSet:
+      case WheelchairUse.notSet:
         return 'na';
-      case WheelchairUseType.no:
+      case WheelchairUse.no:
         return 'No';
-      case WheelchairUseType.yes:
+      case WheelchairUse.yes:
         return 'Yes';
     }
   }
 }
 
-extension WheelchairUseTypeFactory on WheelchairUseType {
-  static WheelchairUseType? from(String string) {
-    switch (string) {
+extension WheelchairUseFactory on WheelchairUse {
+  static WheelchairUse? from(String description) {
+    switch (description) {
       case 'na':
-        return WheelchairUseType.notSet;
+        return WheelchairUse.notSet;
       case 'No':
-        return WheelchairUseType.no;
+        return WheelchairUse.no;
       case 'Yes':
-        return WheelchairUseType.yes;
+        return WheelchairUse.yes;
       default:
         return null;
     }

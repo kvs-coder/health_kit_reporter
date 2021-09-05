@@ -17,7 +17,7 @@ enum BiologicalSex {
 }
 
 extension Description on BiologicalSex {
-  String get string {
+  String get description {
     switch (this) {
       case BiologicalSex.notSet:
         return 'na';
@@ -32,8 +32,8 @@ extension Description on BiologicalSex {
 }
 
 extension BiologicalSexFactory on BiologicalSex {
-  static BiologicalSex? from(String string) {
-    switch (string) {
+  static BiologicalSex? from(String description) {
+    switch (description) {
       case 'na':
         return BiologicalSex.notSet;
       case 'Female':

@@ -20,7 +20,7 @@ enum BloodType {
 }
 
 extension Description on BloodType {
-  String get string {
+  String get description {
     switch (this) {
       case BloodType.notSet:
         return 'na';
@@ -45,8 +45,8 @@ extension Description on BloodType {
 }
 
 extension BloodTypeFactory on BloodType {
-  static BloodType? from(String string) {
-    switch (string) {
+  static BloodType? from(String description) {
+    switch (description) {
       case 'na':
         return BloodType.notSet;
       case 'A+':

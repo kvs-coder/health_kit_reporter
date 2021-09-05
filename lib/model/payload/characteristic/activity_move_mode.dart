@@ -7,29 +7,29 @@
 /// Has a factory method [from]
 /// Creating from [String]
 ///
-enum ActivityMoveModeType {
+enum ActivityMoveMode {
   activeEnergy,
   appleMoveTime,
 }
 
-extension Description on ActivityMoveModeType {
-  String get string {
+extension Description on ActivityMoveMode {
+  String get description {
     switch (this) {
-      case ActivityMoveModeType.activeEnergy:
+      case ActivityMoveMode.activeEnergy:
         return 'Active energy';
-      case ActivityMoveModeType.appleMoveTime:
+      case ActivityMoveMode.appleMoveTime:
         return 'Apple move time';
     }
   }
 }
 
-extension ActivityMoveModeTypeFactory on ActivityMoveModeType {
-  static ActivityMoveModeType? from(String string) {
-    switch (string) {
+extension ActivityMoveModeFactory on ActivityMoveMode {
+  static ActivityMoveMode? from(String description) {
+    switch (description) {
       case 'Active energy':
-        return ActivityMoveModeType.activeEnergy;
+        return ActivityMoveMode.activeEnergy;
       case 'Apple move time':
-        return ActivityMoveModeType.appleMoveTime;
+        return ActivityMoveMode.appleMoveTime;
       default:
         return null;
     }

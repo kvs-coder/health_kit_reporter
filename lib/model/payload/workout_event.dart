@@ -62,10 +62,7 @@ class WorkoutEvent {
 /// to create instances from JSON payload coming from iOS native code.
 ///
 class WorkoutEventHarmonized {
-  const WorkoutEventHarmonized(
-    this.type,
-    this.metadata,
-  );
+  const WorkoutEventHarmonized(this.type, [this.metadata]);
 
   final WorkoutEventType type;
   final Map<String, dynamic>? metadata;

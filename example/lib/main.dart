@@ -346,10 +346,7 @@ class _MyAppState extends State<MyApp> {
         );
         final now = DateTime.now();
         final duration = 60;
-        final eventHarmonized = WorkoutEventHarmonized(
-          WorkoutEventType.pause,
-          null,
-        );
+        final eventHarmonized = WorkoutEventHarmonized(WorkoutEventType.pause);
         final events = [
           WorkoutEvent(
             now.millisecondsSinceEpoch,
@@ -390,7 +387,8 @@ class _MyAppState extends State<MyApp> {
         final minuteAgo = now.add(Duration(minutes: -1));
         final harmonized = CategoryHarmonized(
           0,
-          'Breath Meditation',
+          'HKCategoryValue',
+          'Not Aplicable',
           {},
         );
         final mindfulMinutes = Category(

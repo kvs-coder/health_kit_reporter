@@ -70,15 +70,19 @@ class Category extends Sample<CategoryHarmonized> {
 /// Has a [CategoryHarmonized.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
+/// To create valid instances of [CategoryHarmonized] please refer to Apple documentation
+///
 class CategoryHarmonized {
   const CategoryHarmonized(
     this.value,
     this.description,
+    this.detail,
     this.metadata,
   );
 
   final num value;
   final String description;
+  final String detail;
   final Map<String, dynamic>? metadata;
 
   /// General map representation
@@ -86,6 +90,7 @@ class CategoryHarmonized {
   Map<String, dynamic> get map => {
         'value': value,
         'description': description,
+        'detail': detail,
         'metadata': metadata,
       };
 
@@ -94,5 +99,6 @@ class CategoryHarmonized {
   CategoryHarmonized.fromJson(Map<String, dynamic> json)
       : value = json['value'],
         description = json['description'],
+        detail = json['detail'],
         metadata = json['metadata'];
 }
