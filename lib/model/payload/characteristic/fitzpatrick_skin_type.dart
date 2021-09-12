@@ -39,7 +39,7 @@ extension Description on FitzpatrickSkinType {
 }
 
 extension FitzpatrickSkinTypeFactory on FitzpatrickSkinType {
-  static FitzpatrickSkinType? from(String description) {
+  static FitzpatrickSkinType? from(String? description) {
     switch (description) {
       case 'na':
         return FitzpatrickSkinType.notSet;

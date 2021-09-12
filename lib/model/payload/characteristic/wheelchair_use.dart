@@ -27,7 +27,7 @@ extension Description on WheelchairUse {
 }
 
 extension WheelchairUseFactory on WheelchairUse {
-  static WheelchairUse? from(String description) {
+  static WheelchairUse? from(String? description) {
     switch (description) {
       case 'na':
         return WheelchairUse.notSet;

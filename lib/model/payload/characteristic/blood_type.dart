@@ -45,7 +45,7 @@ extension Description on BloodType {
 }
 
 extension BloodTypeFactory on BloodType {
-  static BloodType? from(String description) {
+  static BloodType? from(String? description) {
     switch (description) {
       case 'na':
         return BloodType.notSet;

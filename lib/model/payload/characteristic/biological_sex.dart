@@ -32,7 +32,7 @@ extension Description on BiologicalSex {
 }
 
 extension BiologicalSexFactory on BiologicalSex {
-  static BiologicalSex? from(String description) {
+  static BiologicalSex? from(String? description) {
     switch (description) {
       case 'na':
         return BiologicalSex.notSet;

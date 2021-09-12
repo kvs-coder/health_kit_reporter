@@ -24,7 +24,7 @@ extension Description on ActivityMoveMode {
 }
 
 extension ActivityMoveModeFactory on ActivityMoveMode {
-  static ActivityMoveMode? from(String description) {
+  static ActivityMoveMode? from(String? description) {
     switch (description) {
       case 'Active energy':
         return ActivityMoveMode.activeEnergy;
