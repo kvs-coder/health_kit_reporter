@@ -350,7 +350,6 @@ class HealthKitReporter {
   static Future<Characteristic> characteristicsQuery() async {
     final result = await _methodChannel.invokeMethod('characteristicsQuery');
     final Map<String, dynamic> map = jsonDecode(result);
-    print(map);
     return Characteristic.fromJson(map);
   }
 
@@ -650,7 +649,6 @@ class HealthKitReporter {
   ///
   static Future<bool> save(Sample sample) async {
     final arguments = sample.parsed();
-    print(arguments);
     return await _methodChannel.invokeMethod('save', arguments);
   }
 }
