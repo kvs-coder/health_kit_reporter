@@ -1,3 +1,7 @@
+## [1.4.1] - 12.09.2021
+
+* Fix characteristic parsing if not all types are requested for reading
+
 ## [1.4.0] - 05.09.2021
 
 * Activity Move mode added
