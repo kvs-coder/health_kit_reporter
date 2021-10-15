@@ -343,7 +343,6 @@ class HealthKitReporter {
     final arguments = predicate.map;
     final result =
         await _methodChannel.invokeMethod('heartbeatSeriesQuery', arguments);
-    print(result);
     final json = jsonDecode(result);
     return HeartbeatSeriesSample.fromJson(json);
   }
