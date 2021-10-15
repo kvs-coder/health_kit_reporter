@@ -21,8 +21,7 @@ public final class StatisticsCollectionQueryStreamHandler: NSObject {
 extension StatisticsCollectionQueryStreamHandler: StreamHandlerProtocol {
     public func setQueries(arguments: [String : Any], events: @escaping FlutterEventSink) throws {
         guard
-            let identifier = arguments["identifier"] as? String,
-            let unit = arguments["unit"] as? String,
+            let preferredUnits = arguments["preferredUnits"] as? [[String: Any]],
             let startTimestamp = arguments["startTimestamp"] as? Double,
             let endTimestamp = arguments["endTimestamp"] as? Double,
             let anchorTimestamp = arguments["anchorTimestamp"] as? Double,
@@ -32,38 +31,43 @@ extension StatisticsCollectionQueryStreamHandler: StreamHandlerProtocol {
         else {
             return
         }
-        guard let type = identifier.objectType as? QuantityType else {
-            return
-        }
         let predicate = NSPredicate.samplesPredicate(
             startDate: Date.make(from: startTimestamp),
             endDate: Date.make(from: endTimestamp)
         )
-        let query = try reporter.reader.statisticsCollectionQuery(
-            type: type,
-            unit: unit,
-            quantitySamplePredicate: predicate,
-            anchorDate: Date.make(from: anchorTimestamp),
-            enumerateFrom: Date.make(from: enumerateFrom),
-            enumerateTo: Date.make(from: enumerateTo),
-            intervalComponents: DateComponents.make(
-                from: intervalComponents
-            ),
-            monitorUpdates: true
-        ) { (statistics, error) in
-            guard
-                error == nil,
-                let statistics = statistics
-            else {
-                return
-            }
-            do {
-                events(try statistics.encoded())
-            } catch {
-                events(nil)
+        for preferredUnit in preferredUnits {
+            if let preferredUnit = try? PreferredUnit.make(from: preferredUnit) {
+                guard let type = preferredUnit.identifier.objectType as? QuantityType else {
+                    return
+                }
+                let unit = preferredUnit.unit
+                let query = try reporter.reader.statisticsCollectionQuery(
+                    type: type,
+                    unit: unit,
+                    quantitySamplePredicate: predicate,
+                    anchorDate: Date.make(from: anchorTimestamp),
+                    enumerateFrom: Date.make(from: enumerateFrom),
+                    enumerateTo: Date.make(from: enumerateTo),
+                    intervalComponents: DateComponents.make(
+                        from: intervalComponents
+                    ),
+                    monitorUpdates: true
+                ) { (statistics, error) in
+                    guard
+                        error == nil,
+                        let statistics = statistics
+                    else {
+                        return
+                    }
+                    do {
+                        events(try statistics.encoded())
+                    } catch {
+                        events(nil)
+                    }
+                }
+                plannedQueries.insert(query)
             }
         }
-        plannedQueries.insert(query)
     }
 
     public static func make(with reporter: HealthKitReporter) -> StatisticsCollectionQueryStreamHandler {

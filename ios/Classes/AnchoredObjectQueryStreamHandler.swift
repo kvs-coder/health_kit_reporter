@@ -21,51 +21,53 @@ public final class AnchoredObjectQueryStreamHandler: NSObject {
 extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
     public func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
         guard
-            let identifier = arguments["identifier"] as? String,
+            let identifiers = arguments["identifiers"] as? [String],
             let startTimestamp = arguments["startTimestamp"] as? Double,
             let endTimestamp = arguments["endTimestamp"] as? Double
         else {
-            return
-        }
-        guard let type = identifier.objectType as? SampleType else {
             return
         }
         let predicate = NSPredicate.samplesPredicate(
             startDate: Date.make(from: startTimestamp),
             endDate: Date.make(from: endTimestamp)
         )
-        let query = try reporter.reader.anchoredObjectQuery(
-            type: type,
-            predicate: predicate,
-            monitorUpdates: true
-        ) { (query, samples, deletedObjects, anchor, error) in
-            guard error == nil else {
+        for identifier in identifiers {
+            guard let type = identifier.objectType as? SampleType else {
                 return
             }
-            var jsonDictionary: [String: Any] = [:]
-            var samplesArray: [String] = []
-            for sample in samples {
-                do {
-                    let encoded = try sample.encoded()
-                    samplesArray.append(encoded)
-                } catch {
-                    continue
+            let query = try reporter.reader.anchoredObjectQuery(
+                type: type,
+                predicate: predicate,
+                monitorUpdates: true
+            ) { (query, samples, deletedObjects, anchor, error) in
+                guard error == nil else {
+                    return
                 }
-            }
-            var deletedObjectsArray: [String] = []
-            for deletedObject in deletedObjects {
-                do {
-                    let encoded = try deletedObject.encoded()
-                    deletedObjectsArray.append(encoded)
-                } catch {
-                    continue
+                var jsonDictionary: [String: Any] = [:]
+                var samplesArray: [String] = []
+                for sample in samples {
+                    do {
+                        let encoded = try sample.encoded()
+                        samplesArray.append(encoded)
+                    } catch {
+                        continue
+                    }
                 }
+                var deletedObjectsArray: [String] = []
+                for deletedObject in deletedObjects {
+                    do {
+                        let encoded = try deletedObject.encoded()
+                        deletedObjectsArray.append(encoded)
+                    } catch {
+                        continue
+                    }
+                }
+                jsonDictionary["samples"] = samplesArray
+                jsonDictionary["deletedObjects"] = deletedObjectsArray
+                events(jsonDictionary)
             }
-            jsonDictionary["samples"] = samplesArray
-            jsonDictionary["deletedObjects"] = deletedObjectsArray
-            events(jsonDictionary)
+            plannedQueries.insert(query)
         }
-        plannedQueries.insert(query)
     }
 
     public static func make(with reporter: HealthKitReporter) -> AnchoredObjectQueryStreamHandler {

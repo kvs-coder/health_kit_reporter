@@ -7,6 +7,7 @@ import 'package:health_kit_reporter/health_kit_reporter.dart';
 import 'package:health_kit_reporter/model/payload/category.dart';
 import 'package:health_kit_reporter/model/payload/date_components.dart';
 import 'package:health_kit_reporter/model/payload/device.dart';
+import 'package:health_kit_reporter/model/payload/preferred_unit.dart';
 import 'package:health_kit_reporter/model/payload/quantity.dart';
 import 'package:health_kit_reporter/model/payload/source.dart';
 import 'package:health_kit_reporter/model/payload/source_revision.dart';
@@ -211,28 +212,21 @@ class _MyAppState extends State<MyApp> {
                           Text('OBSERVE'),
                           ElevatedButton(
                               onPressed: () {
-                                observerQuery(
-                                    QuantityType.stepCount.identifier);
+                                observerQuery([
+                                  QuantityType.stepCount.identifier,
+                                  QuantityType.heartRate.identifier,
+                                ]);
                               },
-                              child: Text('observerQuery - STEPS')),
+                              child: Text('observerQuery - STEPS and HR')),
                           ElevatedButton(
                               onPressed: () {
-                                observerQuery(
-                                    QuantityType.heartRate.identifier);
+                                anchoredObjectQuery([
+                                  QuantityType.stepCount.identifier,
+                                  QuantityType.heartRate.identifier,
+                                ]);
                               },
-                              child: Text('observerQuery - HR')),
-                          ElevatedButton(
-                              onPressed: () {
-                                anchoredObjectQuery(
-                                    QuantityType.stepCount.identifier);
-                              },
-                              child: Text('anchoredObjectQuery - STEPS')),
-                          ElevatedButton(
-                              onPressed: () {
-                                anchoredObjectQuery(
-                                    QuantityType.heartRate.identifier);
-                              },
-                              child: Text('anchoredObjectQuery - HR')),
+                              child:
+                                  Text('anchoredObjectQuery - STEPS and HR')),
                           ElevatedButton(
                               onPressed: () {
                                 queryActivitySummaryUpdates();
@@ -248,6 +242,16 @@ class _MyAppState extends State<MyApp> {
                                 workoutRouteQuery();
                               },
                               child: Text('workoutRouteQuery')),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Text('DELETE'),
+                          ElevatedButton(
+                              onPressed: () {
+                                deleteSteps();
+                              },
+                              child: Text('deleteSteps')),
                         ],
                       ),
                     ],
@@ -446,7 +450,7 @@ class _MyAppState extends State<MyApp> {
   void queryHeartbeatSeries() async {
     try {
       final series = await HealthKitReporter.heartbeatSeriesQuery(_predicate);
-      print('heartbeatSeries: ${series.map}');
+      print('heartbeatSeries: ${series.map((e) => e.map).toList()}');
     } catch (e) {
       print(e);
     }
@@ -487,8 +491,8 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void observerQuery(String identifier) async {
-    final sub = HealthKitReporter.observerQuery(identifier, _predicate,
+  void observerQuery(List<String> identifiers) async {
+    final sub = HealthKitReporter.observerQuery(identifiers, _predicate,
         onUpdate: (identifier) async {
       print('Updates for observerQuerySub - $identifier');
       print(identifier);
@@ -497,10 +501,12 @@ class _MyAppState extends State<MyApp> {
       await _flutterLocalNotificationsPlugin.show(
           0, 'Observer', identifier, details);
     });
-    print('$identifier observerQuerySub: $sub');
-    final isSet = await HealthKitReporter.enableBackgroundDelivery(
-        identifier, UpdateFrequency.immediate);
-    print('$identifier enableBackgroundDelivery: $isSet');
+    print('$identifiers observerQuerySub: $sub');
+    for (final identifier in identifiers) {
+      final isSet = await HealthKitReporter.enableBackgroundDelivery(
+          identifier, UpdateFrequency.immediate);
+      print('$identifier enableBackgroundDelivery: $isSet');
+    }
   }
 
   void workoutRouteQuery() {
@@ -512,14 +518,14 @@ class _MyAppState extends State<MyApp> {
     print('workoutRouteQuery: $sub');
   }
 
-  void anchoredObjectQuery(String identifier) {
-    final sub = HealthKitReporter.anchoredObjectQuery(identifier, _predicate,
+  void anchoredObjectQuery(List<String> identifiers) {
+    final sub = HealthKitReporter.anchoredObjectQuery(identifiers, _predicate,
         onUpdate: (samples, deletedObjects) {
-      print('Updates for anchoredObjectQuerySub - $identifier');
+      print('Updates for anchoredObjectQuerySub');
       print(samples.map((e) => e.map).toList());
       print(deletedObjects.map((e) => e.map).toList());
     });
-    print('$identifier anchoredObjectQuerySub: $sub');
+    print('$identifiers anchoredObjectQuerySub: $sub');
   }
 
   void queryActivitySummaryUpdates() {
@@ -537,16 +543,32 @@ class _MyAppState extends State<MyApp> {
     final enumerateTo = DateTime.utc(2020, 12, 31, 12, 30, 30);
     final intervalComponents = DateComponents(month: 1);
     final sub = HealthKitReporter.statisticsCollectionQuery(
-        QuantityType.stepCount,
-        'count',
-        _predicate,
-        anchorDate,
-        enumerateFrom,
-        enumerateTo,
-        intervalComponents, onUpdate: (statistics) {
-      print('Updates for statisticsCollectionQuerySub');
-      print(statistics.map);
-    });
+      [
+        PreferredUnit(
+          QuantityType.stepCount.identifier,
+          'count',
+        ),
+      ],
+      _predicate,
+      anchorDate,
+      enumerateFrom,
+      enumerateTo,
+      intervalComponents,
+      onUpdate: (statistics) {
+        print('Updates for statisticsCollectionQuerySub');
+        print(statistics.map);
+      },
+    );
     print('statisticsCollectionQuery: $sub');
+  }
+
+  void deleteSteps() async {
+    final map = await HealthKitReporter.deleteObjects(
+        QuantityType.stepCount.identifier,
+        Predicate(
+          DateTime.now().add(Duration(days: -1)),
+          DateTime.now(),
+        ));
+    print(map);
   }
 }

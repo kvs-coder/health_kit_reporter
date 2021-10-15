@@ -814,22 +814,12 @@ extension SwiftHealthKitReporterPlugin {
                         return
                     }
                     do {
-                        guard let series = series else {
-                            result(
-                                FlutterError(
-                                    code: "HeartbeatSeriesQuery",
-                                    message: "Series samples was null",
-                                    details: nil
-                                )
-                            )
-                            return
-                        }
                         result(try series.encoded())
                     } catch {
                         result(
                             FlutterError(
                                 code: "HeartbeatSeriesQuery",
-                                message: "Error in json encoding of serie: \(String(describing: series))",
+                                message: "Error in json encoding of beat by beat series: \(series)",
                                 details: error
                             )
                         )

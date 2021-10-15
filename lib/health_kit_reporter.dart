@@ -12,7 +12,7 @@ import 'model/payload/date_components.dart';
 import 'model/payload/deleted_object.dart';
 import 'model/payload/device.dart';
 import 'model/payload/electrocardiogram.dart';
-import 'model/payload/heartbeat_series_sample.dart';
+import 'model/payload/heartbeat_series.dart';
 import 'model/payload/preferred_unit.dart';
 import 'model/payload/quantity.dart';
 import 'model/payload/sample.dart';
@@ -137,12 +137,6 @@ class HealthKitReporter {
   /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
   /// Will handle event exchanges of the plugin.
   ///
-  static const EventChannel _heartbeatSeriesQueryChannel =
-      EventChannel('health_kit_reporter_event_channel_heartbeat_series_query');
-
-  /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
-  /// Will handle event exchanges of the plugin.
-  ///
   static const EventChannel _workoutRouteQueryChannel =
       EventChannel('health_kit_reporter_event_channel_workout_route_query');
 
@@ -170,10 +164,10 @@ class HealthKitReporter {
   /// Provide the [predicate] to set the date interval.
   ///
   static StreamSubscription<dynamic> observerQuery(
-      String identifier, Predicate predicate,
+      List<String> identifiers, Predicate predicate,
       {required Function(String) onUpdate}) {
     final arguments = <String, dynamic>{
-      'identifier': identifier,
+      'identifiers': identifiers,
     };
     arguments.addAll(predicate.map);
     return _observerQueryChannel
@@ -193,10 +187,10 @@ class HealthKitReporter {
   /// Provide the [predicate] to set the date interval.
   ///
   static StreamSubscription<dynamic> anchoredObjectQuery(
-      String identifier, Predicate predicate,
+      List<String> identifiers, Predicate predicate,
       {required Function(List<Sample>, List<DeletedObject>) onUpdate}) {
     final arguments = <String, dynamic>{
-      'identifier': identifier,
+      'identifiers': identifiers,
     };
     arguments.addAll(predicate.map);
     return _anchoredObjectQueryChannel
@@ -259,8 +253,7 @@ class HealthKitReporter {
   /// Set the grouping by [intervalComponents]
   ///
   static StreamSubscription<dynamic> statisticsCollectionQuery(
-      QuantityType type,
-      String unit,
+      List<PreferredUnit> preferredUnits,
       Predicate predicate,
       DateTime anchorDate,
       DateTime enumerateFrom,
@@ -268,8 +261,7 @@ class HealthKitReporter {
       DateComponents intervalComponents,
       {required Function(Statistics) onUpdate}) {
     final arguments = {
-      'identifier': type.identifier,
-      'unit': unit,
+      'preferredUnits': preferredUnits.map((e) => e.map).toList(),
       'anchorTimestamp': anchorDate.millisecondsSinceEpoch,
       'enumerateFrom': enumerateFrom.millisecondsSinceEpoch,
       'enumerateTo': enumerateTo.millisecondsSinceEpoch,
@@ -338,13 +330,18 @@ class HealthKitReporter {
 
   /// Returns [HeartbeatSeriesSample] sample for the provided time interval predicate [predicate].
   ///
-  static Future<HeartbeatSeriesSample> heartbeatSeriesQuery(
+  static Future<List<HeartbeatSeries>> heartbeatSeriesQuery(
       Predicate predicate) async {
     final arguments = predicate.map;
     final result =
         await _methodChannel.invokeMethod('heartbeatSeriesQuery', arguments);
-    final json = jsonDecode(result);
-    return HeartbeatSeriesSample.fromJson(json);
+    final List<dynamic> list = jsonDecode(result);
+    final series = <HeartbeatSeries>[];
+    for (final Map<String, dynamic> map in list) {
+      final sample = HeartbeatSeries.fromJson(map);
+      series.add(sample);
+    }
+    return series;
   }
 
   /// Returns [Quantity] samples for the provided [type],
@@ -628,16 +625,13 @@ class HealthKitReporter {
 
   /// Deletes all objects related to [identifier] with [predicate].
   ///
-  static Future<Map<String, dynamic>> deleteObjects(
+  static Future<dynamic> deleteObjects(
       String identifier, Predicate predicate) async {
     final arguments = <String, dynamic>{
       'identifier': identifier,
     };
     arguments.addAll(predicate.map);
-    final result =
-        await _methodChannel.invokeMethod('deleteObjects', arguments);
-    final Map<String, dynamic> map = jsonDecode(result);
-    return map;
+    return await _methodChannel.invokeMethod('deleteObjects', arguments);
   }
 
   /// Saves [Sample] in [HealthKit].

@@ -21,32 +21,34 @@ public final class ObserverQueryStreamHandler: NSObject {
 extension ObserverQueryStreamHandler: StreamHandlerProtocol {
     public func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
         guard
-            let identifier = arguments["identifier"] as? String,
+            let identifiers = arguments["identifiers"] as? [String],
             let startTimestamp = arguments["startTimestamp"] as? Double,
             let endTimestamp = arguments["endTimestamp"] as? Double
         else {
-            return
-        }
-        guard let type = identifier.objectType as? SampleType else {
             return
         }
         let predicate = NSPredicate.samplesPredicate(
             startDate: Date.make(from: startTimestamp),
             endDate: Date.make(from: endTimestamp)
         )
-        let query = try reporter.observer.observerQuery(
-            type: type,
-            predicate: predicate
-        ) { (query, identifier, error) in
-            guard
-                error == nil,
-                let identifier = identifier
-            else {
+        for identifier in identifiers {
+            guard let type = identifier.objectType as? SampleType else {
                 return
             }
-            events(["identifier": identifier])
+            let query = try reporter.observer.observerQuery(
+                type: type,
+                predicate: predicate
+            ) { (query, identifier, error) in
+                guard
+                    error == nil,
+                    let identifier = identifier
+                else {
+                    return
+                }
+                events(["identifier": identifier])
+            }
+            plannedQueries.insert(query)
         }
-        plannedQueries.insert(query)
     }
 
     public static func make(with reporter: HealthKitReporter) -> ObserverQueryStreamHandler {

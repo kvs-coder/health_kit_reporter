@@ -8,14 +8,6 @@
 import Foundation
 
 extension FlutterStreamHandler where Self: NSObject & StreamHandlerProtocol {
-    private func hasAlreadyActiveQuery(with identifier: String) -> Bool {
-        for activeQuery in activeQueries {
-            if activeQuery.identifier == identifier {
-                return true
-            }
-        }
-        return false
-    }
     private func executePlannedQueries() {
         for plannedQuery in plannedQueries {
             reporter.manager.executeQuery(plannedQuery)
@@ -40,16 +32,6 @@ extension FlutterStreamHandler where Self: NSObject & StreamHandlerProtocol {
                 arguments: arguments,
                 events: events
             )
-            if let identifier = arguments["identifier"] as? String {
-                let isActive = hasAlreadyActiveQuery(with: identifier)
-                if isActive {
-                    return FlutterError(
-                        code: className,
-                        message: "Error setting query.",
-                        details: "Query is already running."
-                    )
-                }
-            }
             executePlannedQueries()
         } catch {
             return FlutterError(

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:health_kit_reporter/model/payload/heartbeat_series_sample.dart';
+import 'package:health_kit_reporter/model/payload/heartbeat_series.dart';
 
 void main() {
   test('heartbeat_series_sample_parse_from_json', () {
@@ -228,7 +228,7 @@ void main() {
         'metadata': {'HKAlgorithmVersion': '1'}
       }
     };
-    final sut = HeartbeatSeriesSample.fromJson(json);
+    final sut = HeartbeatSeries.fromJson(json);
     expect(sut.uuid, '40975CB7-93FB-4D83-982C-072951654541');
     expect(sut.identifier, 'HKDataTypeIdentifierHeartbeatSeries');
     expect(sut.startTimestamp, 1634308957.9276123);
@@ -248,16 +248,16 @@ void main() {
     expect(sut.sourceRevision.operatingSystem.minorVersion, 0);
     expect(sut.sourceRevision.operatingSystem.patchVersion, 1);
     expect(sut.harmonized.count, 39);
-    expect(sut.harmonized.series.length, 39);
-    expect(sut.harmonized.series[0].precededByGap, true);
-    expect(sut.harmonized.series[0].done, false);
-    expect(sut.harmonized.series[0].timeSinceSeriesStart, 0.95703125);
-    expect(sut.harmonized.series[1].precededByGap, false);
-    expect(sut.harmonized.series[1].done, false);
-    expect(sut.harmonized.series[1].timeSinceSeriesStart, 1.6875);
-    expect(sut.harmonized.series.last.precededByGap, false);
-    expect(sut.harmonized.series.last.done, true);
-    expect(sut.harmonized.series.last.timeSinceSeriesStart, 54.39453125);
+    expect(sut.harmonized.measurements.length, 39);
+    expect(sut.harmonized.measurements[0].precededByGap, true);
+    expect(sut.harmonized.measurements[0].done, false);
+    expect(sut.harmonized.measurements[0].timeSinceSeriesStart, 0.95703125);
+    expect(sut.harmonized.measurements[1].precededByGap, false);
+    expect(sut.harmonized.measurements[1].done, false);
+    expect(sut.harmonized.measurements[1].timeSinceSeriesStart, 1.6875);
+    expect(sut.harmonized.measurements.last.precededByGap, false);
+    expect(sut.harmonized.measurements.last.done, true);
+    expect(sut.harmonized.measurements.last.timeSinceSeriesStart, 54.39453125);
     expect(sut.harmonized.metadata, {'HKAlgorithmVersion': '1'});
   });
 }
