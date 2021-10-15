@@ -12,7 +12,7 @@ import 'model/payload/date_components.dart';
 import 'model/payload/deleted_object.dart';
 import 'model/payload/device.dart';
 import 'model/payload/electrocardiogram.dart';
-import 'model/payload/heartbeat_serie.dart';
+import 'model/payload/heartbeat_series_sample.dart';
 import 'model/payload/preferred_unit.dart';
 import 'model/payload/quantity.dart';
 import 'model/payload/sample.dart';
@@ -145,23 +145,6 @@ class HealthKitReporter {
   ///
   static const EventChannel _workoutRouteQueryChannel =
       EventChannel('health_kit_reporter_event_channel_workout_route_query');
-
-  /// Sets subscription for [HeartbeatSerie] series.
-  /// Will call [onUpdate] callback, if
-  /// there were new series came from enumeration block until it is done.
-  /// Provide the [predicate] to set the date interval.
-  ///
-  static StreamSubscription<dynamic> heartbeatSeriesQuery(Predicate predicate,
-      {required Function(HeartbeatSerie) onUpdate}) {
-    final arguments = predicate.map;
-    return _heartbeatSeriesQueryChannel
-        .receiveBroadcastStream(arguments)
-        .listen((event) {
-      final json = jsonDecode(event);
-      final heartbeatSerie = HeartbeatSerie.fromJson(json);
-      onUpdate(heartbeatSerie);
-    });
-  }
 
   /// Sets subscription for [WorkoutRoute] series.
   /// Will call [onUpdate] callback, if
@@ -351,6 +334,18 @@ class HealthKitReporter {
     final result = await _methodChannel.invokeMethod('characteristicsQuery');
     final Map<String, dynamic> map = jsonDecode(result);
     return Characteristic.fromJson(map);
+  }
+
+  /// Returns [HeartbeatSeriesSample] sample for the provided time interval predicate [predicate].
+  ///
+  static Future<HeartbeatSeriesSample> heartbeatSeriesQuery(
+      Predicate predicate) async {
+    final arguments = predicate.map;
+    final result =
+        await _methodChannel.invokeMethod('heartbeatSeriesQuery', arguments);
+    print(result);
+    final json = jsonDecode(result);
+    return HeartbeatSeriesSample.fromJson(json);
   }
 
   /// Returns [Quantity] samples for the provided [type],

@@ -1,3 +1,7 @@
+## [1.5.0] - 15.10.2021
+
+* no stream heartbeatSeriesQuery. HeartbeatSeries now is a valid sample with a set of beat by beat measurements 
+
 ## [1.4.1] - 12.09.2021
 
 * Fix characteristic parsing if not all types are requested for reading

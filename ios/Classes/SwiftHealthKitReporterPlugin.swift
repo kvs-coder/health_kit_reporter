@@ -802,7 +802,7 @@ extension SwiftHealthKitReporterPlugin {
             do {
                 let query = try reporter.reader.heartbeatSeriesQuery(
                     predicate: predicate
-                ) { (serie, error) in
+                ) { (series, error) in
                     guard error == nil else {
                         result(
                             FlutterError(
@@ -814,7 +814,7 @@ extension SwiftHealthKitReporterPlugin {
                         return
                     }
                     do {
-                        guard let serie = serie else {
+                        guard let series = series else {
                             result(
                                 FlutterError(
                                     code: "HeartbeatSeriesQuery",
@@ -824,12 +824,12 @@ extension SwiftHealthKitReporterPlugin {
                             )
                             return
                         }
-                        result(try serie.encoded())
+                        result(try series.encoded())
                     } catch {
                         result(
                             FlutterError(
                                 code: "HeartbeatSeriesQuery",
-                                message: "Error in json encoding of serie: \(String(describing: serie))",
+                                message: "Error in json encoding of serie: \(String(describing: series))",
                                 details: error
                             )
                         )

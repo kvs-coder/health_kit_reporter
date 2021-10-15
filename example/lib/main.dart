@@ -158,6 +158,11 @@ class _MyAppState extends State<MyApp> {
                               child: Text('samples')),
                           ElevatedButton(
                               onPressed: () {
+                                queryHeartbeatSeries();
+                              },
+                              child: Text('heartbeatSeriesQuery')),
+                          ElevatedButton(
+                              onPressed: () {
                                 querySources();
                               },
                               child: Text('sources')),
@@ -238,11 +243,6 @@ class _MyAppState extends State<MyApp> {
                                 statisticsCollectionQuery();
                               },
                               child: Text('statisticsCollectionQuery')),
-                          ElevatedButton(
-                              onPressed: () {
-                                heartbeatSeriesQuery();
-                              },
-                              child: Text('heartbeatSeriesQuery')),
                           ElevatedButton(
                               onPressed: () {
                                 workoutRouteQuery();
@@ -443,6 +443,15 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  void queryHeartbeatSeries() async {
+    try {
+      final series = await HealthKitReporter.heartbeatSeriesQuery(_predicate);
+      print('heartbeatSeries: ${series.map}');
+    } catch (e) {
+      print(e);
+    }
+  }
+
   void queryCharacteristics() async {
     try {
       final characteristics = await HealthKitReporter.characteristicsQuery();
@@ -492,15 +501,6 @@ class _MyAppState extends State<MyApp> {
     final isSet = await HealthKitReporter.enableBackgroundDelivery(
         identifier, UpdateFrequency.immediate);
     print('$identifier enableBackgroundDelivery: $isSet');
-  }
-
-  void heartbeatSeriesQuery() {
-    final sub =
-        HealthKitReporter.heartbeatSeriesQuery(_predicate, onUpdate: (serie) {
-      print('Updates for heartbeatSeriesQuery');
-      print(serie.map);
-    });
-    print('heartbeatSeriesQuery: $sub');
   }
 
   void workoutRouteQuery() {
