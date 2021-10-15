@@ -1,3 +1,7 @@
+## [1.5.1] - 15.10.2021
+
+* package minor fixes
+
 ## [1.5.0] - 15.10.2021
 
 * no stream heartbeatSeriesQuery. HeartbeatSeries now is a valid sample with a set of beat by beat measurements 

@@ -1,6 +1,6 @@
 name: health_kit_reporter
 description: Helps to write or read data from Apple Health via HealthKit framework.
-version: 1.5.0
+version: 1.5.1
 homepage: https://github.com/VictorKachalov/health_kit_reporter
 
 environment:
@@ -10,10 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  intl: ^0.17.0
 
 dev_dependencies:
-  pedantic: ^1.11.0
+  flutter_lints: ^1.0.0
   flutter_test:
     sdk: flutter
 
