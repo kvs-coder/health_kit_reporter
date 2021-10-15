@@ -412,6 +412,7 @@ class HealthKitReporter {
       Predicate predicate) async {
     final result = await _methodChannel.invokeMethod(
         'electrocardiogramQuery', predicate.map);
+    print(result);
     final List<dynamic> list = jsonDecode(result);
     final electrocardiograms = <Electrocardiogram>[];
     for (final Map<String, dynamic> map in list) {

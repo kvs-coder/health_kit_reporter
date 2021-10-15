@@ -102,7 +102,7 @@ class ElectrocardiogramHarmonized {
   ElectrocardiogramHarmonized.fromJson(Map<String, dynamic> json)
       : averageHeartRate = json['averageHeartRate'],
         averageHeartRateUnit = json['averageHeartRateUnit'],
-        samplingFrequency = json['averageHeartRate'],
+        samplingFrequency = json['samplingFrequency'],
         samplingFrequencyUnit = json['samplingFrequencyUnit'],
         classification = json['classification'],
         symptomsStatus = json['symptomsStatus'],
