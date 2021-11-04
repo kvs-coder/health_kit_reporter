@@ -66,15 +66,14 @@ abstract class Sample<Harmonized> {
 
   /// General constructor from JSON payload
   ///
-  Sample.from(Map<String, dynamic> json, Harmonized harmonized)
+  Sample.from(Map<String, dynamic> json, this.harmonized)
       : uuid = json['uuid'],
         identifier = json['identifier'],
         startTimestamp = json['startTimestamp'],
         endTimestamp = json['endTimestamp'],
         device =
             json['device'] != null ? Device.fromJson(json['device']) : null,
-        sourceRevision = SourceRevision.fromJson(json['sourceRevision']),
-        harmonized = harmonized;
+        sourceRevision = SourceRevision.fromJson(json['sourceRevision']);
 
   /// For saving data, prepares appropriate map
   /// for [HealthKitReporter.save]

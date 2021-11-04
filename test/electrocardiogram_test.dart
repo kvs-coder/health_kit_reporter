@@ -34,7 +34,7 @@ void main() {
         'averageHeartRate': 62,
         'classification': 'HKElectrocardiogramClassification',
         'samplingFrequencyUnit': 'Hz',
-        'averageHeartRateUnit': 'count\/min',
+        'averageHeartRateUnit': 'count/min',
         'symptomsStatus': 'HKElectrocardiogramSymptomsStatus',
         'samplingFrequency': 512,
         'metadata': {
@@ -66,7 +66,7 @@ void main() {
     expect(sut.harmonized.averageHeartRate, 62);
     expect(sut.harmonized.classification, 'HKElectrocardiogramClassification');
     expect(sut.harmonized.samplingFrequencyUnit, 'Hz');
-    expect(sut.harmonized.averageHeartRateUnit, 'count\/min');
+    expect(sut.harmonized.averageHeartRateUnit, 'count/min');
     expect(sut.harmonized.symptomsStatus, 'HKElectrocardiogramSymptomsStatus');
     expect(sut.harmonized.samplingFrequency, 512);
     expect(sut.harmonized.metadata, {

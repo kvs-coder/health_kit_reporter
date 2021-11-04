@@ -21,7 +21,7 @@ void main() {
     expect(sut.biologicalSex, BiologicalSex.male);
     expect(sut.birthday, '1986-09-02T20:56:55.000+02:00'.toString().date);
     expect(sut.bloodType, BloodType.abPositive);
-    expect(sut.fitzpatrickSkinType, FitzpatrickSkinType.II);
+    expect(sut.fitzpatrickSkinType, FitzpatrickSkinType.ii);
     expect(sut.wheelchairUse, WheelchairUse.yes);
     expect(sut.activityMoveMode, ActivityMoveMode.activeEnergy);
   });

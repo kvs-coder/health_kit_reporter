@@ -1,3 +1,7 @@
+## [1.5.2] - 04.11.2021
+
+* invalid timstamps fixes for data saving
+
 ## [1.5.1] - 15.10.2021
 
 * package minor fixes

@@ -9,12 +9,12 @@
 ///
 enum FitzpatrickSkinType {
   notSet,
-  I,
-  II,
-  III,
-  IV,
-  V,
-  VI,
+  i,
+  ii,
+  iii,
+  iv,
+  v,
+  vi,
 }
 
 extension Description on FitzpatrickSkinType {
@@ -22,17 +22,17 @@ extension Description on FitzpatrickSkinType {
     switch (this) {
       case FitzpatrickSkinType.notSet:
         return 'na';
-      case FitzpatrickSkinType.I:
+      case FitzpatrickSkinType.i:
         return 'I';
-      case FitzpatrickSkinType.II:
+      case FitzpatrickSkinType.ii:
         return 'II';
-      case FitzpatrickSkinType.III:
+      case FitzpatrickSkinType.iii:
         return 'III';
-      case FitzpatrickSkinType.IV:
+      case FitzpatrickSkinType.iv:
         return 'IV';
-      case FitzpatrickSkinType.V:
+      case FitzpatrickSkinType.v:
         return 'V';
-      case FitzpatrickSkinType.VI:
+      case FitzpatrickSkinType.vi:
         return 'VI';
     }
   }
@@ -44,17 +44,17 @@ extension FitzpatrickSkinTypeFactory on FitzpatrickSkinType {
       case 'na':
         return FitzpatrickSkinType.notSet;
       case 'I':
-        return FitzpatrickSkinType.I;
+        return FitzpatrickSkinType.i;
       case 'II':
-        return FitzpatrickSkinType.II;
+        return FitzpatrickSkinType.ii;
       case 'III':
-        return FitzpatrickSkinType.III;
+        return FitzpatrickSkinType.iii;
       case 'IV':
-        return FitzpatrickSkinType.IV;
+        return FitzpatrickSkinType.iv;
       case 'V':
-        return FitzpatrickSkinType.V;
+        return FitzpatrickSkinType.v;
       case 'VI':
-        return FitzpatrickSkinType.VI;
+        return FitzpatrickSkinType.vi;
       default:
         return null;
     }

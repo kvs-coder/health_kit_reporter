@@ -32,7 +32,7 @@ void main() {
       'endTimestamp': 1634309012.3221436,
       'harmonized': {
         'count': 39,
-        'series': [
+        'measurements': [
           {
             'precededByGap': true,
             'done': false,
