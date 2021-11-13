@@ -248,7 +248,5 @@ Some features like **HeartbeatSeries** are available only starting with iOS 13.0
 ## License
 Under <a href=https://github.com/VictorKachalov/localized/blob/master/LICENSE>MIT License</a>
 
-## Donation
-If you think that this repo helped you to solve the issues you struggle with, please don't be shy and donate :-)
-
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/paypalme/VictorKachalov/5EUR)
+## Sponsorhip
+If you think that my repo helped you to solve the issues you struggle with, please don't be shy and sponsor :-)
