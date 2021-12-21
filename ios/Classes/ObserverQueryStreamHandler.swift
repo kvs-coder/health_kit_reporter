@@ -21,16 +21,19 @@ public final class ObserverQueryStreamHandler: NSObject {
 extension ObserverQueryStreamHandler: StreamHandlerProtocol {
     public func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
         guard
-            let identifiers = arguments["identifiers"] as? [String],
-            let startTimestamp = arguments["startTimestamp"] as? Double,
-            let endTimestamp = arguments["endTimestamp"] as? Double
+            let identifiers = arguments["identifiers"] as? [String]
         else {
             return
         }
-        let predicate = NSPredicate.samplesPredicate(
-            startDate: Date.make(from: startTimestamp),
-            endDate: Date.make(from: endTimestamp)
-        )
+        var predicate: NSPredicate?
+        if
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double {
+            predicate = NSPredicate.samplesPredicate(
+                startDate: Date.make(from: startTimestamp),
+                endDate: Date.make(from: endTimestamp)
+            )
+        }
         for identifier in identifiers {
             guard let type = identifier.objectType as? SampleType else {
                 return

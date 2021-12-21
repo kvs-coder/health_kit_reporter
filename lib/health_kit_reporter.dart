@@ -164,12 +164,14 @@ class HealthKitReporter {
   /// Provide the [predicate] to set the date interval.
   ///
   static StreamSubscription<dynamic> observerQuery(
-      List<String> identifiers, Predicate predicate,
+      List<String> identifiers, Predicate? predicate,
       {required Function(String) onUpdate}) {
     final arguments = <String, dynamic>{
       'identifiers': identifiers,
     };
-    arguments.addAll(predicate.map);
+    if (predicate != null) {
+      arguments.addAll(predicate.map);
+    }
     return _observerQueryChannel
         .receiveBroadcastStream(arguments)
         .listen((event) {

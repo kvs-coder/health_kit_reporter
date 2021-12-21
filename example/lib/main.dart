@@ -492,7 +492,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void observerQuery(List<String> identifiers) async {
-    final sub = HealthKitReporter.observerQuery(identifiers, _predicate,
+    final sub = HealthKitReporter.observerQuery(identifiers, null,
         onUpdate: (identifier) async {
       print('Updates for observerQuerySub - $identifier');
       print(identifier);
