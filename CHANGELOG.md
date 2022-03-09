@@ -1,3 +1,7 @@
+## [2.0.0] - 09.03.2022
+
+* A way not to provide a predicate where it can be omitted
+
 ## [1.5.2] - 04.11.2021
 
 * invalid timstamps fixes for data saving
