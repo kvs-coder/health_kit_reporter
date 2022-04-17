@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:health_kit_reporter/model/payload/heartbeat_series.dart';
 
 void main() {
-  test('heartbeat_series_sample_parse_from_json', () {
+  test('heartbeat_series_parse_from_json', () {
     final json = {
       'device': {
         'softwareVersion': '8.0.1',

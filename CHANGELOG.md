@@ -1,3 +1,8 @@
+## [2.0.1] - 17.04.2022
+
+* Add workout route as query method, remove it as event stream
+* Minor fixes in the code
+
 ## [2.0.0] - 09.03.2022
 
 * A way not to provide a predicate where it can be omitted

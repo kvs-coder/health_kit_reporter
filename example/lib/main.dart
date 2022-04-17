@@ -164,6 +164,11 @@ class _MyAppState extends State<MyApp> {
                               child: Text('heartbeatSeriesQuery')),
                           ElevatedButton(
                               onPressed: () {
+                                workoutRouteQuery();
+                              },
+                              child: Text('workoutRouteQuery')),
+                          ElevatedButton(
+                              onPressed: () {
                                 querySources();
                               },
                               child: Text('sources')),
@@ -237,11 +242,6 @@ class _MyAppState extends State<MyApp> {
                                 statisticsCollectionQuery();
                               },
                               child: Text('statisticsCollectionQuery')),
-                          ElevatedButton(
-                              onPressed: () {
-                                workoutRouteQuery();
-                              },
-                              child: Text('workoutRouteQuery')),
                         ],
                       ),
                       Column(
@@ -456,6 +456,15 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  void workoutRouteQuery() async {
+    try {
+      final series = await HealthKitReporter.workoutRouteQuery(_predicate);
+      print('workoutRoutes: ${series.map((e) => e.map).toList()}');
+    } catch (e) {
+      print(e);
+    }
+  }
+
   void queryCharacteristics() async {
     try {
       final characteristics = await HealthKitReporter.characteristicsQuery();
@@ -507,15 +516,6 @@ class _MyAppState extends State<MyApp> {
           identifier, UpdateFrequency.immediate);
       print('$identifier enableBackgroundDelivery: $isSet');
     }
-  }
-
-  void workoutRouteQuery() {
-    final sub =
-        HealthKitReporter.workoutRouteQuery(_predicate, onUpdate: (serie) {
-      print('Updates for workoutRouteQuery');
-      print(serie.map);
-    });
-    print('workoutRouteQuery: $sub');
   }
 
   void anchoredObjectQuery(List<String> identifiers) {

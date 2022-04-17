@@ -6,7 +6,7 @@
 ///
 enum SeriesType {
   heartbeatSeries,
-  route,
+  workoutRoute,
 }
 
 extension SeriesTypeIdentifier on SeriesType {
@@ -14,7 +14,7 @@ extension SeriesTypeIdentifier on SeriesType {
     switch (this) {
       case SeriesType.heartbeatSeries:
         return 'HKDataTypeIdentifierHeartbeatSeries';
-      case SeriesType.route:
+      case SeriesType.workoutRoute:
         return 'HKWorkoutRouteTypeIdentifier';
     }
   }

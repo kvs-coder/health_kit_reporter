@@ -134,29 +134,6 @@ class HealthKitReporter {
   static const EventChannel _anchoredObjectQueryChannel =
       EventChannel('health_kit_reporter_event_channel_anchored_object_query');
 
-  /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
-  /// Will handle event exchanges of the plugin.
-  ///
-  static const EventChannel _workoutRouteQueryChannel =
-      EventChannel('health_kit_reporter_event_channel_workout_route_query');
-
-  /// Sets subscription for [WorkoutRoute] series.
-  /// Will call [onUpdate] callback, if
-  /// there were new series came from enumeration block until it is done.
-  /// Provide the [predicate] to set the date interval.
-  ///
-  static StreamSubscription<dynamic> workoutRouteQuery(Predicate predicate,
-      {required Function(WorkoutRoute) onUpdate}) {
-    final arguments = predicate.map;
-    return _workoutRouteQueryChannel
-        .receiveBroadcastStream(arguments)
-        .listen((event) {
-      final json = jsonDecode(event);
-      final workoutRoute = WorkoutRoute.fromJson(json);
-      onUpdate(workoutRoute);
-    });
-  }
-
   /// Sets subscription for data changes.
   /// Will call [onUpdate] callback, if
   /// there were changes regarding to the provided [identifier]
@@ -330,7 +307,7 @@ class HealthKitReporter {
     return Characteristic.fromJson(map);
   }
 
-  /// Returns [HeartbeatSeriesSample] sample for the provided time interval predicate [predicate].
+  /// Returns [HeartbeatSeries] sample for the provided time interval predicate [predicate].
   ///
   static Future<List<HeartbeatSeries>> heartbeatSeriesQuery(
       Predicate predicate) async {
@@ -344,6 +321,22 @@ class HealthKitReporter {
       series.add(sample);
     }
     return series;
+  }
+
+  /// Returns [WorkoutRoute] sample for the provided time interval predicate [predicate].
+  ///
+  static Future<List<WorkoutRoute>> workoutRouteQuery(
+      Predicate predicate) async {
+    final arguments = predicate.map;
+    final result =
+        await _methodChannel.invokeMethod('workoutRouteQuery', arguments);
+    final List<dynamic> list = jsonDecode(result);
+    final routes = <WorkoutRoute>[];
+    for (final Map<String, dynamic> map in list) {
+      final sample = WorkoutRoute.fromJson(map);
+      routes.add(sample);
+    }
+    return routes;
   }
 
   /// Returns [Quantity] samples for the provided [type],

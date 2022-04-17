@@ -22,8 +22,6 @@ final class StreamHandlerFactory: NSObject {
             }
         case .anchoredObjectQuery:
             return AnchoredObjectQueryStreamHandler.make(with: reporter)
-        case .workoutRouteQuery:
-            return WorkoutRouteQueryStreamHandler.make(with: reporter)
         }
     }
 }

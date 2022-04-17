@@ -55,6 +55,14 @@ class HeartbeatSeries extends Sample<HeartbeatSeriesHarmonized> {
             json, HeartbeatSeriesHarmonized.fromJson(json['harmonized']));
 }
 
+/// Equivalent of [HeartbeatSeries.Harmonized]
+/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+///
+/// Supports [map] representation.
+///
+/// Has a [HeartbeatSeriesHarmonized.fromJson] constructor
+/// to create instances from JSON payload coming from iOS native code.
+///
 class HeartbeatSeriesHarmonized {
   const HeartbeatSeriesHarmonized(
     this.count,
