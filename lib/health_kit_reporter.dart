@@ -401,10 +401,14 @@ class HealthKitReporter {
   /// time interval predicate [predicate].
   ///
   static Future<List<Electrocardiogram>> electrocardiogramQuery(
-      Predicate predicate) async {
-    final result = await _methodChannel.invokeMethod(
-        'electrocardiogramQuery', predicate.map);
-    print(result);
+      Predicate predicate,
+      {bool withVoltageMeasurements = false}) async {
+    final arguments = <String, dynamic>{
+      'withVoltageMeasurements': withVoltageMeasurements,
+    };
+    arguments.addAll(predicate.map);
+    final result =
+        await _methodChannel.invokeMethod('electrocardiogramQuery', arguments);
     final List<dynamic> list = jsonDecode(result);
     final electrocardiograms = <Electrocardiogram>[];
     for (final Map<String, dynamic> map in list) {

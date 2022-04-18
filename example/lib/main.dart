@@ -325,8 +325,9 @@ class _ReadView extends StatelessWidget with HealthKitReporterMixin {
 
   void queryElectrocardiograms() async {
     try {
-      final electrocardiograms =
-          await HealthKitReporter.electrocardiogramQuery(predicate);
+      final electrocardiograms = await HealthKitReporter.electrocardiogramQuery(
+          predicate,
+          withVoltageMeasurements: true);
       print(
           'electrocardiograms: ${electrocardiograms.map((e) => e.map).toList()}');
     } catch (e) {

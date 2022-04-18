@@ -112,7 +112,7 @@ extension SwiftHealthKitReporterPlugin {
                 result: result
             )
         case .electrocardiogramQuery:
-            guard let arguments = call.arguments as? [String: Double] else {
+            guard let arguments = call.arguments as? [String: Any] else {
                 throwNoArgumentsError(result: result)
                 return
             }
@@ -532,12 +532,13 @@ extension SwiftHealthKitReporterPlugin {
     }
     private func electrocardiogramQuery(
         reporter: HealthKitReporter,
-        arguments: [String: Double],
+        arguments: [String: Any],
         result: @escaping FlutterResult
     ) {
         guard
-            let startTimestamp = arguments["startTimestamp"],
-            let endTimestamp = arguments["endTimestamp"]
+            let startTimestamp = arguments["startTimestamp"] as? Double,
+            let endTimestamp = arguments["endTimestamp"] as? Double,
+            let withVoltageMeasurements = arguments["withVoltageMeasurements"] as? Bool
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
@@ -549,7 +550,8 @@ extension SwiftHealthKitReporterPlugin {
         if #available(iOS 14.0, *) {
             do {
                 let query = try reporter.reader.electrocardiogramQuery(
-                    predicate: predicate
+                    predicate: predicate,
+                    withVoltageMeasurements: withVoltageMeasurements
                 ) { (electrocardiograms, error) in
                     guard error == nil else {
                         result(
