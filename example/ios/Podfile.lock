@@ -5,7 +5,7 @@ PODS:
   - health_kit_reporter (1.5.2):
     - Flutter
     - HealthKitReporter
-  - HealthKitReporter (1.6.3)
+  - HealthKitReporter (1.6.4)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -28,7 +28,7 @@ SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   health_kit_reporter: 6da8c20414d6a53cf2babcfd0314ea05a943bd3e
-  HealthKitReporter: 42ebaa50989c4e4f6171b2caa3388c53519bea33
+  HealthKitReporter: 313a822918d705beb27bdeeb5794c1afa4fe88bb
 
 PODFILE CHECKSUM: a75497545d4391e2d394c3668e20cfb1c2bbd4aa
 

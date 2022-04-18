@@ -1,3 +1,7 @@
+## [2.0.2] - 18.04.2022
+
+* ECG with Voltage measurements in one query
+
 ## [2.0.1] - 17.04.2022
 
 * Add workout route as query method, remove it as event stream

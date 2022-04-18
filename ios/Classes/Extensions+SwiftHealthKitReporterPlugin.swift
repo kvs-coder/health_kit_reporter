@@ -10,6 +10,33 @@ import HealthKitReporter
 
 // MARK: - MethodCall
 extension SwiftHealthKitReporterPlugin {
+    private enum Method: String {
+        case requestAuthorization
+        case preferredUnits
+        case characteristicsQuery
+        case quantityQuery
+        case categoryQuery
+        case workoutQuery
+        case electrocardiogramQuery
+        case sampleQuery
+        case statisticsQuery
+        case heartbeatSeriesQuery
+        case workoutRouteQuery
+        case queryActivitySummary
+        case sourceQuery
+        case correlationQuery
+        case enableBackgroundDelivery
+        case disableAllBackgroundDelivery
+        case disableBackgroundDelivery
+        case startWatchApp
+        case isAuthorizedToWrite
+        case addCategory
+        case addQuantity
+        case delete
+        case deleteObjects
+        case save
+    }
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         guard let reporter = self.reporter else {
             result(
