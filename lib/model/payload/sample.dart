@@ -83,6 +83,7 @@ abstract class Sample<Harmonized> {
     if (this is Quantity) arguments['quantity'] = map;
     if (this is Category) arguments['category'] = map;
     if (this is Workout) arguments['workout'] = map;
+    if (this is Correlation) arguments['correlation'] = map;
     return arguments;
   }
 

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:health_kit_reporter/health_kit_reporter.dart';
 import 'package:health_kit_reporter/model/payload/category.dart';
+import 'package:health_kit_reporter/model/payload/correlation.dart';
 import 'package:health_kit_reporter/model/payload/date_components.dart';
 import 'package:health_kit_reporter/model/payload/device.dart';
 import 'package:health_kit_reporter/model/payload/preferred_unit.dart';
@@ -152,6 +153,9 @@ class _MyAppState extends State<MyApp> {
         WorkoutType.workoutType.identifier,
         CategoryType.sleepAnalysis.identifier,
         CategoryType.mindfulSession.identifier,
+        QuantityType.bloodPressureDiastolic.identifier,
+        QuantityType.bloodPressureSystolic.identifier,
+        //CorrelationType.bloodPressure.identifier,
       ];
       final isRequested =
           await HealthKitReporter.requestAuthorization(readTypes, writeTypes);
@@ -381,6 +385,12 @@ class _WriteView extends StatelessWidget with HealthKitReporterMixin {
           },
           child: Text('saveMindfulMinutes'),
         ),
+        TextButton(
+          onPressed: () {
+            saveBloodPressureCorrelation();
+          },
+          child: Text('saveBloodPressureCorrelation'),
+        ),
       ],
     );
   }
@@ -491,6 +501,42 @@ class _WriteView extends StatelessWidget with HealthKitReporterMixin {
       } else {
         print('error canWrite mindfulMinutes: $canWrite');
       }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void saveBloodPressureCorrelation() async {
+    try {
+      final now = DateTime.now();
+      final minuteAgo = now.add(Duration(minutes: -1));
+      final sys = Quantity(
+          'testSysUUID234',
+          QuantityType.bloodPressureSystolic.identifier,
+          minuteAgo.millisecondsSinceEpoch,
+          now.millisecondsSinceEpoch,
+          device,
+          sourceRevision,
+          QuantityHarmonized(123, 'mmHg', null));
+      final dia = Quantity(
+          'testDiaUUID456',
+          QuantityType.bloodPressureDiastolic.identifier,
+          minuteAgo.millisecondsSinceEpoch,
+          now.millisecondsSinceEpoch,
+          device,
+          sourceRevision,
+          QuantityHarmonized(89, 'mmHg', null));
+      final correlationJarmonized = CorrelationHarmonized([sys, dia], [], null);
+      final correlation = Correlation(
+          'test',
+          CorrelationType.bloodPressure.identifier,
+          minuteAgo.millisecondsSinceEpoch,
+          now.millisecondsSinceEpoch,
+          device,
+          sourceRevision,
+          correlationJarmonized);
+      final saved = await HealthKitReporter.save(correlation);
+      print('BloodPressureCorrelationSaved: $saved');
     } catch (e) {
       print(e);
     }

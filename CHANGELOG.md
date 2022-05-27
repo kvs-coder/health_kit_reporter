@@ -1,3 +1,7 @@
+## [2.0.4] - 27.05.2022
+
+* Add Correlation samples writing
+
 ## [2.0.3] - 18.04.2022
 
 * ECG with Voltage measurements in one query on demand

@@ -1478,6 +1478,23 @@ extension SwiftHealthKitReporterPlugin {
                 }
             )
         }
+        if let correlation = arguments["correlation"] as? [String: Any] {
+            let sample = try Correlation.make(from: correlation)
+            return sample.copyWith(
+                startTimestamp: sample.startTimestamp.secondsSince1970,
+                endTimestamp: sample.endTimestamp.secondsSince1970,
+                harmonized: sample.harmonized.copyWith(
+                    quantitySamples: sample.harmonized.quantitySamples.map { $0.copyWith(
+                        startTimestamp: $0.startTimestamp.secondsSince1970,
+                        endTimestamp: $0.endTimestamp.secondsSince1970
+                    )},
+                    categorySamples: sample.harmonized.categorySamples.map { $0.copyWith(
+                        startTimestamp: $0.startTimestamp.secondsSince1970,
+                        endTimestamp: $0.endTimestamp.secondsSince1970
+                    )}
+                )
+            )
+        }
         throw HealthKitError.invalidValue("Invalid arguments: \(arguments)")
     }
     private func throwParsingArgumentsError(
