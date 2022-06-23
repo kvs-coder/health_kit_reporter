@@ -1,3 +1,7 @@
+## [2.1.0] - 23.06.2022.
+
+* Make `averageHeartRate` optional as a `HKElectrocardiogram.Classification.inconclusivePoorReading` may not have a value for this field
+
 ## [2.0.4] - 27.05.2022
 
 * Add Correlation samples writing
