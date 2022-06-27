@@ -181,7 +181,7 @@ class ElectrocardiogramHarmonized {
         ),
         symptomsStatus = json['symptomsStatus'],
         symptomsStatusKey = ElectrocardiogramSymptomStatusRawValue.parse(
-          json['symptomsStatus'],
+          json['symptomsStatusKey'],
         ),
         count = json['count'],
         voltageMeasurements = ElectrocardiogramVoltageMeasurement.collect(
