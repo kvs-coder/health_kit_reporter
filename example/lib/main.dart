@@ -228,8 +228,29 @@ class _ReadView extends StatelessWidget with HealthKitReporterMixin {
               queryActivitySummary();
             },
             child: Text('activitySummary')),
+        TextButton(
+            onPressed: () {
+              multipleQuery();
+            },
+            child: Text('multipleQuery')),
       ],
     );
+  }
+
+  void multipleQuery() async {
+    final prefUnits =
+        await HealthKitReporter.preferredUnits([QuantityType.heartRate]);
+    final hrUnits = prefUnits.first.unit;
+
+    final now = DateTime.now();
+
+    for (int _ in List.generate(10, (index) => index + 1)) {
+      final hbQuery = await HealthKitReporter.quantityQuery(
+          QuantityType.heartRate,
+          hrUnits,
+          Predicate(now.subtract(Duration(seconds: 120 * 60 * 24)), now));
+      print(hbQuery.map((e) => e.harmonized.value));
+    }
   }
 
   void querySamples() async {

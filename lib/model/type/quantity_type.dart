@@ -100,6 +100,19 @@ enum QuantityType {
   dietaryCaffeine,
   dietaryWater,
   uvExposure,
+  appleMoveTime,
+  appleWalkingSteadiness,
+  appleSleepingWristTemperature,
+  runningStrideLength,
+  runningVerticalOscillation,
+  runningGroundContactTime,
+  runningPower,
+  runningSpeed,
+  heartRateRecoveryOneMinute,
+  numberOfAlcoholicBeverages,
+  atrialFibrillationBurden,
+  underwaterDepth,
+  waterTemperature,
 }
 
 extension QuantityTypeIdentifier on QuantityType {
@@ -285,6 +298,32 @@ extension QuantityTypeIdentifier on QuantityType {
         return 'HKQuantityTypeIdentifierDietaryCaffeine';
       case QuantityType.uvExposure:
         return 'HKQuantityTypeIdentifierUVExposure';
+      case QuantityType.appleMoveTime:
+        return 'HKQuantityTypeIdentifierAppleMoveTime';
+      case QuantityType.appleWalkingSteadiness:
+        return 'HKQuantityTypeIdentifierAppleWalkingSteadiness';
+      case QuantityType.appleSleepingWristTemperature:
+        return 'HKQuantityTypeIdentifierAppleSleepingWristTemperature';
+      case QuantityType.runningStrideLength:
+        return 'HKQuantityTypeIdentifierRunningStrideLength';
+      case QuantityType.runningVerticalOscillation:
+        return 'HKQuantityTypeIdentifierRunningVerticalOscillation';
+      case QuantityType.runningGroundContactTime:
+        return 'HKQuantityTypeIdentifierRunningGroundContactTime';
+      case QuantityType.runningPower:
+        return 'HKQuantityTypeIdentifierRunningPower';
+      case QuantityType.runningSpeed:
+        return 'HKQuantityTypeIdentifierRunningSpeed';
+      case QuantityType.heartRateRecoveryOneMinute:
+        return 'HKQuantityTypeIdentifierHeartRateRecoveryOneMinute';
+      case QuantityType.numberOfAlcoholicBeverages:
+        return 'HKQuantityTypeIdentifierNumberOfAlcoholicBeverages';
+      case QuantityType.atrialFibrillationBurden:
+        return 'HKQuantityTypeIdentifierAtrialFibrillationBurden';
+      case QuantityType.underwaterDepth:
+        return 'HKQuantityTypeIdentifierUnderwaterDepth';
+      case QuantityType.waterTemperature:
+        return 'HKQuantityTypeIdentifierWaterTemperature';
     }
   }
 }

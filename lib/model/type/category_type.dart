@@ -69,6 +69,13 @@ enum CategoryType {
   vaginalDryness,
   vomiting,
   wheezing,
+  pregnancyTestResult,
+  progesteroneTestResult,
+  persistentIntermenstrualBleeding,
+  prolongedMenstrualPeriods,
+  irregularMenstrualCycles,
+  infrequentMenstrualCycles,
+  appleWalkingSteadinessEvent,
 }
 
 extension CategoryTypeIdentifier on CategoryType {
@@ -192,6 +199,20 @@ extension CategoryTypeIdentifier on CategoryType {
         return 'HKCategoryTypeIdentifierVomiting';
       case CategoryType.wheezing:
         return 'HKCategoryTypeIdentifierWheezing';
+      case CategoryType.pregnancyTestResult:
+        return 'HKCategoryTypeIdentifierPregnancyTestResult';
+      case CategoryType.progesteroneTestResult:
+        return 'HKCategoryTypeIdentifierProgesteroneTestResult';
+      case CategoryType.persistentIntermenstrualBleeding:
+        return 'HKCategoryTypeIdentifierPersistentIntermenstrualBleeding';
+      case CategoryType.prolongedMenstrualPeriods:
+        return 'HKCategoryTypeIdentifierProlongedMenstrualPeriods';
+      case CategoryType.irregularMenstrualCycles:
+        return 'HKCategoryTypeIdentifierIrregularMenstrualCycles';
+      case CategoryType.infrequentMenstrualCycles:
+        return 'HKCategoryTypeIdentifierInfrequentMenstrualCycles';
+      case CategoryType.appleWalkingSteadinessEvent:
+        return 'HKCategoryTypeIdentifierAppleWalkingSteadinessEvent';
     }
   }
 }
