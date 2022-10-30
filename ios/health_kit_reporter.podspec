@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name                  = 'health_kit_reporter'
-  s.version               = '2.0.4'
+  s.version               = '2.1.0'
   s.summary               = 'HealthKitReporter. A wrapper for HealthKit framework. A Flutter plugin'
   s.swift_versions        = '5.3'
   s.description           = 'Helps to write or read data from Apple Health via HealthKit framework using Flutter.'
