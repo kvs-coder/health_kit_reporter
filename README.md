@@ -107,13 +107,13 @@ Future<void> read(bool isRequested) async {
       final type = QuantityTypeFactory.from(preferredUnit.identifier);
       final quantities = await HealthKitReporter.quantityQuery(
         type,
-        preferredUnit.identifier,
+        preferredUnit.unit,
         _predicate,
       );
       print('quantity: ${quantities.map((e) => e.map).toList()}');
       final statistics = await HealthKitReporter.statisticsQuery(
         type,
-        preferredUnit.identifier,
+        preferredUnit.unit,
         _predicate,
       );
       print('statistics: ${statistics.map}');
