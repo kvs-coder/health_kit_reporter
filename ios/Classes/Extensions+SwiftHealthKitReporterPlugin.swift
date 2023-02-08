@@ -11,6 +11,7 @@ import HealthKitReporter
 // MARK: - MethodCall
 extension SwiftHealthKitReporterPlugin {
     private enum Method: String {
+        case isAvailable
         case requestAuthorization
         case preferredUnits
         case characteristicsQuery
@@ -38,16 +39,6 @@ extension SwiftHealthKitReporterPlugin {
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        guard let reporter = self.reporter else {
-            result(
-                FlutterError(
-                    code: className,
-                    message: "Reporter is nil",
-                    details: nil
-                )
-            )
-            return
-        }
         guard let method = Method(rawValue: call.method) else {
             result(
                 FlutterError(
@@ -58,7 +49,25 @@ extension SwiftHealthKitReporterPlugin {
             )
             return
         }
+
+        guard let reporter = self.reporter else {
+            if method == .isAvailable {
+                result(false)
+            } else {
+                result(
+                    FlutterError(
+                        code: className,
+                        message: "HealthKit is not available",
+                        details: nil
+                    )
+                )
+            }
+            return
+        }
+
         switch method {
+        case .isAvailable:
+            result(true)
         case .requestAuthorization:
             guard let arguments = call.arguments as? [String: [String]] else {
                 throwNoArgumentsError(result: result)
@@ -1540,4 +1549,3 @@ extension SwiftHealthKitReporterPlugin {
         )
     }
 }
-

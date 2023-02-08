@@ -3,18 +3,20 @@ import HealthKitReporter
 
 public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
     var reporter: HealthKitReporter?
-    
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let instance = SwiftHealthKitReporterPlugin()
         do {
-            instance.reporter = try HealthKitReporter()
+            instance.reporter = try? HealthKitReporter()
+
+            let binaryMessenger = registrar.messenger()
+            registerMethodChannel(
+                registrar: registrar,
+                binaryMessenger: binaryMessenger,
+                instance: instance
+            )
+
             if let reporter = instance.reporter {
-                let binaryMessenger = registrar.messenger()
-                registerMethodChannel(
-                    registrar: registrar,
-                    binaryMessenger: binaryMessenger,
-                    instance: instance
-                )
                 try registerEventChannel(
                     binaryMessenger: binaryMessenger,
                     reporter: reporter
