@@ -70,22 +70,21 @@ For this method you need to specify the strings identifiers of types you want to
 
 In the example, we want to read data for all **QuantityTypes** and write data for **QuantityType.stepCount**:
 ```dart
-  void requestAuthorization() async {
-    try {
-      final readTypes = <String>[];
-      readTypes.addAll(QuantityType.values.map((e) => e.identifier));
-      final writeTypes = <String>[
-        QuantityType.stepCount.identifier,
-      ];
-      final isRequested =
-          await HealthKitReporter.requestAuthorization(readTypes, writeTypes);
-      if (isRequested) {
-        // read data/write data/observe data
-      }
-    } catch (e) {
-      print(e);
+Future<void> requestAuthorization() async {
+  try {
+    final readTypes = QuantityType.values.map((e) => e.identifier).toList();
+    final writeTypes = <String>[
+      QuantityType.stepCount.identifier,
+    ];
+    final isRequested =
+        await HealthKitReporter.requestAuthorization(readTypes, writeTypes);
+    if (isRequested) {
+      // read data/write data/observe data
     }
+  } catch (e) {
+    print(e);
   }
+}
 ```
 
 **Warning: Please keep in mind, Apple Health Kit does not let anyone to know if reading permissions were provided.**
@@ -99,38 +98,52 @@ See [Authorization status](https://developer.apple.com/documentation/healthkit/h
 After authorization, you can try to start reading data.
 
 ```dart
-void read(bool isRequested) async {
-    if (isRequested) {
-      final preferredUnits =
-      await HealthKitReporter.preferredUnits([QuantityType.stepCount]);
-      preferredUnits.forEach((preferredUnit) async {
-        print('preferredUnit: ${preferredUnit.identifier}');
-        final type = QuantityTypeFactory.from(preferredUnit.identifier);
-        final quantities = await HealthKitReporter.quantityQuery(
-            type, preferredUnit, _predicate);
-        print('quantity: ${quantities.map((e) => e.map).toList()}');
-        final statistics = await HealthKitReporter.statisticsQuery(
-            type, preferredUnit, _predicate);
-        print('statistics: ${statistics.map}');
-      });
-      final characteristics = await HealthKitReporter.characteristicsQuery();
-      print('characteristics: ${characteristics.map}');
-      final categories = await HealthKitReporter.categoryQuery(
-          CategoryType.sleepAnalysis, _predicate);
-      print('categories: ${categories.map((e) => e.map).toList()}');
-      final samples = await HealthKitReporter.sampleQuery(
-          QuantityType.stepCount.identifier, _predicate);
-      print('samples: ${samples.map((e) => e.map).toList()}');
-      final sources = await HealthKitReporter.sourceQuery(
-          QuantityType.stepCount.identifier, _predicate);
-      print('sources: ${sources.map((e) => e.map).toList()}');
-      final correlations = await HealthKitReporter.correlationQuery(
-          CorrelationType.bloodPressure.identifier, _predicate);
-      print('correlations: ${correlations.map((e) => e.map).toList()}');
-    } else {
-      print('error isRequested: $isRequested');
+Future<void> read(bool isRequested) async {
+  if (isRequested) {
+    final preferredUnits =
+        await HealthKitReporter.preferredUnits([QuantityType.stepCount]);
+    for (final preferredUnit in preferredUnits) {
+      print('preferredUnit: ${preferredUnit.identifier}');
+      final type = QuantityTypeFactory.from(preferredUnit.identifier);
+      final quantities = await HealthKitReporter.quantityQuery(
+        type,
+        preferredUnit.unit,
+        _predicate,
+      );
+      print('quantity: ${quantities.map((e) => e.map).toList()}');
+      final statistics = await HealthKitReporter.statisticsQuery(
+        type,
+        preferredUnit.unit,
+        _predicate,
+      );
+      print('statistics: ${statistics.map}');
     }
+    final characteristics = await HealthKitReporter.characteristicsQuery();
+    print('characteristics: ${characteristics.map}');
+    final categories = await HealthKitReporter.categoryQuery(
+      CategoryType.sleepAnalysis,
+      _predicate,
+    );
+    print('categories: ${categories.map((e) => e.map).toList()}');
+    final samples = await HealthKitReporter.sampleQuery(
+      QuantityType.stepCount.identifier,
+      _predicate,
+    );
+    print('samples: ${samples.map((e) => e.map).toList()}');
+    final sources = await HealthKitReporter.sourceQuery(
+      QuantityType.stepCount.identifier,
+      _predicate,
+    );
+    print('sources: ${sources.map((e) => e.map).toList()}');
+    final correlations = await HealthKitReporter.correlationQuery(
+      CorrelationType.bloodPressure.identifier,
+      _predicate,
+    );
+    print('correlations: ${correlations.map((e) => e.map).toList()}');
+  } else {
+    print('error isRequested: $isRequested');
   }
+}
 ```
 
 In the example above, there is a call of **preferredUnits** function. You can provide identifiers to get preferred units for them and eventually receive properly calculated values from queries. The units will be chosen automatically based on you current localization. This is only required for **QuantityTypes**. If you will try to provide invalid unit for a type, you will get an error.
@@ -214,18 +227,23 @@ Try simple **observerQuery** to get notifications if something is changed.
 This call is a subscription for EventChannel of the plugin, so don't forget to cancel it as soon as you don't need it anymore.
 
 ```dart
-  void observerQuery() async {
-    final identifier = QuantityType.stepCount.identifier;
-    final sub = HealthKitReporter.observerQuery(identifier, _predicate,
-        onUpdate: (identifier) async {
+ Future<void> observerQuery() async {
+  final identifier = QuantityType.stepCount.identifier;
+  final sub = HealthKitReporter.observerQuery(
+    [identifier],
+    _predicate,
+    onUpdate: (identifier) async {
       print('Updates for observerQuerySub');
       print(identifier);
-    });
-    print('observerQuerySub: $sub');
-    final isSet = await HealthKitReporter.enableBackgroundDelivery(
-        identifier, UpdateFrequency.immediate);
-    print('enableBackgroundDelivery: $isSet');
-  }
+    },
+  );
+  print('observerQuerySub: $sub');
+  final isSet = await HealthKitReporter.enableBackgroundDelivery(
+    identifier,
+    UpdateFrequency.immediate,
+  );
+  print('enableBackgroundDelivery: $isSet');
+}
 ```
 
 According to [Observing Query](https://developer.apple.com/documentation/healthkit/hkobserverquery) and [Background Delivery](https://developer.apple.com/documentation/healthkit/hkhealthstore/1614175-enablebackgrounddelivery)
