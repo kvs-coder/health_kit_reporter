@@ -50,24 +50,22 @@ extension SwiftHealthKitReporterPlugin {
             return
         }
 
+        if method == .isAvailable {
+            result(HealthKitReporter.isHealthDataAvailable)
+        }
+
         guard let reporter = self.reporter else {
-            if method == .isAvailable {
-                result(false)
-            } else {
-                result(
-                    FlutterError(
-                        code: className,
-                        message: "HealthKit is not available",
-                        details: nil
-                    )
+            result(
+                FlutterError(
+                    code: className,
+                    message: "HealthKit is not available",
+                    details: nil
                 )
-            }
+            )
             return
         }
 
         switch method {
-        case .isAvailable:
-            result(true)
         case .requestAuthorization:
             guard let arguments = call.arguments as? [String: [String]] else {
                 throwNoArgumentsError(result: result)
