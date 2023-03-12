@@ -67,6 +67,8 @@ extension SwiftHealthKitReporterPlugin {
         }
 
         switch method {
+        case .isAvailable:
+            result(HealthKitReporter.isHealthDataAvailable)
         case .requestAuthorization:
             guard let arguments = call.arguments as? [String: [String]] else {
                 throwNoArgumentsError(result: result)
