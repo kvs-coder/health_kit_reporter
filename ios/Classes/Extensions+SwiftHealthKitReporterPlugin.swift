@@ -52,6 +52,7 @@ extension SwiftHealthKitReporterPlugin {
 
         if method == .isAvailable {
             result(HealthKitReporter.isHealthDataAvailable)
+            return
         }
 
         guard let reporter = self.reporter else {
