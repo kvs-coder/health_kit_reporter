@@ -256,6 +256,11 @@ class HealthKitReporter {
     });
   }
 
+  /// Verify whether HealthKit is available.
+  static Future<bool> isAvailable() async {
+    return await _methodChannel.invokeMethod('isAvailable');
+  }
+
   /// Request write/read access to various [HealthKit] types.
   /// Provide [toRead] and/or [toWrite].
   /// If you want only read data, please set [toWrite] as an empty array.

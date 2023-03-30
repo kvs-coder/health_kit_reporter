@@ -12,7 +12,7 @@ enum EventChannel: String, CaseIterable {
     case statisticsCollectionQuery = "health_kit_reporter_event_channel_statistics_collection_query"
     case activitySummaryQuery = "health_kit_reporter_event_channel_query_activity_summary"
     case anchoredObjectQuery = "health_kit_reporter_event_channel_anchored_object_query"
-    
+
     func combinedWith(identifier: String) -> String {
         "\(self.rawValue)_\(identifier)"
     }

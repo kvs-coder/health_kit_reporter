@@ -13,6 +13,6 @@ public protocol StreamHandlerProtocol: FlutterStreamHandler & NSObjectProtocol {
     var plannedQueries: Set<Query> { get set }
 
     func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws
-    
+
     static func make(with reporter: HealthKitReporter) -> Self
 }
