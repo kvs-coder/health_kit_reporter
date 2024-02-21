@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
+import 'model/SampleQueryOptions.dart';
 import 'model/payload/activity_summary.dart';
 import 'model/payload/category.dart';
 import 'model/payload/characteristic/characteristic.dart';
@@ -389,10 +390,15 @@ class HealthKitReporter {
 
   /// Returns [Workout] samples for the provided
   /// time interval predicate [predicate].
-  ///
-  static Future<List<Workout>> workoutQuery(Predicate predicate) async {
-    final result =
-        await _methodChannel.invokeMethod('workoutQuery', predicate.map);
+  /// [queryOption] parameter represents the options passable to the native HealthKit sample query
+  static Future<List<Workout>> workoutQuery(Predicate predicate,
+      {SampleQueryOption? queryOption}) async {
+    var arguments = <String, dynamic>{};
+    arguments.addAll(predicate.map);
+    if (queryOption != null) {
+      arguments["singleQueryOption"] = queryOption.value;
+    }
+    final result = await _methodChannel.invokeMethod('workoutQuery', arguments);
     final List<dynamic> list = jsonDecode(result);
     final workouts = <Workout>[];
     for (final Map<String, dynamic> map in list) {
