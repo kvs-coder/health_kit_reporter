@@ -370,13 +370,16 @@ class HealthKitReporter {
 
   /// Returns [Category] samples for the provided [type]
   /// and the time interval predicate [predicate].
-  ///
+  /// [queryOption] parameter represents the options passable to the native HealthKit sample query
   static Future<List<Category>> categoryQuery(
-      CategoryType type, Predicate predicate) async {
+      CategoryType type, Predicate predicate, {SampleQueryOption? queryOption}) async {
     final arguments = <String, dynamic>{
       'identifier': type.identifier,
     };
     arguments.addAll(predicate.map);
+    if (queryOption != null) {
+      arguments["singleQueryOption"] = queryOption.value;
+    }
     final result =
         await _methodChannel.invokeMethod('categoryQuery', arguments);
     final List<dynamic> list = jsonDecode(result);
