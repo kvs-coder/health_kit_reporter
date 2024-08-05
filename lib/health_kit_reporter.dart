@@ -285,6 +285,15 @@ class HealthKitReporter {
     return await _methodChannel.invokeMethod('requestAuthorization', arguments);
   }
 
+  static Future<bool> requestClinicalRecordsAuthorization(
+      List<String> toRead) async {
+    final arguments = {
+      'toRead': toRead,
+      'toWrite': [],
+    };
+    return await _methodChannel.invokeMethod('requestAuthorization', arguments);
+  }
+
   /// Returns preferred units for provided [types].
   /// Usage is only for [QuantityType]
   ///
