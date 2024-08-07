@@ -27,7 +27,7 @@ extension ClinicalTypeIdentifier on ClinicalType {
       case ClinicalType.conditionRecord:
         return "HKClinicalTypeIdentifierConditionRecord";
       case ClinicalType.immunizationRecord:
-        return "HKClinicalTypeIdentifierImmunizationRec";
+        return "HKClinicalTypeIdentifierImmunizationRecord";
       case ClinicalType.labResultRecord:
         return "HKClinicalTypeIdentifierLabResultRecord";
       case ClinicalType.medicationRecord:
