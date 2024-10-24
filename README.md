@@ -16,8 +16,22 @@ A Flutter wrapper for [HealthKitReporter](https://cocoapods.org/pods/HealthKitRe
 - Add this to your package's pubspec.yaml file:
 ``` Dart
 dependencies:
-     health_kit_reporter: ^2.1.0
+     health_kit_reporter: ^3.1.0
 ```
+
+**TEMPORARY:** Until the CocoaPods library this plugin relies on is upgraded to version 3.1.0 it is compulsory to modify your `ios/Podfile` like so:
+```
+target 'Runner' do
+  use_frameworks!
+  use_modular_headers!
+  ...
+  # TODO: This is temporary, until the PR to upgrade HealthKitReporter CocoaPods library to version 3.1.0 gets merged.
+  pod 'HealthKitReporter', :git => 'https://github.com/quentinleguennec/HealthKitReporter', :branch => 'feature_add_clinical_records', :tag => '3.1.0'
+  ...
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+end
+```
+
 - Get dependencies
 
 ``` shell
@@ -28,7 +42,13 @@ flutter pub get
 
 ### Preparation
 
-At first in your app's entitlements select HealthKit and in your app's info.plist file add permissions:
+In Xcode, go to Runner > Signing and Capabilities and add the entitlement for Health Kit.
+If you want to read Clinical Records then also check "Clinical Health Records" under Health Kit.
+
+***NOTE:*** *You can only tick the "Clinical Health Records" checkmark if your development team has a paid Apple developer subscription. To test on a real device, or to publish your application, you will need a paid Apple subscription, but you can still test on the iOS simulator without a subscription by setting the Development Team to None.*
+
+
+Then in your app's info.plist file add permissions:
 
 ```xml
 <key>NSHealthShareUsageDescription</key>
@@ -44,6 +64,13 @@ If you plan to use **WorkoutRoute** **Series** please provide additionally CoreL
 <string>WHY_YOU_NEED_TO_ALWAYS_SHARE_LOCATION</string>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string>WHY_YOU_NEED_TO_SHARE_LOCATION</string>
+```
+
+If you plan to read **Clinical Records** please provide additionally:
+
+```xml
+<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
+<string>WHY_YOU_NEED_TO_SHARE_DATA</string>
 ```
 
 ### Common usage
@@ -151,6 +178,8 @@ In the example above, there is a call of **preferredUnits** function. You can pr
 The usage of **sampleQuery** for quantity types will return nearly the same result as **quantityQuery**, but the units for the values will be used according to SI, while **quantityQuery** together with **preferredUnits** will handle values units according to thee current localization.
 
 ### Writing Data
+
+***NOTE:*** *Clinical Records are read only, Health Kit does not allow writing any data to Clinical Records.*
 
 Before writing data, you may need to check if writing is allowed by calling **isAuthorizedToWrite**.
 
@@ -260,8 +289,9 @@ If you want to stop observation, you need to:
 - call **disableBackgroundDelivery** or **disableAllBackgroundDelivery**
 
 ## Requirements
-The library supports minimum iOS 9. 
+The library supports minimum iOS 11.
 Some features like **HeartbeatSeries** are available only starting with iOS 13.0 and like **Electrocardiogramm** starting with iOS 14.0.
+Clinical Records are available only starting with iOS 12.0.
 
 ## License
 Under <a href=https://github.com/VictorKachalov/localized/blob/master/LICENSE>MIT License</a>
