@@ -1,3 +1,7 @@
+## [2.3.0] - 13.11.2024
+
+* Add max value to Statistics
+
 ## [2.2.0] - 01.08.2024
 
 * Add support for Clinical Reports
