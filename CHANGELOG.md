@@ -1,3 +1,7 @@
+## [2.3.0] - 14.11.2024
+
+* Add getting workout routes for workout UUID
+
 ## [2.2.0] - 01.08.2024
 
 * Add support for Clinical Reports
