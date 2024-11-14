@@ -236,6 +236,11 @@ class _ReadView extends StatelessWidget with HealthKitReporterMixin {
             child: Text('workoutRouteQuery')),
         TextButton(
             onPressed: () {
+              workoutRouteForUUIDQuery();
+            },
+            child: Text('workoutRouteForUUIDQuery')),
+        TextButton(
+            onPressed: () {
               querySources();
             },
             child: Text('sources')),
@@ -338,6 +343,17 @@ class _ReadView extends StatelessWidget with HealthKitReporterMixin {
   void workoutRouteQuery() async {
     try {
       final series = await HealthKitReporter.workoutRouteQuery(predicate);
+      print('workoutRoutes: ${series.map((e) => e.map).toList()}');
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void workoutRouteForUUIDQuery() async {
+    try {
+      final series = await HealthKitReporter.workoutRouteForUUIDQuery(
+        const UUIDPredicate('D3A3D3A3-4D3A-4A3A-8A3A-3A3A3A3A3A3A'),
+      );
       print('workoutRoutes: ${series.map((e) => e.map).toList()}');
     } catch (e) {
       print(e);

@@ -24,6 +24,7 @@ extension SwiftHealthKitReporterPlugin {
         case statisticsQuery
         case heartbeatSeriesQuery
         case workoutRouteQuery
+        case workoutRouteForUUIDQuery
         case queryActivitySummary
         case sourceQuery
         case correlationQuery
@@ -168,6 +169,16 @@ extension SwiftHealthKitReporterPlugin {
                 return
             }
             workoutRouteQuery(
+                reporter: reporter,
+                arguments: arguments,
+                result: result
+            )
+        case .workoutRouteForUUIDQuery:
+            guard let arguments = call.arguments as? [String: String] else {
+                throwNoArgumentsError(result: result)
+                return
+            }
+            workoutRouteForUUIDQuery(
                 reporter: reporter,
                 arguments: arguments,
                 result: result
@@ -894,6 +905,105 @@ extension SwiftHealthKitReporterPlugin {
                     details: "WorkoutRoute query is available for iOS 11."
                 )
             )
+        }
+    }
+    private func getWorkoutByID(
+        reporter: HealthKitReporter,
+        workoutUUID: UUID
+    ) async -> HKWorkout? {
+        let workoutPredicate = HKQuery.predicateForObject(with: workoutUUID)
+
+        let samples = try! await withCheckedThrowingContinuation {
+          (continuation: CheckedContinuation<[HKSample], Error>) in
+          let query = HKSampleQuery(
+            sampleType: HKObjectType.workoutType(),
+            predicate: workoutPredicate,
+            limit: 1,
+            sortDescriptors: nil
+          ) { (_, results, error) in
+
+            if let hasError = error {
+              continuation.resume(throwing: hasError)
+              return
+            }
+
+            guard let samples = results else {
+              fatalError("workout samples unexpectedly nil")
+            }
+
+            continuation.resume(returning: samples)
+          }
+          reporter.manager.executeQuery(query)
+        }
+
+        guard let workouts = samples as? [HKWorkout] else {
+          return nil
+        }
+
+        return workouts.first ?? nil
+    }
+    @available(iOS 13.0.0, *)
+    private func workoutRouteForUUIDQuery(
+        reporter: HealthKitReporter,
+        arguments: [String: String],
+        result: @escaping FlutterResult
+    )  {
+        guard
+            let uuidString = arguments["uuid"],
+            let uuid = UUID(uuidString: uuidString)
+        else {
+            throwParsingArgumentsError(result: result, arguments: arguments)
+            return
+        }
+        Task {
+            guard let workout = await getWorkoutByID(reporter: reporter, workoutUUID: uuid) else {
+                result(
+                       FlutterError(
+                         code: "workoutRouteForUUIDQuery",
+                         message: "Error getting workout with provided UUID",
+                         details: uuid
+                       )
+                )
+                return
+            }
+
+            let predicate = HKQuery.predicateForObjects(from: workout)
+            do {
+                let query = try reporter.reader.workoutRouteQuery(
+                    predicate: predicate
+                ) { (routes, error) in
+                    guard error == nil else {
+                        result(
+                            FlutterError(
+                                code: "workoutRouteForUUIDQuery",
+                                message: "Error in workoutRouteQuery",
+                                details: error.debugDescription
+                            )
+                        )
+                        return
+                    }
+                    do {
+                        result(try routes.encoded())
+                    } catch {
+                        result(
+                            FlutterError(
+                                code: "workoutRouteForUUIDQuery",
+                                message: "Error in json encoding of workout routes: \(routes)",
+                                details: error
+                            )
+                        )
+                    }
+                }
+                reporter.manager.executeQuery(query)
+            } catch let error {
+                result(
+                    FlutterError(
+                        code: className,
+                        message: "Error in workoutRouteQuery initialization",
+                        details: error
+                    )
+                )
+            }
         }
     }
     private func queryActivitySummary(
