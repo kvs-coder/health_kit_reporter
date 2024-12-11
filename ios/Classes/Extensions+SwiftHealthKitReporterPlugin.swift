@@ -330,6 +330,7 @@ extension SwiftHealthKitReporterPlugin {
             result(success)
         }
     }
+    
     private func preferredUnits(
         reporter: HealthKitReporter,
         arguments: [String],

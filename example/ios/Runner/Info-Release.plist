@@ -22,6 +22,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
+	<string>This super cool app wants to read some data</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Share your data with our super cool app</string>
 	<key>NSHealthUpdateUsageDescription</key>

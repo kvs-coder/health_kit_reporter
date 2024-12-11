@@ -1,11 +1,13 @@
 import 'package:health_kit_reporter/health_kit_reporter.dart';
 
 import '../type/category_type.dart';
+import '../type/clinical_type.dart';
 import '../type/correlation_type.dart';
 import '../type/electrocardiogram_type.dart';
 import '../type/quantity_type.dart';
 import '../type/workout_type.dart';
 import 'category.dart';
+import 'clinical_record.dart';
 import 'correlation.dart';
 import 'device.dart';
 import 'electrocardiogram.dart';
@@ -112,6 +114,10 @@ abstract class Sample<Harmonized> {
         ElectrocardiogramTypeFactory.tryFrom(identifier);
     if (electrocardiogramType != null) {
       return Electrocardiogram.fromJson(json);
+    }
+    final clinicalRecordType = ClinicalTypeFactory.tryFrom(identifier);
+    if (clinicalRecordType != null) {
+      return ClinicalRecord.fromJson(json);
     }
     return null;
   }

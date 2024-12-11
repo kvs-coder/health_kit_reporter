@@ -20,6 +20,7 @@ import 'package:health_kit_reporter/model/predicate.dart';
 import 'package:health_kit_reporter/model/type/activity_summary_type.dart';
 import 'package:health_kit_reporter/model/type/category_type.dart';
 import 'package:health_kit_reporter/model/type/characteristic_type.dart';
+import 'package:health_kit_reporter/model/type/clinical_type.dart';
 import 'package:health_kit_reporter/model/type/correlation_type.dart';
 import 'package:health_kit_reporter/model/type/electrocardiogram_type.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
@@ -47,10 +48,12 @@ mixin HealthKitReporterMixin {
         'kvs.sample.app',
         '444-888-555',
       );
+
   Source get source => Source(
         'myApp',
         'com.kvs.health_kit_reporter_example',
       );
+
   OperatingSystem get operatingSystem => OperatingSystem(
         1,
         2,
@@ -99,7 +102,13 @@ class _MyAppState extends State<MyApp> {
                 onPressed: () => _authorize(),
                 icon: Icon(Icons.login),
                 tooltip: 'Authorizes HealthKit',
-              )
+              ),
+              IconButton(
+                onPressed: () => _authorizeClinicalRecords(),
+                icon: Icon(Icons.login),
+                tooltip: 'Authorizes clinical records',
+                color: Colors.blue,
+              ),
             ],
             bottom: TabBar(
               tabs: [
@@ -164,6 +173,18 @@ class _MyAppState extends State<MyApp> {
       print(e);
     }
   }
+
+  Future<void> _authorizeClinicalRecords() async {
+    try {
+      final readTypes =
+          ClinicalType.values.map((type) => type.identifier).toList();
+      final isRequested =
+          await HealthKitReporter.requestAuthorization(readTypes, []);
+      print('isRequested auth: $isRequested');
+    } catch (e) {
+      print(e);
+    }
+  }
 }
 
 class _ReadView extends StatelessWidget with HealthKitReporterMixin {
@@ -175,7 +196,7 @@ class _ReadView extends StatelessWidget with HealthKitReporterMixin {
       children: [
         TextButton(
             onPressed: () {
-              handleQuantitiySamples();
+              handleQuantitySamples();
             },
             child: Text('preferredUnit:quantity:statistics')),
         TextButton(
@@ -183,6 +204,11 @@ class _ReadView extends StatelessWidget with HealthKitReporterMixin {
               queryCharacteristics();
             },
             child: Text('characteristics')),
+        TextButton(
+            onPressed: () {
+              queryClinicalRecords();
+            },
+            child: Text('Clinical Records')),
         TextButton(
             onPressed: () {
               queryCategory();
@@ -263,6 +289,21 @@ class _ReadView extends StatelessWidget with HealthKitReporterMixin {
     }
   }
 
+  void queryClinicalRecords() async {
+    try {
+      final samples = await HealthKitReporter.sampleQuery(
+        ClinicalType.allergyRecord.identifier,
+        Predicate(
+          DateTime.now().add(Duration(days: -7000)),
+          DateTime.now(),
+        ),
+      );
+      print('clinicalRecords: ${samples.map((e) => e.map).toList()}');
+    } catch (e, stackTrace) {
+      print("$e\n$stackTrace");
+    }
+  }
+
   void queryCategory() async {
     try {
       final categories = await HealthKitReporter.categoryQuery(
@@ -312,7 +353,7 @@ class _ReadView extends StatelessWidget with HealthKitReporterMixin {
     }
   }
 
-  void handleQuantitiySamples() async {
+  void handleQuantitySamples() async {
     try {
       final preferredUnits = await HealthKitReporter.preferredUnits([
         QuantityType.stepCount,

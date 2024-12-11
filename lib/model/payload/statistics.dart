@@ -57,12 +57,14 @@ class StatisticsHarmonized {
     this.average,
     this.recent,
     this.unit,
+    this.max,
   );
 
   final num? summary;
   final num? average;
   final num? recent;
   final String unit;
+  final num? max;
 
   /// General map representation
   ///
@@ -71,6 +73,7 @@ class StatisticsHarmonized {
         'average': average,
         'recent': recent,
         'unit': unit,
+        'max': max,
       };
 
   /// General constructor from JSON payload
@@ -79,5 +82,6 @@ class StatisticsHarmonized {
       : summary = json['summary'],
         average = json['average'],
         recent = json['recent'],
-        unit = json['unit'];
+        unit = json['unit'],
+        max = json['max'];
 }

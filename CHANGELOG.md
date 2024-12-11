@@ -1,3 +1,11 @@
+## [2.3.0] - 13.11.2024
+
+* Add max value to Statistics
+
+## [2.2.0] - 01.08.2024
+
+* Add support for Clinical Reports
+
 ## [2.1.0] - 30.10.2022
 
 * Add new types for iOS 16 (also missing for iOS 15)
