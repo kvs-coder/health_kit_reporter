@@ -38,7 +38,7 @@ extension SwiftHealthKitReporterPlugin {
         case deleteObjects
         case save
     }
-
+    
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         guard let method = Method(rawValue: call.method) else {
             result(
@@ -50,12 +50,12 @@ extension SwiftHealthKitReporterPlugin {
             )
             return
         }
-
+        
         if method == .isAvailable {
             result(HealthKitReporter.isHealthDataAvailable)
             return
         }
-
+        
         guard let reporter = self.reporter else {
             result(
                 FlutterError(
@@ -66,7 +66,7 @@ extension SwiftHealthKitReporterPlugin {
             )
             return
         }
-
+        
         switch method {
         case .isAvailable:
             result(HealthKitReporter.isHealthDataAvailable)
@@ -311,11 +311,11 @@ extension SwiftHealthKitReporterPlugin {
         let toWriteArguments = arguments["toWrite"]
         reporter.manager.requestAuthorization(
             toRead: toReadArguments != nil
-                ? parse(arguments: toReadArguments!)
-                : [],
+            ? parse(arguments: toReadArguments!)
+            : [],
             toWrite: toWriteArguments != nil
-                ? parse(arguments: toWriteArguments!)
-                : []
+            ? parse(arguments: toWriteArguments!)
+            : []
         ) { (success, error) in
             guard error == nil else {
                 result(
@@ -447,16 +447,30 @@ extension SwiftHealthKitReporterPlugin {
         guard
             let identifier = arguments["identifier"] as? String,
             let startTimestamp = arguments["startTimestamp"] as? Double,
-            let endTimestamp = arguments["endTimestamp"] as? Double
+            let endTimestamp = arguments["endTimestamp"] as? Double,
+            let option = arguments["singleQueryOption"] as? String?
         else {
             throwParsingArgumentsError(result: result, arguments: arguments)
             return
         }
+        lazy var hkOptions:HKQueryOptions = {
+            if (option != nil) {
+                if (option == "strictStartDate") {
+                    return [.strictStartDate]
+                } else if (option == "strictEndDate") {
+                    return [.strictEndDate]
+                } else if (option == "notStrict") {
+                    return []
+                }
+            }
+            return [.strictStartDate, .strictEndDate]
+        }()
         do {
             let type = try CategoryType.make(from: identifier)
             let predicate = NSPredicate.samplesPredicate(
                 startDate: Date.make(from: startTimestamp),
-                endDate: Date.make(from: endTimestamp)
+                endDate: Date.make(from: endTimestamp),
+                options: hkOptions
             )
             let query = try reporter.reader.categoryQuery(
                 type: type,
@@ -1303,8 +1317,8 @@ extension SwiftHealthKitReporterPlugin {
                     try Category.make(from: $0)
                 },
                 from: device != nil
-                    ? try Device.make(from: device!)
-                    : nil,
+                ? try Device.make(from: device!)
+                : nil,
                 to: try Workout.make(from: workout)
             ) { (success, error) in
                 guard error == nil else {
@@ -1340,10 +1354,10 @@ extension SwiftHealthKitReporterPlugin {
             reporter.writer.addQuantitiy(try quantity.map {
                 try Quantity.make(from: $0)
             },
-            from: device != nil
-                ? try Device.make(from: device!)
-                : nil,
-            to: try Workout.make(from: workout)) { (success, error) in
+                                         from: device != nil
+                                         ? try Device.make(from: device!)
+                                         : nil,
+                                         to: try Workout.make(from: workout)) { (success, error) in
                 guard error == nil else {
                     result(
                         FlutterError(
