@@ -6,6 +6,10 @@
 
 * Add support for Clinical Reports
 
+## [2.1.1] - 29.05.2023
+
+* Add check for HealthKit availability
+
 ## [2.1.0] - 30.10.2022
 
 * Add new types for iOS 16 (also missing for iOS 15)
