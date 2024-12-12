@@ -354,6 +354,27 @@ class HealthKitReporter {
     return routes;
   }
 
+  /// Returns [WorkoutRoute] sample for the provided UUID [predicate].
+  ///
+  /// Available only for iOS 13.0 and higher.
+  ///
+  static Future<List<WorkoutRoute>> workoutRouteForUUIDQuery(
+    UUIDPredicate predicate,
+  ) async {
+    final arguments = predicate.map;
+    final result = await _methodChannel.invokeMethod(
+      'workoutRouteForUUIDQuery',
+      arguments,
+    );
+    final List<dynamic> list = jsonDecode(result);
+    final routes = <WorkoutRoute>[];
+    for (final Map<String, dynamic> map in list) {
+      final sample = WorkoutRoute.fromJson(map);
+      routes.add(sample);
+    }
+    return routes;
+  }
+
   /// Returns [Quantity] samples for the provided [type],
   /// the preferred [unit] and the time interval predicate [predicate].
   ///

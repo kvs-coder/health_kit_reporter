@@ -1,3 +1,7 @@
+## [2.3.1] - 12.12.2024
+
+* Add getting workout routes for workout UUID
+
 ## [2.3.0] - 13.11.2024
 
 * Add max value to Statistics
