@@ -1,10 +1,18 @@
-## [2.3.0] - 14.11.2024
+## [2.3.1] - 12.12.2024
 
 * Add getting workout routes for workout UUID
+
+## [2.3.0] - 13.11.2024
+
+* Add max value to Statistics
 
 ## [2.2.0] - 01.08.2024
 
 * Add support for Clinical Reports
+
+## [2.1.1] - 29.05.2023
+
+* Add check for HealthKit availability
 
 ## [2.1.0] - 30.10.2022
 
