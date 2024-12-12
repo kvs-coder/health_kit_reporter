@@ -1,3 +1,7 @@
+## [2.3.1] - 12.12.2024
+
+* Add missing Workout types 
+
 ## [2.3.0] - 13.11.2024
 
 * Add max value to Statistics

@@ -90,6 +90,9 @@ enum WorkoutActivityType {
   socialDance,
   pickleball,
   cooldown,
+  swimBikeRun,
+  transition,
+  underwaterDiving,
   other,
 }
 
@@ -256,6 +259,12 @@ extension Value on WorkoutActivityType {
         return 79;
       case WorkoutActivityType.cooldown:
         return 80;
+      case WorkoutActivityType.swimBikeRun:
+        return 82;
+      case WorkoutActivityType.transition:
+        return 83;
+      case WorkoutActivityType.underwaterDiving:
+        return 84;
       case WorkoutActivityType.other:
         return 3000;
     }
@@ -425,6 +434,12 @@ extension Description on WorkoutActivityType {
         return 'Pickerball';
       case WorkoutActivityType.cooldown:
         return 'Cooldown';
+      case WorkoutActivityType.swimBikeRun:
+        return 'Swim Bike Run';
+      case WorkoutActivityType.transition:
+        return 'Transition';
+      case WorkoutActivityType.underwaterDiving:
+        return 'Underwater Diving';
       case WorkoutActivityType.other:
         return 'Other';
     }
@@ -594,6 +609,12 @@ extension WorkoutActivityTypeFactory on WorkoutActivityType {
         return WorkoutActivityType.pickleball;
       case 80:
         return WorkoutActivityType.cooldown;
+      case 82:
+        return WorkoutActivityType.swimBikeRun;
+      case 83:
+        return WorkoutActivityType.transition;
+      case 84:
+        return WorkoutActivityType.underwaterDiving;
       case 3000:
         return WorkoutActivityType.other;
       default:
