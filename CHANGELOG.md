@@ -1,6 +1,10 @@
-## [2.3.1] - 12.12.2024
+## [2.3.2] - 25.02.2025
 
 * Add getting workout routes for workout UUID
+
+## [2.3.1] - 12.12.2024
+
+* Add missing Workout types 
 
 ## [2.3.0] - 13.11.2024
 
