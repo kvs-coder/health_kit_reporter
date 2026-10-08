@@ -5,13 +5,13 @@
 //  Created by Victor Kachalov on 09.12.20.
 //
 
-import Foundation
+import Flutter
 import HealthKitReporter
 
 public final class StatisticsCollectionQueryStreamHandler: NSObject {
     public let reporter: HealthKitReporter
-    public var activeQueries = Set<Query>()
-    public var plannedQueries = Set<Query>()
+    public var activeQueries = [QueryHandle]()
+    public var plannedQueries = [QueryHandle]()
 
     init(reporter: HealthKitReporter) {
         self.reporter = reporter
@@ -19,54 +19,46 @@ public final class StatisticsCollectionQueryStreamHandler: NSObject {
 }
 // MARK: - StreamHandlerProtocol
 extension StatisticsCollectionQueryStreamHandler: StreamHandlerProtocol {
-    public func setQueries(arguments: [String : Any], events: @escaping FlutterEventSink) throws {
-        guard
-            let preferredUnits = arguments["preferredUnits"] as? [[String: Any]],
-            let startTimestamp = arguments["startTimestamp"] as? Double,
-            let endTimestamp = arguments["endTimestamp"] as? Double,
-            let anchorTimestamp = arguments["anchorTimestamp"] as? Double,
-            let enumerateFrom = arguments["enumerateFrom"] as? Double,
-            let enumerateTo = arguments["enumerateTo"] as? Double,
-            let intervalComponents = arguments["intervalComponents"] as? [String: Any]
-        else {
-            return
+    public func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
+        guard let preferredUnits = arguments["preferredUnits"] as? [[String: Any]] else {
+            throw HealthKitError.invalidValue("Missing preferredUnits in \(arguments)")
         }
-        let predicate = NSPredicate.samplesPredicate(
-            startDate: Date.make(from: startTimestamp),
-            endDate: Date.make(from: endTimestamp)
-        )
+        let predicate = try arguments.samplesPredicate()
+        let anchorDate = try arguments.date("anchorTimestamp")
+        let enumerateFrom = try arguments.date("enumerateFrom")
+        let enumerateTo = try arguments.date("enumerateTo")
+        let intervalComponents = DateComponents.make(from: try arguments.dictionary("intervalComponents"))
+        let separateBySource = arguments["separateBySource"] as? Bool ?? false
         for preferredUnit in preferredUnits {
-            if let preferredUnit = try? PreferredUnit.make(from: preferredUnit) {
-                guard let type = preferredUnit.identifier.objectType as? QuantityType else {
+            let preferredUnit = try PreferredUnit.make(from: preferredUnit)
+            guard let type = preferredUnit.identifier.objectType as? QuantityType else {
+                throw HealthKitError.invalidType("Not a quantity type: \(preferredUnit.identifier)")
+            }
+            let query = try reporter.reader.statisticsCollectionQuery(
+                type: type,
+                unit: preferredUnit.unit,
+                quantitySamplePredicate: predicate,
+                anchorDate: anchorDate,
+                enumerateFrom: enumerateFrom,
+                enumerateTo: enumerateTo,
+                intervalComponents: intervalComponents,
+                monitorUpdates: true,
+                separateBySource: separateBySource
+            ) { (statistics, error) in
+                if let error = error {
+                    events(FlutterError(code: "StatisticsCollectionQuery", error: error))
                     return
                 }
-                let unit = preferredUnit.unit
-                let query = try reporter.reader.statisticsCollectionQuery(
-                    type: type,
-                    unit: unit,
-                    quantitySamplePredicate: predicate,
-                    anchorDate: Date.make(from: anchorTimestamp),
-                    enumerateFrom: Date.make(from: enumerateFrom),
-                    enumerateTo: Date.make(from: enumerateTo),
-                    intervalComponents: DateComponents.make(
-                        from: intervalComponents
-                    ),
-                    monitorUpdates: true
-                ) { (statistics, error) in
-                    guard
-                        error == nil,
-                        let statistics = statistics
-                    else {
-                        return
-                    }
-                    do {
-                        events(try statistics.encoded())
-                    } catch {
-                        events(nil)
-                    }
+                guard let statistics = statistics else {
+                    return
                 }
-                plannedQueries.insert(query)
+                do {
+                    events(try statistics.encoded())
+                } catch {
+                    events(FlutterError(code: "StatisticsCollectionQuery", error: error))
+                }
             }
+            plannedQueries.append(query)
         }
     }
 

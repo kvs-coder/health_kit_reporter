@@ -5,12 +5,13 @@
 //  Created by Victor Kachalov on 09.12.20.
 //
 
+import Flutter
 import HealthKitReporter
 
 public protocol StreamHandlerProtocol: FlutterStreamHandler & NSObjectProtocol {
     var reporter: HealthKitReporter { get }
-    var activeQueries: Set<Query> { get set }
-    var plannedQueries: Set<Query> { get set }
+    var activeQueries: [QueryHandle] { get set }
+    var plannedQueries: [QueryHandle] { get set }
 
     func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws
 

@@ -6,26 +6,21 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let instance = SwiftHealthKitReporterPlugin()
-
-        instance.reporter = HealthKitReporter()
-
         let binaryMessenger = registrar.messenger()
         registerMethodChannel(
             registrar: registrar,
             binaryMessenger: binaryMessenger,
             instance: instance
         )
-
-        do {
-            if let reporter = instance.reporter {
-                try registerEventChannel(
-                    binaryMessenger: binaryMessenger,
-                    reporter: reporter
-                )
-            }
-        } catch {
-            print(error)
+        guard HealthKitReporter.isHealthDataAvailable else {
+            return
         }
+        let reporter = HealthKitReporter()
+        instance.reporter = reporter
+        registerEventChannel(
+            binaryMessenger: binaryMessenger,
+            reporter: reporter
+        )
     }
     private static func registerMethodChannel(
         registrar: FlutterPluginRegistrar,
@@ -43,14 +38,13 @@ public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {
     private static func registerEventChannel(
         binaryMessenger: FlutterBinaryMessenger,
         reporter: HealthKitReporter
-    ) throws {
+    ) {
         for event in EventChannel.allCases {
             let eventChannel = FlutterEventChannel(
                 name: event.rawValue,
                 binaryMessenger: binaryMessenger
             )
-            let streamHandler = try StreamHandlerFactory.make(with: reporter, for: event)
-            eventChannel.setStreamHandler(streamHandler)
+            eventChannel.setStreamHandler(StreamHandlerFactory.make(with: reporter, for: event))
         }
     }
 }

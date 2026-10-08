@@ -5,13 +5,13 @@
 //  Created by Victor Kachalov on 08.12.20.
 //
 
-import Foundation
+import Flutter
 import HealthKitReporter
 
 public final class ObserverQueryStreamHandler: NSObject {
     public let reporter: HealthKitReporter
-    public var activeQueries = Set<Query>()
-    public var plannedQueries = Set<Query>()
+    public var activeQueries = [QueryHandle]()
+    public var plannedQueries = [QueryHandle]()
 
     init(reporter: HealthKitReporter) {
         self.reporter = reporter
@@ -20,37 +20,23 @@ public final class ObserverQueryStreamHandler: NSObject {
 // MARK: - StreamHandlerProtocol
 extension ObserverQueryStreamHandler: StreamHandlerProtocol {
     public func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws {
-        guard
-            let identifiers = arguments["identifiers"] as? [String]
-        else {
-            return
-        }
-        var predicate: NSPredicate?
-        if
-            let startTimestamp = arguments["startTimestamp"] as? Double,
-            let endTimestamp = arguments["endTimestamp"] as? Double {
-            predicate = NSPredicate.samplesPredicate(
-                startDate: Date.make(from: startTimestamp),
-                endDate: Date.make(from: endTimestamp)
-            )
-        }
-        for identifier in identifiers {
-            guard let type = identifier.objectType as? SampleType else {
-                return
-            }
+        let predicate = try arguments.samplesPredicate()
+        for identifier in try arguments.strings("identifiers") {
             let query = try reporter.observer.observerQuery(
-                type: type,
+                type: try identifier.asSampleType(),
                 predicate: predicate
-            ) { (query, identifier, error) in
-                guard
-                    error == nil,
-                    let identifier = identifier
-                else {
+            ) { (_, identifier, error, completion) in
+                defer { completion() }
+                if let error = error {
+                    events(FlutterError(code: "ObserverQuery", error: error))
+                    return
+                }
+                guard let identifier = identifier else {
                     return
                 }
                 events(["identifier": identifier])
             }
-            plannedQueries.insert(query)
+            plannedQueries.append(query)
         }
     }
 
