@@ -19,7 +19,11 @@ dependencies:
      health_kit_reporter: ^3.1.0
 ```
 
-**TEMPORARY:** Until the CocoaPods library this plugin relies on is upgraded to version 3.1.0 it is compulsory to modify your `ios/Podfile` like so:
+This plugin supports both CocoaPods and Swift Package Manager. Flutter's guide documents Swift Package Manager as enabled by default starting with Flutter 3.44. The CocoaPods-specific setup below remains necessary only when your app uses CocoaPods.
+
+### CocoaPods setup
+
+**TEMPORARY:** Until the CocoaPods library this plugin relies on is upgraded to version 3.1.0, modify your `ios/Podfile` as follows:
 ```
 target 'Runner' do
   use_frameworks!

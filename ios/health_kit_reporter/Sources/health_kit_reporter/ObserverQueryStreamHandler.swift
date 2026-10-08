@@ -5,6 +5,7 @@
 //  Created by Victor Kachalov on 08.12.20.
 //
 
+import Flutter
 import Foundation
 import HealthKitReporter
 

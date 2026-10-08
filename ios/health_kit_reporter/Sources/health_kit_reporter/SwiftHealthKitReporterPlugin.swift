@@ -1,4 +1,5 @@
 import Flutter
+import Foundation
 import HealthKitReporter
 
 public class SwiftHealthKitReporterPlugin: NSObject, FlutterPlugin {

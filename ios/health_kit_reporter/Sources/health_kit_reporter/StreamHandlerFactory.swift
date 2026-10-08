@@ -5,6 +5,7 @@
 //  Created by Kachalov, Victor on 11.04.21.
 //
 
+import Foundation
 import HealthKitReporter
 
 final class StreamHandlerFactory: NSObject {

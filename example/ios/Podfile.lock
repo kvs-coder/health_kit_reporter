@@ -27,16 +27,16 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   HealthKitReporter:
-    :commit: 13267bb81332e4f4efd7d1b4b42712407f0ffa5d
+    :commit: d45b580af1a86088297413cae766c2d72c6d516e
     :git: https://github.com/quentinleguennec/HealthKitReporter
     :tag: 3.1.0
 
 SPEC CHECKSUMS:
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
-  health_kit_reporter: f6e13538b33edf31bd01a98bcedcfbb38ed8cac6
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_local_notifications: ef18f0537538fcd18e9106b3ddc91cc10b4e579a
+  health_kit_reporter: 429bdc1519d4945ad426f6e0c4178c6c2588c6fd
   HealthKitReporter: 4fae728be1afa52c4833d4cfb9835b368bfc89e6
 
-PODFILE CHECKSUM: 1889de476e99ab1321e8cfcbb6ee5c188827da99
+PODFILE CHECKSUM: c6e658ac4f2439ebf9a07dd794b28231a3ebdb77
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.17.0

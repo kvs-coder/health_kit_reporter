@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.source                = { :path => '.' }
   s.social_media_url      = 'https://twitter.com/Victor_Kachalov'
   s.ios.deployment_target = '9.0'
-  s.source_files          = 'Classes/**/*'
+  s.source_files          = 'health_kit_reporter/Sources/health_kit_reporter/**/*.swift'
   s.platform              = :ios, '9.0'
 
   s.dependency 'Flutter'

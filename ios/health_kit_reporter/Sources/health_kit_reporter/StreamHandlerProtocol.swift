@@ -5,6 +5,8 @@
 //  Created by Victor Kachalov on 09.12.20.
 //
 
+import Flutter
+import Foundation
 import HealthKitReporter
 
 public protocol StreamHandlerProtocol: FlutterStreamHandler & NSObjectProtocol {
