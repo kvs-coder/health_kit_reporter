@@ -1,18 +1,18 @@
 name: health_kit_reporter
 description: Helps to write or read data from Apple Health via HealthKit framework.
-version: 2.3.1
-homepage: https://github.com/VictorKachalov/health_kit_reporter
+version: 4.0.0
+homepage: https://github.com/kvs-coder/health_kit_reporter
 
 environment:
-  sdk: '>=2.12.0 <4.0.0'
-  flutter: ">=1.20.0"
+  sdk: '>=3.5.0 <4.0.0'
+  flutter: ">=3.24.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
 dev_dependencies:
-  flutter_lints: ^1.0.0
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
 
@@ -28,7 +28,7 @@ flutter:
   plugin:
     platforms:
       ios:
-        pluginClass: HealthKitReporterPlugin
+        pluginClass: SwiftHealthKitReporterPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
