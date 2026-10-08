@@ -44,6 +44,6 @@ void main() {
     expect(sut.sourceRevision.operatingSystem.patchVersion, 0);
     expect(sut.harmonized.value, 100);
     expect(sut.harmonized.unit, 'count');
-    expect(sut.harmonized.metadata, {'HKWasUserEntered': 1});
+    expect(sut.harmonized.metadata?.map, {'HKWasUserEntered': 1});
   });
 }

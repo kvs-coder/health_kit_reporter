@@ -1,7 +1,7 @@
 import 'package:health_kit_reporter/health_kit_reporter.dart';
 
 /// Equivalent of [BiologicalSex]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [String] description extension [Description]
 /// for available cases

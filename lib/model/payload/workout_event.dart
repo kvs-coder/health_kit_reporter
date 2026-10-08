@@ -1,7 +1,9 @@
+import '../decorator/extensions.dart';
 import 'package:health_kit_reporter/model/payload/workout_event_type.dart';
+import 'metadata.dart';
 
 /// Equivalent of [WorkoutEvent]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -36,9 +38,9 @@ class WorkoutEvent {
   /// General constructor from JSON payload
   ///
   WorkoutEvent.fromJson(Map<String, dynamic> json)
-      : startTimestamp = json['startTimestamp'],
-        endTimestamp = json['endTimestamp'],
-        duration = json['duration'],
+      : startTimestamp = parseNum(json['startTimestamp']),
+        endTimestamp = parseNum(json['endTimestamp']),
+        duration = parseNum(json['duration']),
         harmonized = WorkoutEventHarmonized.fromJson(json['harmonized']);
 
   /// Simplifies creating a list of objects from JSON payload.
@@ -54,7 +56,7 @@ class WorkoutEvent {
 }
 
 /// Equivalent of [WorkoutEvent.Harmonized]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -65,19 +67,19 @@ class WorkoutEventHarmonized {
   const WorkoutEventHarmonized(this.type, [this.metadata]);
 
   final WorkoutEventType type;
-  final Map<String, dynamic>? metadata;
+  final Metadata? metadata;
 
   /// General map representation
   ///
   Map<String, dynamic> get map => {
         'value': type.value,
         'description': type.description,
-        'metadata': metadata,
+        'metadata': metadata?.map,
       };
 
   /// General constructor from JSON payload
   ///
   WorkoutEventHarmonized.fromJson(Map<String, dynamic> json)
       : type = WorkoutEventTypeFactory.from(json['value']),
-        metadata = json['metadata'];
+        metadata = Metadata.tryFromJson(json['metadata']);
 }

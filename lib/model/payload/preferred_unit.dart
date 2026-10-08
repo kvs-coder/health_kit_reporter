@@ -1,5 +1,5 @@
 /// Equivalent of [PreferredUnit]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Has a [PreferredUnit.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.

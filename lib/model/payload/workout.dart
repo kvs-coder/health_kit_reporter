@@ -1,13 +1,15 @@
+import '../decorator/extensions.dart';
 import 'package:health_kit_reporter/model/payload/workout_activity_type.dart';
 
 import '../type/workout_type.dart';
-import 'device.dart';
 import 'sample.dart';
-import 'source_revision.dart';
+import 'statistics.dart';
+import 'workout_activity.dart';
 import 'workout_event.dart';
+import 'metadata.dart';
 
 /// Equivalent of [Workout]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -18,27 +20,27 @@ import 'workout_event.dart';
 ///
 class Workout extends Sample<WorkoutHarmonized> {
   const Workout(
-    String uuid,
-    String identifier,
-    num startTimestamp,
-    num endTimestamp,
-    Device? device,
-    SourceRevision sourceRevision,
-    WorkoutHarmonized harmonized,
+    super.uuid,
+    super.identifier,
+    super.startTimestamp,
+    super.endTimestamp,
+    super.device,
+    super.sourceRevision,
+    super.harmonized,
     this.duration,
-    this.workoutEvents,
-  ) : super(
-          uuid,
-          identifier,
-          startTimestamp,
-          endTimestamp,
-          device,
-          sourceRevision,
-          harmonized,
-        );
+    this.workoutEvents, [
+    this.statistics,
+    this.activities,
+  ]);
 
   final num duration;
   final List<WorkoutEvent> workoutEvents;
+
+  /// Statistics of every quantity type recorded during the workout (iOS 16+)
+  final List<Statistics>? statistics;
+
+  /// Activities of a multi-sport workout (iOS 16+)
+  final List<WorkoutActivity>? activities;
 
   /// General map representation
   ///
@@ -53,18 +55,29 @@ class Workout extends Sample<WorkoutHarmonized> {
         'duration': duration,
         'workoutEvents': workoutEvents.map((e) => e.map).toList(),
         'harmonized': harmonized.map,
+        'statistics': statistics?.map((e) => e.map).toList(),
+        'activities': activities?.map((e) => e.map).toList(),
       };
 
   /// General constructor from JSON payload
   ///
   Workout.fromJson(Map<String, dynamic> json)
-      : duration = json['duration'],
-        workoutEvents = WorkoutEvent.collect(json['workoutEvents']),
-        super.from(json, WorkoutHarmonized.fromJson(json['harmonized']));
+      : duration = parseNum(json['duration']),
+        workoutEvents = parseList(json['workoutEvents'], WorkoutEvent.fromJson),
+        statistics = json['statistics'] == null
+            ? null
+            : parseList(json['statistics'], Statistics.fromJson),
+        activities = json['activities'] == null
+            ? null
+            : parseList(json['activities'], WorkoutActivity.fromJson),
+        super.from(
+            json,
+            WorkoutHarmonized.fromJson(
+                Map<String, dynamic>.from(json['harmonized'])));
 }
 
 /// Equivalent of [Workout.Harmonized]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -94,7 +107,7 @@ class WorkoutHarmonized {
   final String totalSwimmingStrokeCountUnit;
   final num? totalFlightsClimbed;
   final String totalFlightsClimbedUnit;
-  final Map<String, dynamic>? metadata;
+  final Metadata? metadata;
 
   /// General map representation
   ///
@@ -109,20 +122,21 @@ class WorkoutHarmonized {
         'totalSwimmingStrokeCountUnit': totalSwimmingStrokeCountUnit,
         'totalFlightsClimbed': totalFlightsClimbed,
         'totalFlightsClimbedUnit': totalFlightsClimbedUnit,
-        'metadata': metadata
+        'metadata': metadata?.map
       };
 
   /// General constructor from JSON payload
   ///
   WorkoutHarmonized.fromJson(Map<String, dynamic> json)
       : type = WorkoutActivityTypeFactory.from(json['value']),
-        totalEnergyBurned = json['totalEnergyBurned'],
+        totalEnergyBurned = tryParseNum(json['totalEnergyBurned']),
         totalEnergyBurnedUnit = json['totalEnergyBurnedUnit'],
-        totalDistance = json['totalDistance'],
+        totalDistance = tryParseNum(json['totalDistance']),
         totalDistanceUnit = json['totalDistanceUnit'],
-        totalSwimmingStrokeCount = json['totalSwimmingStrokeCount'],
+        totalSwimmingStrokeCount =
+            tryParseNum(json['totalSwimmingStrokeCount']),
         totalSwimmingStrokeCountUnit = json['totalSwimmingStrokeCountUnit'],
-        totalFlightsClimbed = json['totalFlightsClimbed'],
+        totalFlightsClimbed = tryParseNum(json['totalFlightsClimbed']),
         totalFlightsClimbedUnit = json['totalFlightsClimbedUnit'],
-        metadata = json['metadata'];
+        metadata = Metadata.tryFromJson(json['metadata']);
 }

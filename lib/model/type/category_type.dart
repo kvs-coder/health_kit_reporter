@@ -1,7 +1,7 @@
 import '../../exceptions.dart';
 
 /// Equivalent of [CategoryType]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [identifier] extension representing
 /// original [String] of the type.

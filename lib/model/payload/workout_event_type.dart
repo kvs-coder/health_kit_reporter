@@ -52,7 +52,7 @@ extension Description on WorkoutEventType {
       case WorkoutEventType.segment:
         return 'Segment';
       case WorkoutEventType.pauseOrResumeRequest:
-        return 'Pause on resume request';
+        return 'Pause or resume request';
     }
   }
 }

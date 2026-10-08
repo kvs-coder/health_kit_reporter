@@ -136,7 +136,7 @@ void main() {
     expect(sut.harmonized.routes[0].locations[0].altitude, 36.923385620117188);
     expect(sut.harmonized.routes[0].locations[0].timestamp, 1650106382.259656);
     expect(sut.harmonized.routes[0].locations[0].floor, 1);
-    expect(sut.harmonized.metadata, {
+    expect(sut.harmonized.metadata?.map, {
       "HKMetadataKeySyncVersion": "2",
       "HKMetadataKeySyncIdentifier": "8DA1E494-C047-4610-967F-267D60BD6E16"
     });

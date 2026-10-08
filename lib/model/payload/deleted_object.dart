@@ -1,5 +1,7 @@
+import 'metadata.dart';
+
 /// Equivalent of [DeletedObject]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -10,18 +12,18 @@ class DeletedObject {
   const DeletedObject(this.uuid, this.metadata);
 
   final String uuid;
-  final Map<String, dynamic>? metadata;
+  final Metadata? metadata;
 
   /// General map representation
   ///
   Map<String, dynamic> get map => {
         'uuid': uuid,
-        'metadata': metadata,
+        'metadata': metadata?.map,
       };
 
   /// General constructor from JSON payload
   ///
   DeletedObject.fromJson(Map<String, dynamic> json)
       : uuid = json['uuid'],
-        metadata = json['metadata'];
+        metadata = Metadata.tryFromJson(json['metadata']);
 }

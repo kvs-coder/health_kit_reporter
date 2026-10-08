@@ -1,7 +1,7 @@
 import 'source.dart';
 
 /// Equivalent of [SourceRevision]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -44,7 +44,7 @@ class SourceRevision {
 }
 
 /// Equivalent of [SourceRevision.OperatingSystem]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///

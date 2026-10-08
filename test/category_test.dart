@@ -43,6 +43,6 @@ void main() {
     expect(sut.harmonized.value, 1);
     expect(sut.harmonized.description, 'HKCategoryValueSleepAnalysis');
     expect(sut.harmonized.detail, 'Asleep');
-    expect(sut.harmonized.metadata, {'HKWasUserEntered': '1'});
+    expect(sut.harmonized.metadata?.map, {'HKWasUserEntered': '1'});
   });
 }

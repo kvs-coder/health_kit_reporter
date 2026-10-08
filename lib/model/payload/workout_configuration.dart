@@ -1,5 +1,5 @@
 /// Equivalent of [WorkoutConfiguration]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -25,7 +25,7 @@ class WorkoutConfiguration {
 }
 
 /// Equivalent of [WorkoutConfiguration.Harmonized]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///

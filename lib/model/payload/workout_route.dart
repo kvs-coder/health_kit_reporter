@@ -1,11 +1,11 @@
+import '../decorator/extensions.dart';
 import 'package:health_kit_reporter/model/type/workout_type.dart';
 
-import 'device.dart';
 import 'sample.dart';
-import 'source_revision.dart';
+import 'metadata.dart';
 
 /// Equivalent of [WorkoutRoute]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -16,22 +16,14 @@ import 'source_revision.dart';
 ///
 class WorkoutRoute extends Sample<WorkoutRouteHarmonized> {
   const WorkoutRoute(
-    String uuid,
-    String identifier,
-    num startTimestamp,
-    num endTimestamp,
-    Device? device,
-    SourceRevision sourceRevision,
-    WorkoutRouteHarmonized harmonized,
-  ) : super(
-          uuid,
-          identifier,
-          startTimestamp,
-          endTimestamp,
-          device,
-          sourceRevision,
-          harmonized,
-        );
+    super.uuid,
+    super.identifier,
+    super.startTimestamp,
+    super.endTimestamp,
+    super.device,
+    super.sourceRevision,
+    super.harmonized,
+  );
 
   /// General map representation
   ///
@@ -53,7 +45,7 @@ class WorkoutRoute extends Sample<WorkoutRouteHarmonized> {
 }
 
 /// Equivalent of [WorkoutRoute.Harmonized]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -69,14 +61,14 @@ class WorkoutRouteHarmonized {
 
   final int count;
   final List<WorkoutRouteBatch> routes;
-  final Map<String, dynamic>? metadata;
+  final Metadata? metadata;
 
   /// General map representation
   ///
   Map<String, dynamic> get map => {
         'count': count,
         'routes': routes.map((e) => e.map).toList(),
-        'metadata': metadata,
+        'metadata': metadata?.map,
       };
 
   /// General constructor from JSON payload
@@ -84,7 +76,7 @@ class WorkoutRouteHarmonized {
   WorkoutRouteHarmonized.fromJson(Map<String, dynamic> json)
       : count = json['count'],
         routes = WorkoutRouteBatch.collect(json['routes']),
-        metadata = json['metadata'];
+        metadata = Metadata.tryFromJson(json['metadata']);
 }
 
 class WorkoutRouteBatch {
@@ -122,7 +114,7 @@ class WorkoutRouteBatch {
 }
 
 /// Equivalent of [WorkoutRoute.Location]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -178,17 +170,17 @@ class WorkoutRouteLocation {
   /// General constructor from JSON payload
   ///
   WorkoutRouteLocation.fromJson(Map<String, dynamic> json)
-      : latitude = json['latitude'],
-        longitude = json['longitude'],
-        altitude = json['altitude'],
-        course = json['course'],
-        courseAccuracy = json['courseAccuracy'],
+      : latitude = parseNum(json['latitude']),
+        longitude = parseNum(json['longitude']),
+        altitude = parseNum(json['altitude']),
+        course = parseNum(json['course']),
+        courseAccuracy = tryParseNum(json['courseAccuracy']),
         floor = json['floor'],
-        horizontalAccuracy = json['horizontalAccuracy'],
-        speed = json['speed'],
-        speedAccuracy = json['speedAccuracy'],
-        timestamp = json['timestamp'],
-        verticalAccuracy = json['verticalAccuracy'];
+        horizontalAccuracy = parseNum(json['horizontalAccuracy']),
+        speed = parseNum(json['speed']),
+        speedAccuracy = tryParseNum(json['speedAccuracy']),
+        timestamp = parseNum(json['timestamp']),
+        verticalAccuracy = parseNum(json['verticalAccuracy']);
 
   /// Simplifies creating a list of objects from JSON payload.
   ///

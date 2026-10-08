@@ -90,7 +90,7 @@ void main() {
     expect(sut.harmonized.averageHeartRateUnit, 'count/min');
     expect(sut.harmonized.symptomsStatus, 'HKElectrocardiogramSymptomsStatus');
     expect(sut.harmonized.samplingFrequency, 512);
-    expect(sut.harmonized.metadata, {
+    expect(sut.harmonized.metadata?.map, {
       'HKMetadataKeyAppleECGAlgorithmVersion': '2',
       'HKMetadataKeySyncVersion': '0',
       'HKMetadataKeySyncIdentifier': 'E9217BF0-CA9D-4865-BCBD-88E23763E64E'

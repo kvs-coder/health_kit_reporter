@@ -6,7 +6,7 @@ import 'fitzpatrick_skin_type.dart';
 import 'wheelchair_use.dart';
 
 /// Equivalent of [Characteristic]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///

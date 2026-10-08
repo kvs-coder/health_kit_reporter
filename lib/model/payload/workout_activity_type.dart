@@ -1,7 +1,7 @@
 import 'package:health_kit_reporter/exceptions.dart';
 
 /// Equivalent of [HKWorkoutActivityType]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [String] description extension [Description]
 /// for available cases
@@ -339,7 +339,7 @@ extension Description on WorkoutActivityType {
       case WorkoutActivityType.play:
         return 'Play';
       case WorkoutActivityType.preparationAndRecovery:
-        return 'Prepare and Recovery';
+        return 'Preparation and Recovery';
       case WorkoutActivityType.racquetball:
         return 'Racquetball';
       case WorkoutActivityType.rowing:
@@ -421,7 +421,7 @@ extension Description on WorkoutActivityType {
       case WorkoutActivityType.mixedCardio:
         return 'Mixed Cardio';
       case WorkoutActivityType.handCycling:
-        return 'Handy Cycling';
+        return 'Hand Cycling';
       case WorkoutActivityType.discSports:
         return 'Disc Sports';
       case WorkoutActivityType.fitnessGaming:
@@ -431,7 +431,7 @@ extension Description on WorkoutActivityType {
       case WorkoutActivityType.socialDance:
         return 'Social Dance';
       case WorkoutActivityType.pickleball:
-        return 'Pickerball';
+        return 'Pickleball';
       case WorkoutActivityType.cooldown:
         return 'Cooldown';
       case WorkoutActivityType.swimBikeRun:

@@ -168,7 +168,7 @@ void main() {
         1);
     expect(sut.harmonized.quantitySamples[0].harmonized.value, 123);
     expect(sut.harmonized.quantitySamples[0].harmonized.unit, "mmHg");
-    expect(sut.harmonized.quantitySamples[0].harmonized.metadata,
+    expect(sut.harmonized.quantitySamples[0].harmonized.metadata?.map,
         {"you": "saved it"});
     expect(sut.harmonized.quantitySamples[1].identifier,
         "HKQuantityTypeIdentifierBloodPressureDiastolic");
@@ -208,9 +208,9 @@ void main() {
         1);
     expect(sut.harmonized.quantitySamples[1].harmonized.value, 83);
     expect(sut.harmonized.quantitySamples[1].harmonized.unit, "mmHg");
-    expect(sut.harmonized.quantitySamples[1].harmonized.metadata,
+    expect(sut.harmonized.quantitySamples[1].harmonized.metadata?.map,
         {"you": "saved it"});
     expect(sut.harmonized.categorySamples.length, 0);
-    expect(sut.harmonized.metadata, {"you": "saved it"});
+    expect(sut.harmonized.metadata?.map, {"you": "saved it"});
   });
 }

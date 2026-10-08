@@ -1,9 +1,8 @@
-import 'device.dart';
 import 'sample.dart';
-import 'source_revision.dart';
+import 'metadata.dart';
 
 /// Equivalent of [Category]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -15,22 +14,14 @@ import 'source_revision.dart';
 ///
 class Category extends Sample<CategoryHarmonized> {
   const Category(
-    String uuid,
-    String identifier,
-    num startTimestamp,
-    num endTimestamp,
-    Device? device,
-    SourceRevision sourceRevision,
-    CategoryHarmonized harmonized,
-  ) : super(
-          uuid,
-          identifier,
-          startTimestamp,
-          endTimestamp,
-          device,
-          sourceRevision,
-          harmonized,
-        );
+    super.uuid,
+    super.identifier,
+    super.startTimestamp,
+    super.endTimestamp,
+    super.device,
+    super.sourceRevision,
+    super.harmonized,
+  );
 
   /// General map representation
   ///
@@ -63,7 +54,7 @@ class Category extends Sample<CategoryHarmonized> {
 }
 
 /// Equivalent of [Category.Harmonized]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -83,7 +74,7 @@ class CategoryHarmonized {
   final num value;
   final String description;
   final String detail;
-  final Map<String, dynamic>? metadata;
+  final Metadata? metadata;
 
   /// General map representation
   ///
@@ -91,7 +82,7 @@ class CategoryHarmonized {
         'value': value,
         'description': description,
         'detail': detail,
-        'metadata': metadata,
+        'metadata': metadata?.map,
       };
 
   /// General constructor from JSON payload
@@ -100,5 +91,5 @@ class CategoryHarmonized {
       : value = json['value'],
         description = json['description'],
         detail = json['detail'],
-        metadata = json['metadata'];
+        metadata = Metadata.tryFromJson(json['metadata']);
 }

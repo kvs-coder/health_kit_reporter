@@ -1,11 +1,11 @@
-import 'package:health_kit_reporter/model/payload/device.dart';
+import '../decorator/extensions.dart';
 import 'package:health_kit_reporter/model/payload/sample.dart';
-import 'package:health_kit_reporter/model/payload/source_revision.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
 import 'package:health_kit_reporter/model/type/series_type.dart';
+import 'metadata.dart';
 
 /// Equivalent of [HeartbeatSeries]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -18,22 +18,14 @@ import 'package:health_kit_reporter/model/type/series_type.dart';
 ///
 class HeartbeatSeries extends Sample<HeartbeatSeriesHarmonized> {
   const HeartbeatSeries(
-    String uuid,
-    String identifier,
-    num startTimestamp,
-    num endTimestamp,
-    Device? device,
-    SourceRevision sourceRevision,
-    HeartbeatSeriesHarmonized harmonized,
-  ) : super(
-          uuid,
-          identifier,
-          startTimestamp,
-          endTimestamp,
-          device,
-          sourceRevision,
-          harmonized,
-        );
+    super.uuid,
+    super.identifier,
+    super.startTimestamp,
+    super.endTimestamp,
+    super.device,
+    super.sourceRevision,
+    super.harmonized,
+  );
 
   /// General map representation
   ///
@@ -56,7 +48,7 @@ class HeartbeatSeries extends Sample<HeartbeatSeriesHarmonized> {
 }
 
 /// Equivalent of [HeartbeatSeries.Harmonized]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -72,14 +64,14 @@ class HeartbeatSeriesHarmonized {
 
   final int count;
   final List<HeartbeatSeriesMeasurement> measurements;
-  final Map<String, dynamic>? metadata;
+  final Metadata? metadata;
 
   /// General map representation
   ///
   Map<String, dynamic> get map => {
         'count': count,
         'measurements': measurements.map((e) => e.map).toList(),
-        'metadata': metadata,
+        'metadata': metadata?.map,
       };
 
   /// General constructor from JSON payload
@@ -87,11 +79,11 @@ class HeartbeatSeriesHarmonized {
   HeartbeatSeriesHarmonized.fromJson(Map<String, dynamic> json)
       : count = json['count'],
         measurements = HeartbeatSeriesMeasurement.collect(json['measurements']),
-        metadata = json['metadata'];
+        metadata = Metadata.tryFromJson(json['metadata']);
 }
 
 /// Equivalent of [HeartbeatSeries]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -122,7 +114,7 @@ class HeartbeatSeriesMeasurement {
   /// General constructor from JSON payload
   ///
   HeartbeatSeriesMeasurement.fromJson(Map<String, dynamic> json)
-      : timeSinceSeriesStart = json['timeSinceSeriesStart'],
+      : timeSinceSeriesStart = parseNum(json['timeSinceSeriesStart']),
         precededByGap = json['precededByGap'],
         done = json['done'];
 

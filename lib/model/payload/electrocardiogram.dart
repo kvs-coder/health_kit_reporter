@@ -1,11 +1,11 @@
+import '../decorator/extensions.dart';
 import 'package:health_kit_reporter/model/type/electrocardiogram_type.dart';
 
-import 'device.dart';
 import 'sample.dart';
-import 'source_revision.dart';
+import 'metadata.dart';
 
 /// Equivalent of [Electrocardiogram]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -16,23 +16,15 @@ import 'source_revision.dart';
 ///
 class Electrocardiogram extends Sample<ElectrocardiogramHarmonized> {
   const Electrocardiogram(
-    String uuid,
-    String identifier,
-    num startTimestamp,
-    num endTimestamp,
-    Device? device,
-    SourceRevision sourceRevision,
-    ElectrocardiogramHarmonized harmonized,
+    super.uuid,
+    super.identifier,
+    super.startTimestamp,
+    super.endTimestamp,
+    super.device,
+    super.sourceRevision,
+    super.harmonized,
     this.numberOfMeasurements,
-  ) : super(
-          uuid,
-          identifier,
-          startTimestamp,
-          endTimestamp,
-          device,
-          sourceRevision,
-          harmonized,
-        );
+  );
 
   final int numberOfMeasurements;
 
@@ -59,7 +51,7 @@ class Electrocardiogram extends Sample<ElectrocardiogramHarmonized> {
 }
 
 /// Equivalent of [Electrocardiogram.Harmonized]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -79,7 +71,7 @@ class ElectrocardiogramHarmonized {
     this.metadata,
   );
 
-  final num averageHeartRate;
+  final num? averageHeartRate;
   final String averageHeartRateUnit;
   final num samplingFrequency;
   final String samplingFrequencyUnit;
@@ -87,7 +79,7 @@ class ElectrocardiogramHarmonized {
   final String symptomsStatus;
   final int count;
   final List<ElectrocardiogramVoltageMeasurement> voltageMeasurements;
-  final Map<String, dynamic>? metadata;
+  final Metadata? metadata;
 
   /// General map representation
   ///
@@ -100,26 +92,26 @@ class ElectrocardiogramHarmonized {
         'symptomsStatus': symptomsStatus,
         'count': count,
         'voltageMeasurements': voltageMeasurements.map((e) => e.map).toList(),
-        'metadata': metadata,
+        'metadata': metadata?.map,
       };
 
   /// General constructor from JSON payload
   ///
   ElectrocardiogramHarmonized.fromJson(Map<String, dynamic> json)
-      : averageHeartRate = json['averageHeartRate'],
+      : averageHeartRate = tryParseNum(json['averageHeartRate']),
         averageHeartRateUnit = json['averageHeartRateUnit'],
-        samplingFrequency = json['samplingFrequency'],
+        samplingFrequency = parseNum(json['samplingFrequency']),
         samplingFrequencyUnit = json['samplingFrequencyUnit'],
         classification = json['classification'],
         symptomsStatus = json['symptomsStatus'],
         count = json['count'],
         voltageMeasurements = ElectrocardiogramVoltageMeasurement.collect(
             json['voltageMeasurements']),
-        metadata = json['metadata'];
+        metadata = Metadata.tryFromJson(json['metadata']);
 }
 
 /// Equivalent of [Electrocardiogram.VoltageMeasurement]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -147,7 +139,7 @@ class ElectrocardiogramVoltageMeasurement {
   ElectrocardiogramVoltageMeasurement.fromJson(Map<String, dynamic> json)
       : harmonized = ElectrocardiogramVoltageMeasurementHarmonized.fromJson(
             json['harmonized']),
-        timeSinceSampleStart = json['timeSinceSampleStart'];
+        timeSinceSampleStart = parseNum(json['timeSinceSampleStart']);
 
   /// Simplifies creating a list of objects from JSON payload.
   ///
@@ -162,7 +154,7 @@ class ElectrocardiogramVoltageMeasurement {
 }
 
 /// Equivalent of [Electrocardiogram.VoltageMeasurement.Harmonized]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -189,6 +181,6 @@ class ElectrocardiogramVoltageMeasurementHarmonized {
   ///
   ElectrocardiogramVoltageMeasurementHarmonized.fromJson(
       Map<String, dynamic> json)
-      : value = json['value'],
+      : value = parseNum(json['value']),
         unit = json['unit'];
 }

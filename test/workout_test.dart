@@ -89,7 +89,7 @@ void main() {
         WorkoutEventType.pause.value);
     expect(sut.workoutEvents[0].harmonized.type.description,
         WorkoutEventType.pause.description);
-    expect(sut.workoutEvents[0].harmonized.metadata, {'some': 'meta'});
+    expect(sut.workoutEvents[0].harmonized.metadata?.map, {'some': 'meta'});
     expect(sut.harmonized.totalFlightsClimbedUnit, 'count');
     expect(sut.harmonized.totalEnergyBurnedUnit, 'Cal');
     expect(sut.harmonized.totalEnergyBurned, 1.2);
@@ -100,6 +100,6 @@ void main() {
     expect(sut.harmonized.totalDistanceUnit, 'm');
     expect(sut.harmonized.totalDistance, 123);
     expect(sut.harmonized.totalSwimmingStrokeCountUnit, 'count');
-    expect(sut.harmonized.metadata, {'HKWasUserEntered': '1'});
+    expect(sut.harmonized.metadata?.map, {'HKWasUserEntered': '1'});
   });
 }

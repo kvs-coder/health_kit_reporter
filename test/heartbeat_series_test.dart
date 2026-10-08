@@ -258,6 +258,6 @@ void main() {
     expect(sut.harmonized.measurements.last.precededByGap, false);
     expect(sut.harmonized.measurements.last.done, true);
     expect(sut.harmonized.measurements.last.timeSinceSeriesStart, 54.39453125);
-    expect(sut.harmonized.metadata, {'HKAlgorithmVersion': '1'});
+    expect(sut.harmonized.metadata?.map, {'HKAlgorithmVersion': '1'});
   });
 }

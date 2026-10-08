@@ -1,13 +1,12 @@
 import 'package:health_kit_reporter/model/type/correlation_type.dart';
 
 import 'category.dart';
-import 'device.dart';
 import 'quantity.dart';
 import 'sample.dart';
-import 'source_revision.dart';
+import 'metadata.dart';
 
 /// Equivalent of [Correlation]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -18,22 +17,14 @@ import 'source_revision.dart';
 ///
 class Correlation extends Sample<CorrelationHarmonized> {
   const Correlation(
-    String uuid,
-    String identifier,
-    num startTimestamp,
-    num endTimestamp,
-    Device? device,
-    SourceRevision sourceRevision,
-    CorrelationHarmonized harmonized,
-  ) : super(
-          uuid,
-          identifier,
-          startTimestamp,
-          endTimestamp,
-          device,
-          sourceRevision,
-          harmonized,
-        );
+    super.uuid,
+    super.identifier,
+    super.startTimestamp,
+    super.endTimestamp,
+    super.device,
+    super.sourceRevision,
+    super.harmonized,
+  );
 
   /// General constructor from JSON payload
   ///
@@ -55,7 +46,7 @@ class Correlation extends Sample<CorrelationHarmonized> {
 }
 
 /// Equivalent of [Correlation.Harmonized]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
@@ -71,14 +62,14 @@ class CorrelationHarmonized {
 
   final List<Quantity> quantitySamples;
   final List<Category> categorySamples;
-  final Map<String, dynamic>? metadata;
+  final Metadata? metadata;
 
   /// General map representation
   ///
   Map<String, dynamic> get map => {
         'quantitySamples': quantitySamples.map((e) => e.map).toList(),
         'categorySamples': categorySamples.map((e) => e.map).toList(),
-        'metadata': metadata,
+        'metadata': metadata?.map,
       };
 
   /// General constructor from JSON payload
@@ -86,5 +77,5 @@ class CorrelationHarmonized {
   CorrelationHarmonized.fromJson(Map<String, dynamic> json)
       : quantitySamples = Quantity.collect(json['quantitySamples']),
         categorySamples = Category.collect(json['categorySamples']),
-        metadata = json['metadata'];
+        metadata = Metadata.tryFromJson(json['metadata']);
 }

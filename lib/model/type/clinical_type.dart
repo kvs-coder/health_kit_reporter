@@ -1,7 +1,7 @@
 import '../../exceptions.dart';
 
 /// Equivalent of [ClinicalType]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [identifier] extension representing
 /// original [String] of the type.
@@ -17,6 +17,8 @@ enum ClinicalType {
   medicationRecord,
   procedureRecord,
   vitalSignRecord,
+  coverageRecord,
+  clinicalNoteRecord,
 }
 
 extension ClinicalTypeIdentifier on ClinicalType {
@@ -36,6 +38,10 @@ extension ClinicalTypeIdentifier on ClinicalType {
         return "HKClinicalTypeIdentifierProcedureRecord";
       case ClinicalType.vitalSignRecord:
         return "HKClinicalTypeIdentifierVitalSignRecord";
+      case ClinicalType.coverageRecord:
+        return "HKClinicalTypeIdentifierCoverageRecord";
+      case ClinicalType.clinicalNoteRecord:
+        return "HKClinicalTypeIdentifierClinicalNoteRecord";
     }
   }
 }

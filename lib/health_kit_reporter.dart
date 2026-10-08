@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
-import 'model/SampleQueryOptions.dart';
+import 'model/sample_query_option.dart';
 import 'model/payload/activity_summary.dart';
 import 'model/payload/category.dart';
+import 'model/payload/clinical_record.dart';
 import 'model/payload/characteristic/characteristic.dart';
 import 'model/payload/correlation.dart';
 import 'model/payload/date_components.dart';
@@ -21,16 +21,20 @@ import 'model/payload/source.dart';
 import 'model/payload/statistics.dart';
 import 'model/payload/workout.dart';
 import 'model/payload/workout_configuration.dart';
+import 'model/payload/vision_prescription.dart';
+import 'model/payload/workout_effort_relationship.dart';
 import 'model/payload/workout_route.dart';
 import 'model/predicate.dart';
 import 'model/type/activity_summary_type.dart';
 import 'model/type/category_type.dart';
 import 'model/type/characteristic_type.dart';
+import 'model/type/clinical_type.dart';
 import 'model/type/correlation_type.dart';
 import 'model/type/document_type.dart';
 import 'model/type/electrocardiogram_type.dart';
 import 'model/type/quantity_type.dart';
 import 'model/type/series_type.dart';
+import 'model/type/vision_prescription_type.dart';
 import 'model/type/workout_type.dart';
 import 'model/update_frequency.dart';
 
@@ -40,6 +44,10 @@ import 'model/update_frequency.dart';
 ///
 /// The list of Platform methods:
 /// - [requestAuthorization]
+/// - [requestClinicalRecordsAuthorization]
+/// - [requestPerObjectReadAuthorization]
+/// - [supportsHealthRecords]
+/// - [isWritable]
 /// - [preferredUnits]
 /// - [characteristicsQuery]
 /// - [quantityQuery]
@@ -55,13 +63,20 @@ import 'model/update_frequency.dart';
 /// - [disableBackgroundDelivery]
 /// - [sourceQuery]
 /// - [correlationQuery]
+/// - [clinicalRecordQuery]
+/// - [visionPrescriptionQuery]
+/// - [workoutEffortRelationshipQuery]
 /// - [startWatchApp]
 /// - [isAuthorizedToWrite]
 /// - [addCategory]
 /// - [addQuantity]
+/// - [relateWorkoutEffort]
+/// - [unrelateWorkoutEffort]
 /// - [delete]
+/// - [deleteSamples]
 /// - [deleteObjects]
 /// - [save]
+/// - [saveSamples]
 ///
 /// Functions [enableBackgroundDelivery], [disableAllBackgroundDelivery], [disableBackgroundDelivery]
 /// are preferred to use with [observerQuery] set up, since they allow
@@ -79,8 +94,12 @@ import 'model/update_frequency.dart';
 /// Call [preferredUnits] to see which [PreferredUnit] is used for the [Quantity]. With invalid unit
 /// the [quantityQuery], [statisticsQuery] will fail to retrieve the data.
 ///
-/// The method [electrocardiogramQuery] requires iOS 14.0 and higher.
-/// The method [heartbeatSeriesQuery] requires iOS 13.0 and higher.
+/// The plugin requires iOS 15.0 and higher.
+/// [visionPrescriptionQuery] and [requestPerObjectReadAuthorization] require iOS 16.0,
+/// [workoutEffortRelationshipQuery], [relateWorkoutEffort] and [unrelateWorkoutEffort] iOS 18.0.
+///
+/// Errors arrive as [PlatformException]s whose message is the native error's
+/// localized description.
 ///
 ///
 /// Receives events from native side. Channel: [health_kit_reporter_event_channel]
@@ -143,58 +162,65 @@ class HealthKitReporter {
   ///
   static StreamSubscription<dynamic> observerQuery(
       List<String> identifiers, Predicate? predicate,
-      {required Function(String) onUpdate}) {
+      {required Function(String) onUpdate, Function? onError}) {
     final arguments = <String, dynamic>{
       'identifiers': identifiers,
     };
     if (predicate != null) {
       arguments.addAll(predicate.map);
     }
-    return _observerQueryChannel
-        .receiveBroadcastStream(arguments)
-        .listen((event) {
+    return _observerQueryChannel.receiveBroadcastStream(arguments).listen(
+        (event) {
       final map = Map<String, dynamic>.from(event);
       final identifier = map['identifier'];
       onUpdate(identifier);
-    });
+    }, onError: onError);
   }
 
   /// Will fetch the actual values as a first data snapshot
   /// and notify about data changes.
   /// Will call [onUpdate] callback, if
-  /// there were changes regarding to the provided [identifier]
+  /// there were changes regarding to the provided [identifiers]
   /// inside [HealthKit].
   /// Provide the [predicate] to set the date interval.
   ///
+  /// [onUpdate] receives the new [anchor] as a base64 string with every update.
+  /// Persist it and pass it as [anchor] to the next query to receive only
+  /// the changes since; without [anchor] the query starts from the beginning.
+  /// Deleted objects carry only their uuid, so match it against the samples you keep.
+  ///
   static StreamSubscription<dynamic> anchoredObjectQuery(
-      List<String> identifiers, Predicate predicate,
-      {required Function(List<Sample>, List<DeletedObject>) onUpdate}) {
+      List<String> identifiers, Predicate? predicate,
+      {String? anchor,
+      required Function(List<Sample> samples,
+              List<DeletedObject> deletedObjects, String? anchor)
+          onUpdate,
+      Function? onError}) {
     final arguments = <String, dynamic>{
       'identifiers': identifiers,
     };
-    arguments.addAll(predicate.map);
-    return _anchoredObjectQueryChannel
-        .receiveBroadcastStream(arguments)
-        .listen((event) {
-      final map = LinkedHashMap<String, dynamic>.from(event);
-      final samplesList = List.from(map['samples']);
+    if (predicate != null) {
+      arguments.addAll(predicate.map);
+    }
+    if (anchor != null) {
+      arguments['anchor'] = anchor;
+    }
+    return _anchoredObjectQueryChannel.receiveBroadcastStream(arguments).listen(
+        (event) {
+      final map = Map<String, dynamic>.from(event);
       final samples = <Sample>[];
-      for (final String element in samplesList) {
-        final json = jsonDecode(element);
-        final sample = Sample.factory(json);
+      for (final String element in List.from(map['samples'])) {
+        final sample = Sample.factory(jsonDecode(element));
         if (sample != null) {
           samples.add(sample);
         }
       }
-      final deletedObjectsList = List.from(map['deletedObjects']);
-      final deletedObjects = <DeletedObject>[];
-      for (final String element in deletedObjectsList) {
-        final json = jsonDecode(element);
-        final deletedObject = DeletedObject.fromJson(json);
-        deletedObjects.add(deletedObject);
-      }
-      onUpdate(samples, deletedObjects);
-    });
+      final deletedObjects = <DeletedObject>[
+        for (final String element in List.from(map['deletedObjects']))
+          DeletedObject.fromJson(jsonDecode(element))
+      ];
+      onUpdate(samples, deletedObjects, map['anchor']);
+    }, onError: onError);
   }
 
   /// Will fetch the actual values as a first data snapshot
@@ -206,7 +232,8 @@ class HealthKitReporter {
   ///
   static StreamSubscription<dynamic> queryActivitySummaryUpdates(
       Predicate predicate,
-      {required Function(List<ActivitySummary>) onUpdate}) {
+      {required Function(List<ActivitySummary>) onUpdate,
+      Function? onError}) {
     final arguments = predicate.map;
     return _queryActivitySummaryChannel
         .receiveBroadcastStream(arguments)
@@ -218,7 +245,7 @@ class HealthKitReporter {
         activitySummaries.add(activitySummary);
       }
       onUpdate(activitySummaries);
-    });
+    }, onError: onError);
   }
 
   /// Will fetch the actual values as a first data snapshot
@@ -239,13 +266,16 @@ class HealthKitReporter {
       DateTime enumerateFrom,
       DateTime enumerateTo,
       DateComponents intervalComponents,
-      {required Function(Statistics) onUpdate}) {
+      {required Function(Statistics) onUpdate,
+      bool separateBySource = false,
+      Function? onError}) {
     final arguments = {
       'preferredUnits': preferredUnits.map((e) => e.map).toList(),
       'anchorTimestamp': anchorDate.millisecondsSinceEpoch,
       'enumerateFrom': enumerateFrom.millisecondsSinceEpoch,
       'enumerateTo': enumerateTo.millisecondsSinceEpoch,
       'intervalComponents': intervalComponents.map,
+      'separateBySource': separateBySource,
     };
     arguments.addAll(predicate.map);
     return _statisticsCollectionQueryChannel
@@ -254,7 +284,7 @@ class HealthKitReporter {
       final json = jsonDecode(event);
       final statistics = Statistics.fromJson(json);
       onUpdate(statistics);
-    });
+    }, onError: onError);
   }
 
   /// Verify whether HealthKit is available.
@@ -269,12 +299,18 @@ class HealthKitReporter {
   /// - [ActivitySummaryType]
   /// - [CategoryType]
   /// - [CharacteristicType]
-  /// - [CorrelationType]
   /// - [DocumentType]
   /// - [ElectrocardiogramType]
   /// - [QuantityType]
   /// - [SeriesType]
   /// - [WorkoutType]
+  ///
+  /// Only types whose [isWritable] is true can be requested for writing.
+  /// Correlations ([CorrelationType]) and per-object types
+  /// ([VisionPrescriptionType], see [requestPerObjectReadAuthorization])
+  /// can't be requested at all. For all of these the call fails with
+  /// a [PlatformException] instead of [HealthKit] crashing the app.
+  /// Request clinical records with [requestClinicalRecordsAuthorization].
   ///
   static Future<bool> requestAuthorization(
       List<String> toRead, List<String> toWrite) async {
@@ -285,13 +321,50 @@ class HealthKitReporter {
     return await _methodChannel.invokeMethod('requestAuthorization', arguments);
   }
 
+  /// Request read access to clinical records ([ClinicalType] identifiers).
+  ///
+  /// Call it apart from [requestAuthorization]: it starts Health's records flow,
+  /// which needs an Apple Account and the Clinical Health Records entitlement.
+  /// Check [supportsHealthRecords] first.
+  ///
   static Future<bool> requestClinicalRecordsAuthorization(
       List<String> toRead) async {
     final arguments = {
       'toRead': toRead,
-      'toWrite': [],
+      'toWrite': <String>[],
     };
     return await _methodChannel.invokeMethod('requestAuthorization', arguments);
+  }
+
+  /// Asks the user which objects of a per-object authorization type the app may read,
+  /// e.g. [VisionPrescriptionType.visionPrescription]. Requires iOS 16.
+  /// [predicate] narrows the objects offered.
+  ///
+  static Future<bool> requestPerObjectReadAuthorization(String identifier,
+      {Predicate? predicate}) async {
+    final arguments = <String, dynamic>{
+      'identifier': identifier,
+    };
+    if (predicate != null) arguments.addAll(predicate.map);
+    return await _methodChannel.invokeMethod(
+        'requestPerObjectReadAuthorization', arguments);
+  }
+
+  /// Tells whether the device supports clinical health records.
+  ///
+  static Future<bool> supportsHealthRecords() async =>
+      await _methodChannel.invokeMethod('supportsHealthRecords');
+
+  /// Whether an app may request write access to the type with [identifier].
+  /// False for types [HealthKit] only computes or records itself
+  /// (e.g. [QuantityType.appleExerciseTime], ECGs), clinical records and correlations.
+  /// Use it to build the write set of [requestAuthorization].
+  ///
+  static Future<bool> isWritable(String identifier) async {
+    final arguments = {
+      'identifier': identifier,
+    };
+    return await _methodChannel.invokeMethod('isWritable', arguments);
   }
 
   /// Returns preferred units for provided [types].
@@ -299,16 +372,13 @@ class HealthKitReporter {
   ///
   static Future<List<PreferredUnit>> preferredUnits(
       List<QuantityType> types) async {
-    final arguments = types.map((e) => e.identifier).toList();
+    final arguments = {
+      'identifiers': types.map((e) => e.identifier).toList(),
+    };
     final result =
         await _methodChannel.invokeMethod('preferredUnits', arguments);
     final List<dynamic> list = jsonDecode(result);
-    final preferredUnits = <PreferredUnit>[];
-    for (final Map<String, dynamic> map in list) {
-      final preferredUnit = PreferredUnit.fromJson(map);
-      preferredUnits.add(preferredUnit);
-    }
-    return preferredUnits;
+    return list.map((e) => PreferredUnit.fromJson(e)).toList();
   }
 
   /// Returns [Characteristic] info.
@@ -326,32 +396,20 @@ class HealthKitReporter {
   ///
   static Future<List<HeartbeatSeries>> heartbeatSeriesQuery(
       Predicate predicate) async {
-    final arguments = predicate.map;
-    final result =
-        await _methodChannel.invokeMethod('heartbeatSeriesQuery', arguments);
+    final result = await _methodChannel.invokeMethod(
+        'heartbeatSeriesQuery', predicate.map);
     final List<dynamic> list = jsonDecode(result);
-    final series = <HeartbeatSeries>[];
-    for (final Map<String, dynamic> map in list) {
-      final sample = HeartbeatSeries.fromJson(map);
-      series.add(sample);
-    }
-    return series;
+    return list.map((e) => HeartbeatSeries.fromJson(e)).toList();
   }
 
   /// Returns [WorkoutRoute] sample for the provided time interval predicate [predicate].
   ///
   static Future<List<WorkoutRoute>> workoutRouteQuery(
       Predicate predicate) async {
-    final arguments = predicate.map;
     final result =
-        await _methodChannel.invokeMethod('workoutRouteQuery', arguments);
+        await _methodChannel.invokeMethod('workoutRouteQuery', predicate.map);
     final List<dynamic> list = jsonDecode(result);
-    final routes = <WorkoutRoute>[];
-    for (final Map<String, dynamic> map in list) {
-      final sample = WorkoutRoute.fromJson(map);
-      routes.add(sample);
-    }
-    return routes;
+    return list.map((e) => WorkoutRoute.fromJson(e)).toList();
   }
 
   /// Returns [Quantity] samples for the provided [type],
@@ -369,12 +427,7 @@ class HealthKitReporter {
     final result =
         await _methodChannel.invokeMethod('quantityQuery', arguments);
     final List<dynamic> list = jsonDecode(result);
-    final quantities = <Quantity>[];
-    for (final Map<String, dynamic> map in list) {
-      final quantity = Quantity.fromJson(map);
-      quantities.add(quantity);
-    }
-    return quantities;
+    return list.map((e) => Quantity.fromJson(e)).toList();
   }
 
   /// Returns [Category] samples for the provided [type]
@@ -389,32 +442,24 @@ class HealthKitReporter {
     final result =
         await _methodChannel.invokeMethod('categoryQuery', arguments);
     final List<dynamic> list = jsonDecode(result);
-    final categories = <Category>[];
-    for (final Map<String, dynamic> map in list) {
-      final category = Category.fromJson(map);
-      categories.add(category);
-    }
-    return categories;
+    return list.map((e) => Category.fromJson(e)).toList();
   }
 
   /// Returns [Workout] samples for the provided
   /// time interval predicate [predicate].
-  /// [queryOption] parameter represents the options passable to the native HealthKit sample query
+  /// [queryOption] tells whether the workouts must start and/or end inside
+  /// the interval; both by default.
+  ///
   static Future<List<Workout>> workoutQuery(Predicate predicate,
       {SampleQueryOption? queryOption}) async {
-    var arguments = <String, dynamic>{};
+    final arguments = <String, dynamic>{};
     arguments.addAll(predicate.map);
     if (queryOption != null) {
-      arguments["singleQueryOption"] = queryOption.value;
+      arguments['predicateOptions'] = queryOption.value;
     }
     final result = await _methodChannel.invokeMethod('workoutQuery', arguments);
     final List<dynamic> list = jsonDecode(result);
-    final workouts = <Workout>[];
-    for (final Map<String, dynamic> map in list) {
-      final workout = Workout.fromJson(map);
-      workouts.add(workout);
-    }
-    return workouts;
+    return list.map((e) => Workout.fromJson(e)).toList();
   }
 
   /// Returns [Electrocardiogram] samples for the provided
@@ -430,12 +475,7 @@ class HealthKitReporter {
     final result =
         await _methodChannel.invokeMethod('electrocardiogramQuery', arguments);
     final List<dynamic> list = jsonDecode(result);
-    final electrocardiograms = <Electrocardiogram>[];
-    for (final Map<String, dynamic> map in list) {
-      final electrocardiogram = Electrocardiogram.fromJson(map);
-      electrocardiograms.add(electrocardiogram);
-    }
-    return electrocardiograms;
+    return list.map((e) => Electrocardiogram.fromJson(e)).toList();
   }
 
   /// Returns [Sample] samples for the provided [identifier] and the
@@ -444,8 +484,6 @@ class HealthKitReporter {
   /// If [identifier] was recognized as one of [QuantityType], the
   /// units will be set automatically by original
   /// library [HealthKitReporter] according to SI.
-  /// See https://cocoapods.org/pods/HealthKitReporter
-  /// file [Extensions+HKQuantityType.swift]
   ///
   static Future<List<Sample>> sampleQuery(
       String identifier, Predicate predicate) async {
@@ -454,11 +492,9 @@ class HealthKitReporter {
     };
     arguments.addAll(predicate.map);
     final result = await _methodChannel.invokeMethod('sampleQuery', arguments);
-    final list = List.from(result);
     final samples = <Sample>[];
-    for (final String element in list) {
-      final json = jsonDecode(element);
-      final sample = Sample.factory(json);
+    for (final String element in List.from(result)) {
+      final sample = Sample.factory(jsonDecode(element));
       if (sample != null) {
         samples.add(sample);
       }
@@ -468,39 +504,86 @@ class HealthKitReporter {
 
   /// Returns [Statistics] for the provided [type] and the,
   /// the preferred [unit] and the time interval predicate [predicate].
+  /// With [separateBySource] the result also holds
+  /// [Statistics.sourceStatistics], the values per source.
   ///
   /// Warning: The [unit] should be valid. See [preferredUnits].
   ///
   static Future<Statistics> statisticsQuery(
-      QuantityType type, String unit, Predicate predicate) async {
+      QuantityType type, String unit, Predicate predicate,
+      {bool separateBySource = false}) async {
     final arguments = <String, dynamic>{
       'identifier': type.identifier,
       'unit': unit,
+      'separateBySource': separateBySource,
     };
     arguments.addAll(predicate.map);
     final result =
         await _methodChannel.invokeMethod('statisticsQuery', arguments);
-    final Map<String, dynamic> map = jsonDecode(result);
-    final statistics = Statistics.fromJson(map);
-    return statistics;
+    return Statistics.fromJson(jsonDecode(result));
   }
 
-  /// Returns [HeartbeatSerie] samples for the provided
-  /// time interval predicate [predicate].
+  /// Returns [ActivitySummary] samples for the days
+  /// of the time interval predicate [predicate].
   ///
   static Future<List<ActivitySummary>> queryActivitySummary(
       Predicate predicate) async {
-    final arguments = <String, dynamic>{};
-    arguments.addAll(predicate.map);
-    final result =
-        await _methodChannel.invokeMethod('queryActivitySummary', arguments);
+    final result = await _methodChannel.invokeMethod(
+        'queryActivitySummary', predicate.map);
     final List<dynamic> list = jsonDecode(result);
-    final activitySummaries = <ActivitySummary>[];
-    for (final Map<String, dynamic> map in list) {
-      final activitySummary = ActivitySummary.fromJson(map);
-      activitySummaries.add(activitySummary);
-    }
-    return activitySummaries;
+    return list.map((e) => ActivitySummary.fromJson(e)).toList();
+  }
+
+  /// Returns [ClinicalRecord] samples of [type],
+  /// optionally narrowed by the time interval predicate [predicate].
+  ///
+  /// Requires the Clinical Health Records entitlement,
+  /// [supportsHealthRecords] and [requestClinicalRecordsAuthorization].
+  ///
+  static Future<List<ClinicalRecord>> clinicalRecordQuery(ClinicalType type,
+      {Predicate? predicate}) async {
+    final arguments = <String, dynamic>{
+      'identifier': type.identifier,
+    };
+    if (predicate != null) arguments.addAll(predicate.map);
+    final result =
+        await _methodChannel.invokeMethod('clinicalRecordQuery', arguments);
+    final List<dynamic> list = jsonDecode(result);
+    return list.map((e) => ClinicalRecord.fromJson(e)).toList();
+  }
+
+  /// Returns [VisionPrescription] samples,
+  /// optionally narrowed by the time interval predicate [predicate]. Requires iOS 16.
+  ///
+  /// Requires per-object read authorization, see [requestPerObjectReadAuthorization]
+  /// with [VisionPrescriptionType.visionPrescription].
+  ///
+  static Future<List<VisionPrescription>> visionPrescriptionQuery(
+      {Predicate? predicate}) async {
+    final result = await _methodChannel.invokeMethod(
+        'visionPrescriptionQuery', predicate?.map ?? <String, dynamic>{});
+    return VisionPrescription.collect(jsonDecode(result));
+  }
+
+  /// Returns the workout effort score samples related to workouts
+  /// whose dates match [predicate]. Requires iOS 18.
+  ///
+  /// Pass the [anchor] of the previous result to receive only the changes since;
+  /// [mostRelevant] returns only the most relevant effort sample per workout.
+  ///
+  static Future<WorkoutEffortRelationshipResult> workoutEffortRelationshipQuery(
+      {Predicate? predicate, String? anchor, bool mostRelevant = false}) async {
+    final arguments = <String, dynamic>{
+      'mostRelevant': mostRelevant,
+    };
+    if (predicate != null) arguments.addAll(predicate.map);
+    if (anchor != null) arguments['anchor'] = anchor;
+    final result = Map<String, dynamic>.from(await _methodChannel.invokeMethod(
+        'workoutEffortRelationshipQuery', arguments));
+    return WorkoutEffortRelationshipResult(
+      WorkoutEffortRelationship.collect(jsonDecode(result['relationships'])),
+      result['anchor'],
+    );
   }
 
   /// Returns a status of calling native method for
@@ -551,44 +634,35 @@ class HealthKitReporter {
     arguments.addAll(predicate.map);
     final result = await _methodChannel.invokeMethod('sourceQuery', arguments);
     final List<dynamic> list = jsonDecode(result);
-    final sources = <Source>[];
-    for (final Map<String, dynamic> map in list) {
-      final source = Source.fromJson(map);
-      sources.add(source);
-    }
-    return sources;
+    return list.map((e) => Source.fromJson(e)).toList();
   }
 
   /// Returns [Correlation] samples for the provided [identifier], the
   /// time interval predicate [predicate] and optional [typePredicates] for
-  /// [Category] and/or [Quantity] values.
+  /// [Category] and/or [Quantity] values, keyed by their identifiers.
   ///
   /// Warning: In order to use the correlations, you must be sure, that you have
   /// provided reading permissions for relevant [QuantityType].
   ///
   /// For instance, if you want to get the data for [CorrelationType.bloodPressure],
   /// you need to ask user to give read permissions for [QuantityType.bloodPressureDiastolic] and
-  /// [QuantityType.bloodPressureSystolic]. Otherwise [HealthKit] will throw fatal error with
-  /// message: "Authorization to read the following types is disallowed:
-  /// HKCorrelationTypeIdentifierBloodPressure".
+  /// [QuantityType.bloodPressureSystolic].
   ///
   static Future<List<Correlation>> correlationQuery(
       String identifier, Predicate predicate,
       {Map<String, Predicate>? typePredicates}) async {
-    final arguments = {
+    final arguments = <String, dynamic>{
       'identifier': identifier,
-      'typePredicates': typePredicates,
     };
+    if (typePredicates != null) {
+      arguments['typePredicates'] =
+          typePredicates.map((key, value) => MapEntry(key, value.map));
+    }
     arguments.addAll(predicate.map);
     final result =
         await _methodChannel.invokeMethod('correlationQuery', arguments);
     final List<dynamic> list = jsonDecode(result);
-    final correlations = <Correlation>[];
-    for (final Map<String, dynamic> map in list) {
-      final correlation = Correlation.fromJson(map);
-      correlations.add(correlation);
-    }
-    return correlations;
+    return list.map((e) => Correlation.fromJson(e)).toList();
   }
 
   /// Returns status of the App on WatchOS device.
@@ -609,8 +683,9 @@ class HealthKitReporter {
     return await _methodChannel.invokeMethod('isAuthorizedToWrite', arguments);
   }
 
-  /// Adds [Category] samples to your [workout].
-  /// [device] is optional.
+  /// Adds new [Category] samples to a [workout] stored in [HealthKit],
+  /// looked up by its [Workout.uuid].
+  /// [device] is optional and replaces the device of every sample.
   ///
   static Future<bool> addCategory(List<Category> categories, Workout workout,
       {Device? device}) async {
@@ -622,8 +697,9 @@ class HealthKitReporter {
     return await _methodChannel.invokeMethod('addCategory', arguments);
   }
 
-  /// Adds [Quantity] samples to your [workout].
-  /// [device] is optional.
+  /// Adds new [Quantity] samples to a [workout] stored in [HealthKit],
+  /// looked up by its [Workout.uuid].
+  /// [device] is optional and replaces the device of every sample.
   ///
   static Future<bool> addQuantity(List<Quantity> quantities, Workout workout,
       {Device? device}) async {
@@ -635,28 +711,91 @@ class HealthKitReporter {
     return await _methodChannel.invokeMethod('addQuantity', arguments);
   }
 
-  /// Deletes [Sample] from [HealthKit].
+  /// Relates a workout effort score or estimated workout effort score [sample]
+  /// to the stored workout with [workoutUUID], or to one of its activities
+  /// with [activityUUID]. Requires iOS 18.
+  ///
+  /// A [sample] already stored in [HealthKit] (found by its uuid) is related as is,
+  /// otherwise it is saved first.
+  ///
+  static Future<bool> relateWorkoutEffort(Quantity sample, String workoutUUID,
+      {String? activityUUID}) async {
+    final arguments = <String, dynamic>{
+      'sample': sample.map,
+      'workoutUUID': workoutUUID,
+    };
+    if (activityUUID != null) arguments['activityUUID'] = activityUUID;
+    return await _methodChannel.invokeMethod('relateWorkoutEffort', arguments);
+  }
+
+  /// Removes the relation between the stored effort score [sample],
+  /// looked up by its uuid, and the stored workout with [workoutUUID]
+  /// (or one of its activities with [activityUUID]). Requires iOS 18.
+  ///
+  static Future<bool> unrelateWorkoutEffort(Quantity sample, String workoutUUID,
+      {String? activityUUID}) async {
+    final arguments = <String, dynamic>{
+      'sample': sample.map,
+      'workoutUUID': workoutUUID,
+    };
+    if (activityUUID != null) arguments['activityUUID'] = activityUUID;
+    return await _methodChannel.invokeMethod(
+        'unrelateWorkoutEffort', arguments);
+  }
+
+  /// Deletes the [sample] stored in [HealthKit], looked up by its [Sample.uuid]:
+  /// use a sample read from [HealthKit] or one carrying the uuid [save] returned.
+  /// An unknown uuid fails with a [PlatformException].
   ///
   static Future<bool> delete(Sample sample) async {
     final arguments = sample.parsed();
     return await _methodChannel.invokeMethod('delete', arguments);
   }
 
-  /// Deletes all objects related to [identifier] with [predicate].
+  /// Deletes the stored [samples] at once, looked up by their uuids.
+  /// Either all of them are deleted or none.
   ///
-  static Future<dynamic> deleteObjects(
+  static Future<bool> deleteSamples(List<Sample> samples) async {
+    final arguments = {
+      'samples': samples.map((e) => e.parsed()).toList(),
+    };
+    return await _methodChannel.invokeMethod('deleteSamples', arguments);
+  }
+
+  /// Deletes all objects related to [identifier] with [predicate].
+  /// Returns a map with the `status` and the deleted `count`.
+  ///
+  static Future<Map<String, dynamic>> deleteObjects(
       String identifier, Predicate predicate) async {
     final arguments = <String, dynamic>{
       'identifier': identifier,
     };
     arguments.addAll(predicate.map);
-    return await _methodChannel.invokeMethod('deleteObjects', arguments);
+    final result =
+        await _methodChannel.invokeMethod('deleteObjects', arguments);
+    return Map<String, dynamic>.from(result);
   }
 
-  /// Saves [Sample] in [HealthKit].
+  /// Saves [sample] in [HealthKit] and returns the uuid
+  /// [HealthKit] gave the stored sample.
+  /// Keep it to delete the sample later, e.g. with [delete].
   ///
-  static Future<bool> save(Sample sample) async {
+  static Future<String?> save(Sample sample) async {
     final arguments = sample.parsed();
-    return await _methodChannel.invokeMethod('save', arguments);
+    final result = Map<String, dynamic>.from(
+        await _methodChannel.invokeMethod('save', arguments));
+    return result['uuid'];
+  }
+
+  /// Saves [samples] at once; either all of them are stored or none.
+  /// Returns the uuids of the stored samples, in the order of [samples].
+  ///
+  static Future<List<String>> saveSamples(List<Sample> samples) async {
+    final arguments = {
+      'samples': samples.map((e) => e.parsed()).toList(),
+    };
+    final result = Map<String, dynamic>.from(
+        await _methodChannel.invokeMethod('saveSamples', arguments));
+    return List<String>.from(result['uuids']);
   }
 }

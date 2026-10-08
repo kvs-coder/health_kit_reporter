@@ -1,5 +1,5 @@
 /// Equivalent of [UpdateFrequency]
-/// from [HealthKitReporter] https://cocoapods.org/pods/HealthKitReporter
+/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [value] extension representing
 /// original [int] of the type.
