@@ -1,3 +1,36 @@
+## [4.0.0] - 08.10.2026
+
+Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitReporter) through Swift Package Manager. See "Migrating to 4.0.0" in the README.
+
+### BREAKING CHANGES
+
+* Swift Package Manager only: the podspec and the Objective-C registration are gone, the plugin registers from Swift (`SwiftHealthKitReporterPlugin`). Requires iOS 15, Flutter 3.24 and Dart 3.5.
+* `save` returns the uuid of the stored sample (`Future<String?>`).
+* `delete`, `addQuantity` / `addCategory` and `unrelateWorkoutEffort` act on the stored sample with the payload's uuid.
+* `anchoredObjectQuery` takes an optional `anchor` string and passes the new anchor to `onUpdate` as a third argument.
+* Metadata is a flat object, modelled as `Metadata` / `MetadataValue` (strings, numbers, booleans, `{"timestamp"}` dates, `{"value", "unit"}` quantities) instead of `Map<String, dynamic>`.
+* Vision prescription dates are seconds since 1970.
+* Non-finite numbers arrive as `"Infinity"`, `"-Infinity"` and `"NaN"` and are parsed into doubles.
+* Corrected strings: "Pickleball", "Hand Cycling", "Preparation and Recovery", "Pause or resume request"; ECG "Sinus rhythm" and the environmental audio exposure event strings come from the library.
+* `requestAuthorization` fails with a `PlatformException` for types HealthKit can't authorize and for unknown identifiers instead of ignoring them; errors carry the native localized description.
+* `model/SampleQueryOptions.dart` moved to `model/sample_query_option.dart`; `deleteObjects` returns `Map<String, dynamic>`; `ActivitySummary.date` and `ElectrocardiogramHarmonized.averageHeartRate` are nullable.
+
+### Features
+
+* `saveSamples` / `deleteSamples` (all-or-nothing), `isWritable`, `supportsHealthRecords`, `requestPerObjectReadAuthorization`.
+* `clinicalRecordQuery`, `visionPrescriptionQuery` with the `VisionPrescription` model.
+* Workout effort (iOS 18): `workoutEffortRelationshipQuery` with anchors, `relateWorkoutEffort`, `unrelateWorkoutEffort`.
+* New optional fields: statistics `min`, `duration` and `sourceStatistics` (`separateBySource`), activity summary move time and `paused`, workout `statistics` and `activities`.
+* 17 quantity types and 4 category types the library supports; coverage and clinical note records.
+* `onError` callbacks for the stream queries.
+* The example app lists every method grouped by area and seeds simulator data.
+
+### Fixes
+
+* `correlationQuery` sends its `typePredicates`; they couldn't be encoded before.
+* `environmentalAudioExposureEvent` uses HealthKit's identifier.
+* Results and events are delivered on the platform thread.
+
 ## [2.3.1] - 12.12.2024
 
 * Add missing Workout types 
