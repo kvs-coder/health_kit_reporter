@@ -113,6 +113,23 @@ enum QuantityType {
   atrialFibrillationBurden,
   underwaterDepth,
   waterTemperature,
+  environmentalSoundReduction,
+  cyclingCadence,
+  cyclingFunctionalThresholdPower,
+  cyclingPower,
+  cyclingSpeed,
+  physicalEffort,
+  timeInDaylight,
+  crossCountrySkiingSpeed,
+  distanceCrossCountrySkiing,
+  distancePaddleSports,
+  paddleSportsSpeed,
+  distanceRowing,
+  rowingSpeed,
+  distanceSkatingSports,
+  workoutEffortScore,
+  estimatedWorkoutEffortScore,
+  appleSleepingBreathingDisturbances,
 }
 
 extension QuantityTypeIdentifier on QuantityType {
@@ -324,6 +341,40 @@ extension QuantityTypeIdentifier on QuantityType {
         return 'HKQuantityTypeIdentifierUnderwaterDepth';
       case QuantityType.waterTemperature:
         return 'HKQuantityTypeIdentifierWaterTemperature';
+      case QuantityType.environmentalSoundReduction:
+        return 'HKQuantityTypeIdentifierEnvironmentalSoundReduction';
+      case QuantityType.cyclingCadence:
+        return 'HKQuantityTypeIdentifierCyclingCadence';
+      case QuantityType.cyclingFunctionalThresholdPower:
+        return 'HKQuantityTypeIdentifierCyclingFunctionalThresholdPower';
+      case QuantityType.cyclingPower:
+        return 'HKQuantityTypeIdentifierCyclingPower';
+      case QuantityType.cyclingSpeed:
+        return 'HKQuantityTypeIdentifierCyclingSpeed';
+      case QuantityType.physicalEffort:
+        return 'HKQuantityTypeIdentifierPhysicalEffort';
+      case QuantityType.timeInDaylight:
+        return 'HKQuantityTypeIdentifierTimeInDaylight';
+      case QuantityType.crossCountrySkiingSpeed:
+        return 'HKQuantityTypeIdentifierCrossCountrySkiingSpeed';
+      case QuantityType.distanceCrossCountrySkiing:
+        return 'HKQuantityTypeIdentifierDistanceCrossCountrySkiing';
+      case QuantityType.distancePaddleSports:
+        return 'HKQuantityTypeIdentifierDistancePaddleSports';
+      case QuantityType.paddleSportsSpeed:
+        return 'HKQuantityTypeIdentifierPaddleSportsSpeed';
+      case QuantityType.distanceRowing:
+        return 'HKQuantityTypeIdentifierDistanceRowing';
+      case QuantityType.rowingSpeed:
+        return 'HKQuantityTypeIdentifierRowingSpeed';
+      case QuantityType.distanceSkatingSports:
+        return 'HKQuantityTypeIdentifierDistanceSkatingSports';
+      case QuantityType.workoutEffortScore:
+        return 'HKQuantityTypeIdentifierWorkoutEffortScore';
+      case QuantityType.estimatedWorkoutEffortScore:
+        return 'HKQuantityTypeIdentifierEstimatedWorkoutEffortScore';
+      case QuantityType.appleSleepingBreathingDisturbances:
+        return 'HKQuantityTypeIdentifierAppleSleepingBreathingDisturbances';
     }
   }
 }

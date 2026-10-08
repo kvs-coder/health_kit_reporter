@@ -76,6 +76,10 @@ enum CategoryType {
   irregularMenstrualCycles,
   infrequentMenstrualCycles,
   appleWalkingSteadinessEvent,
+  bleedingAfterPregnancy,
+  bleedingDuringPregnancy,
+  sleepApneaEvent,
+  hypertensionEvent,
 }
 
 extension CategoryTypeIdentifier on CategoryType {
@@ -114,7 +118,8 @@ extension CategoryTypeIdentifier on CategoryType {
       case CategoryType.contraceptive:
         return 'HKCategoryTypeIdentifierContraceptive';
       case CategoryType.environmentalAudioExposureEvent:
-        return 'HKCategoryTypeIdentifierEnvironmentalAudioExposureEvent';
+        // HealthKit renamed audioExposureEvent; both name the same type
+        return 'HKCategoryTypeIdentifierAudioExposureEvent';
       case CategoryType.headphoneAudioExposureEvent:
         return 'HKCategoryTypeIdentifierHeadphoneAudioExposureEvent';
       case CategoryType.handwashingEvent:
@@ -213,6 +218,14 @@ extension CategoryTypeIdentifier on CategoryType {
         return 'HKCategoryTypeIdentifierInfrequentMenstrualCycles';
       case CategoryType.appleWalkingSteadinessEvent:
         return 'HKCategoryTypeIdentifierAppleWalkingSteadinessEvent';
+      case CategoryType.bleedingAfterPregnancy:
+        return 'HKCategoryTypeIdentifierBleedingAfterPregnancy';
+      case CategoryType.bleedingDuringPregnancy:
+        return 'HKCategoryTypeIdentifierBleedingDuringPregnancy';
+      case CategoryType.sleepApneaEvent:
+        return 'HKCategoryTypeIdentifierSleepApneaEvent';
+      case CategoryType.hypertensionEvent:
+        return 'HKCategoryTypeIdentifierHypertensionEvent';
     }
   }
 }
