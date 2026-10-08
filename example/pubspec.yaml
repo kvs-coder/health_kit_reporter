@@ -11,16 +11,15 @@ description: Demonstrates how to use the health_kit_reporter plugin.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.1.0
+version: 4.0.0
 publish_to: none
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=3.5.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_local_notifications: ^5.0.0-nullsafety.1
   health_kit_reporter:
     # When depending on this package from a real application you should use:
     #   health_kit_reporter: ^x.y.z
@@ -34,6 +33,7 @@ dependencies:
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
 
