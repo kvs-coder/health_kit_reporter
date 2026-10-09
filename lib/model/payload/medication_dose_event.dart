@@ -2,6 +2,7 @@ import '../decorator/extensions.dart';
 import '../type/medication_type.dart';
 import 'metadata.dart';
 import 'sample.dart';
+import 'payload.dart';
 
 /// Equivalent of [MedicationDoseEvent]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -59,7 +60,7 @@ class MedicationDoseEvent extends Sample<MedicationDoseEventHarmonized> {
 /// Equivalent of [MedicationDoseEvent.Harmonized]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
-class MedicationDoseEventHarmonized {
+class MedicationDoseEventHarmonized with Payload {
   const MedicationDoseEventHarmonized(
     this.scheduleType,
     this.medicationConceptIdentifier,
@@ -86,6 +87,7 @@ class MedicationDoseEventHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'scheduleType': scheduleType,
         'medicationConceptIdentifier': medicationConceptIdentifier,

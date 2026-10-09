@@ -1,6 +1,7 @@
 import '../decorator/extensions.dart';
 import 'package:health_kit_reporter/model/payload/workout_event_type.dart';
 import 'metadata.dart';
+import 'payload.dart';
 
 /// Equivalent of [WorkoutEvent]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -13,7 +14,7 @@ import 'metadata.dart';
 ///
 /// Requires [WorkoutType] permissions provided.
 ///
-class WorkoutEvent {
+class WorkoutEvent with Payload {
   final num startTimestamp;
   final num endTimestamp;
   final num duration;
@@ -28,6 +29,7 @@ class WorkoutEvent {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'startTimestamp': startTimestamp,
         'endTimestamp': endTimestamp,
@@ -63,7 +65,7 @@ class WorkoutEvent {
 /// Has a [WorkoutEventHarmonized.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class WorkoutEventHarmonized {
+class WorkoutEventHarmonized with Payload {
   const WorkoutEventHarmonized(this.type, [this.metadata]);
 
   final WorkoutEventType type;
@@ -71,6 +73,7 @@ class WorkoutEventHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'value': type.value,
         'description': type.description,

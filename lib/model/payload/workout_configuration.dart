@@ -1,3 +1,5 @@
+import 'payload.dart';
+
 /// Equivalent of [WorkoutConfiguration]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
@@ -5,7 +7,7 @@
 ///
 /// Requires [WorkoutType] permissions provided.
 ///
-class WorkoutConfiguration {
+class WorkoutConfiguration with Payload {
   const WorkoutConfiguration(this.activityValue, this.locationValue,
       this.swimmingValue, this.harmonized);
 
@@ -16,6 +18,7 @@ class WorkoutConfiguration {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'activityValue': activityValue,
         'locationValue': locationValue,
@@ -29,7 +32,7 @@ class WorkoutConfiguration {
 ///
 /// Supports [map] representation.
 ///
-class WorkoutConfigurationHarmonized {
+class WorkoutConfigurationHarmonized with Payload {
   const WorkoutConfigurationHarmonized(this.value, this.unit);
 
   final int value;
@@ -37,6 +40,7 @@ class WorkoutConfigurationHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'value': value,
         'unit': unit,

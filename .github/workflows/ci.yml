@@ -15,7 +15,7 @@ permissions:
 
 env:
   # Minimum Dart line coverage of lib/ in percent. Only ever raise it, to the level the latest test PR reaches.
-  COVERAGE_THRESHOLD: "94.8"
+  COVERAGE_THRESHOLD: "95.0"
 
 jobs:
   release-guard:
@@ -60,7 +60,7 @@ jobs:
         run: flutter test
 
   example:
-    name: Example (SwiftPM build)
+    name: Example (SwiftPM build, Swift tests, integration)
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
@@ -77,3 +77,30 @@ jobs:
       - name: Build
         working-directory: example
         run: flutter build ios --no-codesign
+      # Any available iPhone simulator of the runner's Xcode
+      - name: Boot a simulator
+        run: |
+          udid=$(xcrun simctl list devices available | grep -m1 -oE 'iPhone[^(]*\(([0-9A-F-]{36})\)' | grep -oE '[0-9A-F-]{36}')
+          echo "SIMULATOR=$udid" >> "$GITHUB_ENV"
+          xcrun simctl boot "$udid"
+      - name: Swift unit tests (RunnerTests)
+        working-directory: example
+        run: |
+          flutter build ios --config-only --simulator --debug
+          xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner \
+            -destination "id=$SIMULATOR" -only-testing:RunnerTests
+      # The authorization sheet can't be answered in CI, so only the rows that need
+      # no authorization run here; the full catalog stays a manual run (AGENTS.md §6C)
+      - name: Integration test (rows without authorization)
+        working-directory: example
+        run: flutter test integration_test -d "$SIMULATOR" --dart-define=NO_AUTHORIZATION=true
+
+  swiftlint:
+    name: SwiftLint
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SwiftLint
+        run: command -v swiftlint || brew install swiftlint
+      - name: Lint
+        run: swiftlint lint --strict

@@ -2,6 +2,7 @@ import 'package:health_kit_reporter/model/type/clinical_type.dart';
 
 import 'sample.dart';
 import 'metadata.dart';
+import 'payload.dart';
 
 /// Equivalent of [ClinicalRecord]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -51,7 +52,7 @@ class ClinicalRecord extends Sample<ClinicalRecordHarmonized> {
 /// Has a [ClinicalRecordHarmonized.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class ClinicalRecordHarmonized {
+class ClinicalRecordHarmonized with Payload {
   const ClinicalRecordHarmonized(
     this.displayName,
     this.fhirSourceUrl,
@@ -68,6 +69,7 @@ class ClinicalRecordHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'displayName': displayName,
         'fhirSourceUrl': fhirSourceUrl,

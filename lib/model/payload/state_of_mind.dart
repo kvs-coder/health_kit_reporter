@@ -2,6 +2,7 @@ import '../decorator/extensions.dart';
 import '../type/state_of_mind_type.dart';
 import 'metadata.dart';
 import 'sample.dart';
+import 'payload.dart';
 
 /// Equivalent of [StateOfMind]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -60,7 +61,7 @@ class StateOfMind extends Sample<StateOfMindHarmonized> {
 /// Equivalent of [StateOfMind.Harmonized]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
-class StateOfMindHarmonized {
+class StateOfMindHarmonized with Payload {
   const StateOfMindHarmonized(
     this.kind,
     this.valence,
@@ -84,6 +85,7 @@ class StateOfMindHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'kind': kind,
         'valence': valence,

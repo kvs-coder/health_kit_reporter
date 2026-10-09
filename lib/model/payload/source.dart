@@ -1,3 +1,5 @@
+import 'payload.dart';
+
 /// Equivalent of [Source]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
@@ -7,7 +9,7 @@
 /// to create instances from JSON payload coming from iOS native code.
 /// And supports multiple object creation by [collect] method from JSON list.
 ///
-class Source {
+class Source with Payload {
   const Source(
     this.name,
     this.bundleIdentifier,
@@ -18,6 +20,7 @@ class Source {
 
   /// General map representation
   ///
+  @override
   Map<String, String> get map => {
         'name': name,
         'bundleIdentifier': bundleIdentifier,

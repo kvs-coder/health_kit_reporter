@@ -3,6 +3,7 @@ import 'package:health_kit_reporter/model/payload/sample.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
 import 'package:health_kit_reporter/model/type/series_type.dart';
 import 'metadata.dart';
+import 'payload.dart';
 
 /// Equivalent of [HeartbeatSeries]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -55,7 +56,7 @@ class HeartbeatSeries extends Sample<HeartbeatSeriesHarmonized> {
 /// Has a [HeartbeatSeriesHarmonized.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class HeartbeatSeriesHarmonized {
+class HeartbeatSeriesHarmonized with Payload {
   const HeartbeatSeriesHarmonized(
     this.count,
     this.measurements,
@@ -68,6 +69,7 @@ class HeartbeatSeriesHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'count': count,
         'measurements': measurements.map((e) => e.map).toList(),
@@ -92,7 +94,7 @@ class HeartbeatSeriesHarmonized {
 ///
 /// Requires [SeriesType] permissions provided.
 ///
-class HeartbeatSeriesMeasurement {
+class HeartbeatSeriesMeasurement with Payload {
   const HeartbeatSeriesMeasurement(
     this.timeSinceSeriesStart,
     this.precededByGap,
@@ -105,6 +107,7 @@ class HeartbeatSeriesMeasurement {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'timeSinceSeriesStart': timeSinceSeriesStart,
         'precededByGap': precededByGap,

@@ -3,6 +3,7 @@ import 'metadata.dart';
 import 'statistics.dart';
 import 'workout_activity_type.dart';
 import 'workout_event.dart';
+import 'payload.dart';
 
 /// Equivalent of [WorkoutActivity]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -14,7 +15,7 @@ import 'workout_event.dart';
 /// Has a [WorkoutActivity.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class WorkoutActivity {
+class WorkoutActivity with Payload {
   const WorkoutActivity(
     this.uuid,
     this.activityValue,
@@ -64,6 +65,7 @@ class WorkoutActivity {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'uuid': uuid,
         'activityValue': activityValue,

@@ -1,6 +1,7 @@
 import '../decorator/extensions.dart';
 import 'sample.dart';
 import 'metadata.dart';
+import 'payload.dart';
 
 /// Equivalent of [Quantity]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -62,7 +63,7 @@ class Quantity extends Sample<QuantityHarmonized> {
 /// Has a [QuantityHarmonized.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class QuantityHarmonized {
+class QuantityHarmonized with Payload {
   const QuantityHarmonized(
     this.value,
     this.unit,
@@ -75,6 +76,7 @@ class QuantityHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'value': value,
         'unit': unit,

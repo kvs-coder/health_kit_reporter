@@ -4,6 +4,7 @@ import 'biological_sex.dart';
 import 'blood_type.dart';
 import 'fitzpatrick_skin_type.dart';
 import 'wheelchair_use.dart';
+import '../payload.dart';
 
 /// Equivalent of [Characteristic]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -15,7 +16,7 @@ import 'wheelchair_use.dart';
 ///
 /// Requires [CharacteristicType] permissions provided.
 ///
-class Characteristic {
+class Characteristic with Payload {
   final BiologicalSex? biologicalSex;
   final DateTime? birthday;
   final BloodType? bloodType;
@@ -23,6 +24,7 @@ class Characteristic {
   final WheelchairUse? wheelchairUse;
   final ActivityMoveMode? activityMoveMode;
 
+  @override
   Map<String, String?> get map => {
         'biologicalSex': biologicalSex?.description,
         'birthday': birthday?.toIso8601String(),

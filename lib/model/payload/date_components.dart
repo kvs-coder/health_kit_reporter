@@ -1,9 +1,11 @@
+import 'payload.dart';
+
 /// Equivalent of [DateComponents]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Supports [map] representation.
 ///
-class DateComponents {
+class DateComponents with Payload {
   const DateComponents({
     this.era,
     this.year,
@@ -37,6 +39,7 @@ class DateComponents {
 
   /// General map representation
   ///
+  @override
   Map<String, int?> get map => {
         'era': era,
         'year': year,

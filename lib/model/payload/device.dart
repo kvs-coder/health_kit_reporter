@@ -1,3 +1,5 @@
+import 'payload.dart';
+
 /// Equivalent of [Device]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
@@ -6,7 +8,7 @@
 /// Has a [Device.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class Device {
+class Device with Payload {
   const Device(
     this.name,
     this.manufacturer,
@@ -27,6 +29,7 @@ class Device {
   final String? localIdentifier;
   final String? udiDeviceIdentifier;
 
+  @override
   Map<String, String?> get map => {
         'name': name,
         'manufacturer': manufacturer,

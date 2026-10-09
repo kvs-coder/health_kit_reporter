@@ -1,6 +1,7 @@
 import '../decorator/extensions.dart';
 import 'quantity.dart';
 import 'workout.dart';
+import 'payload.dart';
 
 /// Equivalent of [WorkoutEffortRelationship]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -10,7 +11,7 @@ import 'workout.dart';
 /// Has a [WorkoutEffortRelationship.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class WorkoutEffortRelationship {
+class WorkoutEffortRelationship with Payload {
   const WorkoutEffortRelationship(
       this.workout, this.activityUUID, this.samples);
 
@@ -24,6 +25,7 @@ class WorkoutEffortRelationship {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'workout': workout.map,
         'activityUUID': activityUUID,

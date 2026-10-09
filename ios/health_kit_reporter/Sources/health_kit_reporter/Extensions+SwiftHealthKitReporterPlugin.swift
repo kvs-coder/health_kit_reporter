@@ -659,42 +659,43 @@ extension SwiftHealthKitReporterPlugin {
      `make(from:)` keeps its "uuid", so delete and unrelate find the stored sample
      */
     private func parseSample(_ arguments: [String: Any]) throws -> Sample {
-        if let quantity = arguments["quantity"] as? [String: Any] {
-            return try Quantity.make(from: quantity)
+        guard
+            arguments.count == 1,
+            let (kind, value) = arguments.first,
+            let payload = value as? [String: Any]
+        else {
+            throw HealthKitError.invalidValue("Invalid arguments: \(arguments)")
         }
-        if let category = arguments["category"] as? [String: Any] {
-            return try Category.make(from: category)
-        }
-        if let workout = arguments["workout"] as? [String: Any] {
-            return try Workout.make(from: workout)
-        }
-        if let correlation = arguments["correlation"] as? [String: Any] {
-            return try Correlation.make(from: correlation)
-        }
-        if let audiogram = arguments["audiogram"] as? [String: Any] {
-            return try Audiogram.make(from: audiogram)
-        }
-        if let document = arguments["cdaDocument"] as? [String: Any] {
-            return try CDADocument.make(from: document)
-        }
-        if let prescription = arguments["visionPrescription"] as? [String: Any] {
+        switch kind {
+        case "quantity":
+            return try Quantity.make(from: payload)
+        case "category":
+            return try Category.make(from: payload)
+        case "workout":
+            return try Workout.make(from: payload)
+        case "correlation":
+            return try Correlation.make(from: payload)
+        case "audiogram":
+            return try Audiogram.make(from: payload)
+        case "cdaDocument":
+            return try CDADocument.make(from: payload)
+        case "visionPrescription":
             guard #available(iOS 16.0, *) else {
                 throw HealthKitError.notAvailable("Vision prescriptions are available from iOS 16")
             }
-            return try VisionPrescription.make(from: prescription)
-        }
-        if let stateOfMind = arguments["stateOfMind"] as? [String: Any] {
+            return try VisionPrescription.make(from: payload)
+        case "stateOfMind":
             guard #available(iOS 18.0, *) else {
                 throw HealthKitError.notAvailable("State of mind is available from iOS 18")
             }
-            return try StateOfMind.make(from: stateOfMind)
-        }
-        if let assessment = arguments["scoredAssessment"] as? [String: Any] {
+            return try StateOfMind.make(from: payload)
+        case "scoredAssessment":
             guard #available(iOS 18.0, *) else {
                 throw HealthKitError.notAvailable("Scored assessments are available from iOS 18")
             }
-            return try ScoredAssessment.make(from: assessment)
+            return try ScoredAssessment.make(from: payload)
+        default:
+            throw HealthKitError.invalidValue("Invalid arguments: \(arguments)")
         }
-        throw HealthKitError.invalidValue("Invalid arguments: \(arguments)")
     }
 }

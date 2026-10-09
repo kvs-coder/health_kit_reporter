@@ -1,4 +1,5 @@
 import '../decorator/extensions.dart';
+import 'payload.dart';
 
 /// Equivalent of [QuantitySeriesValue]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -11,7 +12,7 @@ import '../decorator/extensions.dart';
 /// to create instances from JSON payload coming from iOS native code.
 /// And supports multiple object creation by [collect] method from JSON list.
 ///
-class QuantitySeriesValue {
+class QuantitySeriesValue with Payload {
   const QuantitySeriesValue(
     this.value,
     this.unit,
@@ -34,6 +35,7 @@ class QuantitySeriesValue {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'value': value,
         'unit': unit,

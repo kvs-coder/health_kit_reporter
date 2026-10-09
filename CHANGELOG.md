@@ -30,6 +30,8 @@ Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitRepor
 * Reader: `sampleQueryWithDescriptors`, `quantitySeriesQuery`, `verifiableClinicalRecordQuery`, `cdaDocumentQuery`, `audiogramQuery`, `stateOfMindQuery` and `scoredAssessmentQuery` (iOS 18), `medicationDoseEventQuery` and `userAnnotatedMedicationQuery` (iOS 26).
 * Writer: `saveWorkout` (workout builder with samples, activities and route), `saveQuantitySeries`, `saveHeartbeatSeries`; `save` / `saveSamples` store audiograms, CDA documents, states of mind and scored assessments.
 * Types `AudiogramType`, `StateOfMindType`, `ScoredAssessmentType`, `MedicationType`, factories for `DocumentType` and `SeriesType`; models `Audiogram`, `CDADocument`, `StateOfMind`, `ScoredAssessment`, `MedicationDoseEvent`, `UserAnnotatedMedication`, `VerifiableClinicalRecord`, `Attachment`, `QuantitySeriesValue`, `AuthorizationRequestStatus`, `QueryDescriptor`.
+* Payload models compare by value: `==`, `hashCode` and `toString` from their `map` (`Payload` mixin); samples compare their uuid and contents.
+* The plugin ships a privacy manifest (`PrivacyInfo.xcprivacy`): no tracking, no collected data.
 * The example app lists every method grouped by area and seeds simulator data.
 
 ### Fixes
@@ -38,6 +40,7 @@ Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitRepor
 * `environmentalAudioExposureEvent` uses HealthKit's identifier.
 * Results and events are delivered on the platform thread.
 * Samples or deleted objects that fail to encode fail the reply or the event instead of disappearing.
+* README: setup of capabilities, entitlements and Info.plist keys; testing apps by mocking the channels.
 * Live queries work when Health data is unavailable: they report `HealthKitError.notAvailable` instead of a `MissingPluginException`.
 
 ## [2.3.1] - 12.12.2024

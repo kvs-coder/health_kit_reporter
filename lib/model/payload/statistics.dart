@@ -1,5 +1,6 @@
 import '../decorator/extensions.dart';
 import 'source.dart';
+import 'payload.dart';
 
 /// Equivalent of [Statistics]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -14,7 +15,7 @@ import 'source.dart';
 ///
 /// Requires [QuantityType] permissions provided.
 ///
-class Statistics {
+class Statistics with Payload {
   const Statistics(
     this.identifier,
     this.startTimestamp,
@@ -33,6 +34,7 @@ class Statistics {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'identifier': identifier,
         'startTimestamp': startTimestamp,
@@ -69,7 +71,7 @@ class Statistics {
 /// Has a [StatisticsHarmonized.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class StatisticsHarmonized {
+class StatisticsHarmonized with Payload {
   const StatisticsHarmonized(
     this.summary,
     this.average,
@@ -92,6 +94,7 @@ class StatisticsHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'summary': summary,
         'average': average,
@@ -119,7 +122,7 @@ class StatisticsHarmonized {
 ///
 /// The statistics values of one [source].
 ///
-class SourceStatistics {
+class SourceStatistics with Payload {
   const SourceStatistics(this.source, this.harmonized);
 
   final Source source;
@@ -127,6 +130,7 @@ class SourceStatistics {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'source': source.map,
         'harmonized': harmonized.map,

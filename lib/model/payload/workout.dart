@@ -7,6 +7,7 @@ import 'statistics.dart';
 import 'workout_activity.dart';
 import 'workout_event.dart';
 import 'metadata.dart';
+import 'payload.dart';
 
 /// Equivalent of [Workout]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -84,7 +85,7 @@ class Workout extends Sample<WorkoutHarmonized> {
 /// Has a [WorkoutHarmonized.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class WorkoutHarmonized {
+class WorkoutHarmonized with Payload {
   const WorkoutHarmonized(
     this.type,
     this.totalEnergyBurned,
@@ -111,6 +112,7 @@ class WorkoutHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'value': type.value,
         'description': type.description,

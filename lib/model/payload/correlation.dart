@@ -4,6 +4,7 @@ import 'category.dart';
 import 'quantity.dart';
 import 'sample.dart';
 import 'metadata.dart';
+import 'payload.dart';
 
 /// Equivalent of [Correlation]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -53,7 +54,7 @@ class Correlation extends Sample<CorrelationHarmonized> {
 /// Has a [CorrelationHarmonized.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class CorrelationHarmonized {
+class CorrelationHarmonized with Payload {
   const CorrelationHarmonized(
     this.quantitySamples,
     this.categorySamples,
@@ -66,6 +67,7 @@ class CorrelationHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'quantitySamples': quantitySamples.map((e) => e.map).toList(),
         'categorySamples': categorySamples.map((e) => e.map).toList(),

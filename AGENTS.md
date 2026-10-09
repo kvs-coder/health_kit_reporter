@@ -62,13 +62,14 @@ lib/
     └── type/<type_name>.dart         (QuantityType, CategoryType, ... → HealthKit identifiers)
 
 ios/health_kit_reporter/
-├── Package.swift                     (iOS 15, HealthKitReporter from: "4.0.0"; no resources)
+├── Package.swift                     (iOS 15, HealthKitReporter from: "4.0.0"; one resource: the privacy manifest)
 └── Sources/health_kit_reporter/
     ├── SwiftHealthKitReporterPlugin.swift            (registration: one reporter, channels)
     ├── Extensions+SwiftHealthKitReporterPlugin.swift (Method enum, dispatcher, reply helpers)
     ├── Extensions+<Type>.swift                       (argument parsing, FlutterError(code:error:), ...)
     ├── <Query>StreamHandler.swift + StreamHandlerProtocol / StreamHandlerFactory
-    └── MethodChannel.swift / EventChannel.swift      (channel names)
+    ├── MethodChannel.swift / EventChannel.swift      (channel names)
+    └── PrivacyInfo.xcprivacy                         (no tracking, no collected data; a SwiftPM resource)
 
 test/
 ├── fixtures.dart                     (JSON payloads shaped like HealthKitReporter 4.0.0 encodes them)
@@ -76,12 +77,15 @@ test/
 ├── api_test.dart, health_kit_reporter_test.dart   (every method against mocked channels)
 └── model_round_trip_test.dart, metadata_test.dart, non_finite_test.dart, uuid_round_trip_test.dart, ...
 
-docs/adr/                             (decisions of the plugin, numbered: 0001-sample-timestamps-are-seconds.md)
+doc/
+├── adr/                              (decisions of the plugin, numbered: 0001-sample-timestamps-are-seconds.md, ...)
+└── arc42/                            (context, building blocks, runtime view, crosscutting concepts, decisions)
 
 example/
 ├── lib/main.dart
 ├── lib/demo/                         (DemoRow / DemoSection, Catalog of rows, DemoPage, HealthTypes, Seeding, DemoSamples)
 ├── integration_test/catalog_test.dart (runs every row against HealthKit in the simulator)
+├── ios/RunnerTests/                  (XCTest of the plugin's Swift: argument helpers, dispatcher, stream handlers)
 └── ios/                              (Runner, migrated to SPM; no Podfile)
 ```
 
@@ -89,7 +93,7 @@ example/
 * **The library owns HealthKit**: plugin Swift imports `HealthKitReporter` (and `Flutter`, `Foundation`) — never `HealthKit`. Mapping between HK objects and payloads happens in the library.
 * **One reporter**: `SwiftHealthKitReporterPlugin.register` creates one `HealthKitReporter` and injects it into the dispatcher and every stream handler.
 * **JSON contract**: payloads cross the channel as the library's `encoded()` JSON and come back as model `map`s read by `make(from:)`. Keys and value shapes follow the library exactly: flat metadata, seconds since 1970 in payloads, `"Infinity"` / `"-Infinity"` / `"NaN"` for non-finite numbers.
-* **Timestamps**: payload timestamps are seconds since 1970 in both directions, also in samples built in Dart for saving (`DateTime.secondsSinceEpoch`); the dispatcher never converts payloads ([ADR 0001](docs/adr/0001-sample-timestamps-are-seconds.md)). Arguments that aren't payloads — `Predicate` and `DateTime` arguments — are milliseconds (`millisecondsSinceEpoch`), converted by `Date.make(from:)`.
+* **Timestamps**: payload timestamps are seconds since 1970 in both directions, also in samples built in Dart for saving (`DateTime.secondsSinceEpoch`); the dispatcher never converts payloads ([ADR 0001](doc/adr/0001-sample-timestamps-are-seconds.md)). Arguments that aren't payloads — `Predicate` and `DateTime` arguments — are milliseconds (`millisecondsSinceEpoch`), converted by `Date.make(from:)`.
 * **Identity**: a payload's `uuid` names the stored HealthKit sample. Delete, add-to-workout and unrelate send the stored sample's `map`, so Dart models always keep and send `uuid`.
 * **Errors**: every failure reaches Dart as a `PlatformException` whose `code` is the method name and whose `message` is `error.localizedDescription` (`FlutterError(code:error:)`); `details` is always a `String`.
 * **Threads**: results and events are delivered on the platform thread (`DispatchQueue.main`).
@@ -141,6 +145,7 @@ example/
   3. `Map<String, dynamic> get map` with the library's keys (nested models through their `map`, metadata through `metadata?.map`).
   4. `<Name>.fromJson(Map<String, dynamic> json)` — numbers through `parseNum` / `tryParseNum`, lists through `parseList`, metadata through `Metadata.tryFromJson`.
   5. `static List<<Name>> collect(List<dynamic> list)` where the API returns lists.
+  6. Value equality through the `Payload` mixin (`lib/model/payload/payload.dart`), which compares, hashes and prints the `map`; samples get it from `Sample`. Don't hand-write `==`.
 * **Doc comments**: every public class starts with `/// Equivalent of [<Name>]` / `/// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter`; fields get one when their unit isn't obvious (`/// Seconds since 1970`).
 * **API methods** in `health_kit_reporter.dart` are `static Future<...>` (or `StreamSubscription` for live queries with `onUpdate` and `onError`), document their arguments, iOS version and failures, and send arguments as maps.
 * **Types**: `enum <Name>Type` with an exhaustive `identifier` switch returning HealthKit's raw identifier string, and a `<Name>TypeFactory` with `from` / `tryFrom`. A new library type case gets a Dart case with the identifier HealthKit's SDK prints.
@@ -170,6 +175,7 @@ The codebase enforces test-first **TDD**. Code without tests will be rejected.
 | :--- | :--- | :--- | :--- |
 | **Model Tests** | `lib/model/**` | `flutter_test` | Parse fixtures shaped like the library's JSON; `map` → `fromJson` round trips; uuid kept; older JSON without new fields still parses. |
 | **API Tests** | `lib/health_kit_reporter.dart` | `flutter_test` | Every method against a mocked `MethodChannel` / `EventChannel`: arguments sent, replies and errors parsed. |
+| **Swift Unit** | `ios/.../Sources` | `XCTest` | `example/ios/RunnerTests` (`@testable import health_kit_reporter`): argument helpers, error mapping, dispatcher replies and codes, stream handler planning, listening and cancelling. |
 | **Integration** | Swift dispatcher + HealthKit | `integration_test` | `example/integration_test/catalog_test.dart` runs every demo row in the simulator; authorize the app first (the authorization sheet can't be driven from a test). |
 | **Build** | `ios/`, `example/ios` | `flutter build ios` | The example builds with SPM, resolving HealthKitReporter 4.x. |
 
@@ -189,12 +195,18 @@ flutter test --coverage
 flutter config --enable-swift-package-manager
 (cd example && flutter test && flutter build ios --no-codesign)
 
-# 3. Run every demo row against HealthKit in a simulator (authorize the app once first;
+# 3. Lint the Swift sources and run their unit tests in a simulator
+swiftlint lint --strict
+(cd example && flutter build ios --config-only --simulator --debug && \
+  xcodebuild test -workspace ios/Runner.xcworkspace -scheme Runner \
+    -destination 'id=<simulator-id>' -only-testing:RunnerTests)
+
+# 4. Run every demo row against HealthKit in a simulator (authorize the app once first;
 #    --no-uninstall keeps the authorization between runs)
 (cd example && flutter test integration_test --no-uninstall -d <simulator-id>)
 ```
 
-`.github/workflows/ci.yml` runs 1 and 2 on every PR and push to `master`.
+`.github/workflows/ci.yml` runs 1, 2 and 3 on every PR and push to `master`, plus the integration rows that need no authorization (`--dart-define=NO_AUTHORIZATION=true`): CI can't answer the authorization sheet, so the full catalog run stays manual.
 
 ### D. Quality Gate Requirements
 Before any commit or PR creation, the codebase must pass all gates:
@@ -202,7 +214,8 @@ Before any commit or PR creation, the codebase must pass all gates:
 2. `flutter test` — **all tests green**; quote the passed/failed counts.
 3. Example build — `flutter build ios --no-codesign` passes; **required whenever Swift or public API changes**. Otherwise state "not applicable — no Swift or public API change".
 4. Coverage — line coverage of `lib/` is **≥ `COVERAGE_THRESHOLD`** in `.github/workflows/ci.yml`; quote the measured percentage. A PR that adds tests raises the threshold to its new measured level (rounded down to one decimal); never lower it.
-5. Integration — for changes to the Swift dispatcher, run the catalog integration test in a simulator and quote which rows failed and why.
+5. Swift — `swiftlint lint --strict` clean and the `RunnerTests` green (quote the count) whenever Swift changes.
+6. Integration — for changes to the Swift dispatcher, run the catalog integration test in a simulator and quote which rows failed and why.
 
 ---
 
@@ -318,7 +331,7 @@ Before outputting code or submitting PRs, explicitly verify:
 * [ ] Do Dart models keep `final` fields, the library's JSON keys, `parseNum` for numbers, nullable new fields, and `uuid`?
 * [ ] Are timestamps seconds in every payload, also samples built in Dart, and milliseconds only in `Predicate` / `DateTime` arguments?
 * [ ] Does every new channel method have an API test, a dispatcher case, a `DemoRow` and a README snippet?
-* [ ] Are `flutter analyze` and `flutter test` green, coverage ≥ `COVERAGE_THRESHOLD`, and the example building with SPM?
+* [ ] Are `flutter analyze` and `flutter test` green, coverage ≥ `COVERAGE_THRESHOLD`, the example building with SPM, SwiftLint clean and `RunnerTests` green?
 * [ ] Do `pubspec.yaml` and `CHANGELOG.md` agree on the version, aligned with HealthKitReporter's major?
 * [ ] Is the branch named strictly `<initials>/issue-<XXX>`?
 * [ ] Are git commits made without `--no-verify` and staged without blind `git add .`?

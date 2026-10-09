@@ -3,6 +3,7 @@ import 'package:health_kit_reporter/model/type/workout_type.dart';
 
 import 'sample.dart';
 import 'metadata.dart';
+import 'payload.dart';
 
 /// Equivalent of [WorkoutRoute]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -52,7 +53,7 @@ class WorkoutRoute extends Sample<WorkoutRouteHarmonized> {
 /// Has a [WorkoutRouteHarmonized.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class WorkoutRouteHarmonized {
+class WorkoutRouteHarmonized with Payload {
   const WorkoutRouteHarmonized(
     this.count,
     this.routes,
@@ -65,6 +66,7 @@ class WorkoutRouteHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'count': count,
         'routes': routes.map((e) => e.map).toList(),
@@ -79,7 +81,7 @@ class WorkoutRouteHarmonized {
         metadata = Metadata.tryFromJson(json['metadata']);
 }
 
-class WorkoutRouteBatch {
+class WorkoutRouteBatch with Payload {
   const WorkoutRouteBatch(
     this.locations,
     this.done,
@@ -90,6 +92,7 @@ class WorkoutRouteBatch {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'locations': locations.map((e) => e.map).toList(),
         'done': done,
@@ -124,7 +127,7 @@ class WorkoutRouteBatch {
 ///
 /// Requires [CoreLocation] permissions provided.
 ///
-class WorkoutRouteLocation {
+class WorkoutRouteLocation with Payload {
   const WorkoutRouteLocation(
     this.latitude,
     this.longitude,
@@ -153,6 +156,7 @@ class WorkoutRouteLocation {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'latitude': latitude,
         'longitude': longitude,

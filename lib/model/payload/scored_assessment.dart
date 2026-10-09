@@ -2,6 +2,7 @@ import '../decorator/extensions.dart';
 import '../type/scored_assessment_type.dart';
 import 'metadata.dart';
 import 'sample.dart';
+import 'payload.dart';
 
 /// Equivalent of [ScoredAssessment]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -61,7 +62,7 @@ class ScoredAssessment extends Sample<ScoredAssessmentHarmonized> {
 ///
 /// HealthKit saves exactly 7 (GAD-7) or 9 (PHQ-9) [answers].
 ///
-class ScoredAssessmentHarmonized {
+class ScoredAssessmentHarmonized with Payload {
   const ScoredAssessmentHarmonized(
     this.answers,
     this.score,
@@ -80,6 +81,7 @@ class ScoredAssessmentHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'answers': answers,
         'score': score,

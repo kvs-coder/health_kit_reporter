@@ -1,6 +1,7 @@
 import 'package:health_kit_reporter/model/type/activity_summary_type.dart';
 
 import '../decorator/extensions.dart';
+import 'payload.dart';
 
 /// Equivalent of [ActivitySummary]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -12,7 +13,7 @@ import '../decorator/extensions.dart';
 ///
 /// Requires [ActivitySummaryType] permissions provided.
 ///
-class ActivitySummary {
+class ActivitySummary with Payload {
   const ActivitySummary(
     this.identifier,
     this.date,
@@ -27,6 +28,7 @@ class ActivitySummary {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'identifier': identifier,
         'date': date?.toIso8601String(),
@@ -53,7 +55,7 @@ class ActivitySummary {
 /// The move time fields are set for move time summaries (iOS 14+),
 /// see [activityMoveMode]; [paused] tells whether the rings were paused (iOS 18+).
 ///
-class ActivitySummaryHarmonized {
+class ActivitySummaryHarmonized with Payload {
   const ActivitySummaryHarmonized(
     this.activeEnergyBurned,
     this.activeEnergyBurnedGoal,
@@ -88,6 +90,7 @@ class ActivitySummaryHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'activeEnergyBurned': activeEnergyBurned,
         'activeEnergyBurnedGoal': activeEnergyBurnedGoal,

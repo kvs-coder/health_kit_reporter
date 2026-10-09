@@ -1,5 +1,6 @@
 import '../decorator/extensions.dart';
 import 'sample.dart';
+import 'payload.dart';
 
 /// Equivalent of [VerifiableClinicalRecord]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -54,7 +55,7 @@ class VerifiableClinicalRecord
 /// Equivalent of [VerifiableClinicalRecord.Harmonized]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
-class VerifiableClinicalRecordHarmonized {
+class VerifiableClinicalRecordHarmonized with Payload {
   const VerifiableClinicalRecordHarmonized(
     this.recordTypes,
     this.issuerIdentifier,
@@ -89,6 +90,7 @@ class VerifiableClinicalRecordHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'recordTypes': recordTypes,
         'issuerIdentifier': issuerIdentifier,
@@ -121,7 +123,7 @@ class VerifiableClinicalRecordHarmonized {
 ///
 /// The person a verifiable record is about.
 ///
-class VerifiableClinicalRecordSubject {
+class VerifiableClinicalRecordSubject with Payload {
   const VerifiableClinicalRecordSubject(
     this.fullName,
     this.dateOfBirth,
@@ -134,6 +136,7 @@ class VerifiableClinicalRecordSubject {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'fullName': fullName,
         'dateOfBirth': dateOfBirth,

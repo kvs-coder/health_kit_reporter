@@ -1,0 +1,24 @@
+# SwiftLint for the plugin sources and their unit tests (CI job "SwiftLint")
+included:
+  - ios/health_kit_reporter/Sources
+  - example/ios/RunnerTests
+excluded:
+  - ios/health_kit_reporter/.build
+disabled_rules:
+  # Category is imported twice on purpose: `import struct HealthKitReporter.Category`
+  # resolves its clash with the Objective-C runtime (AGENTS.md §5A)
+  - duplicate_imports
+opt_in_rules:
+  - empty_count
+line_length: 120
+# exhaustive switches over the Method enum list every case, so their cases don't add complexity
+cyclomatic_complexity:
+  ignores_case_statements: true
+# the dispatcher has one case per Dart method
+function_body_length:
+  warning: 60
+  error: 300
+file_length:
+  warning: 800
+type_body_length:
+  warning: 300

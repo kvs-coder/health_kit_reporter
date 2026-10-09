@@ -6,6 +6,9 @@ import 'package:integration_test/integration_test.dart';
 /// Runs every row of the demo against HealthKit in the simulator.
 /// Authorize the app once first (run it and allow all), since the
 /// authorization sheet can't be driven from a test.
+///
+/// CI can't answer that sheet, so it passes `--dart-define=NO_AUTHORIZATION=true`
+/// and runs only the rows that need no authorization.
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   final catalog = Catalog();
@@ -30,10 +33,24 @@ void main() {
     'recalibrateEstimates',
   };
 
+  const noAuthorization = bool.fromEnvironment('NO_AUTHORIZATION');
+  const authorizationFree = {
+    'isAvailable',
+    'isWritable',
+    'requestAuthorization with a read-only type',
+    'isAuthorizedToWrite',
+    'supportsHealthRecords',
+    'authorizationRequestStatus',
+    'earliestPermittedSampleDate',
+    'recalibrateEstimates',
+    'startWatchApp',
+  };
+
   for (final section in catalog.sections) {
     for (final row in section.rows) {
-      test('${section.title} / ${row.title}',
-          skip: presentsSheet.contains(row.title), () async {
+      final skip = presentsSheet.contains(row.title) ||
+          noAuthorization && !authorizationFree.contains(row.title);
+      test('${section.title} / ${row.title}', skip: skip, () async {
         if (row.isLive) {
           final updates = <String>[];
           final subscription = row.listen!(updates.add);

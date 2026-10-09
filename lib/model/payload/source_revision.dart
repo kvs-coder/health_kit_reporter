@@ -1,4 +1,5 @@
 import 'source.dart';
+import 'payload.dart';
 
 /// Equivalent of [SourceRevision]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -8,7 +9,7 @@ import 'source.dart';
 /// Has a [SourceRevision.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class SourceRevision {
+class SourceRevision with Payload {
   const SourceRevision(
     this.source,
     this.version,
@@ -25,6 +26,7 @@ class SourceRevision {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'source': source.map,
         'version': version,
@@ -51,7 +53,7 @@ class SourceRevision {
 /// Has a [OperatingSystem.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class OperatingSystem {
+class OperatingSystem with Payload {
   const OperatingSystem(
     this.majorVersion,
     this.minorVersion,
@@ -64,6 +66,7 @@ class OperatingSystem {
 
   /// General map representation
   ///
+  @override
   Map<String, int> get map => {
         'majorVersion': majorVersion,
         'minorVersion': minorVersion,

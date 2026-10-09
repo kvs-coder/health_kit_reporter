@@ -1,5 +1,6 @@
 import '../decorator/extensions.dart';
 import '../type/medication_type.dart';
+import 'payload.dart';
 
 /// Equivalent of [UserAnnotatedMedication]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -14,7 +15,7 @@ import '../type/medication_type.dart';
 ///
 /// Requires per-object read authorization of [MedicationType.userAnnotatedMedication].
 ///
-class UserAnnotatedMedication {
+class UserAnnotatedMedication with Payload {
   const UserAnnotatedMedication(
     this.nickname,
     this.isArchived,
@@ -29,6 +30,7 @@ class UserAnnotatedMedication {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'nickname': nickname,
         'isArchived': isArchived,
@@ -56,7 +58,7 @@ class UserAnnotatedMedication {
 ///
 /// The medication a user tracks, with its codings.
 ///
-class UserAnnotatedMedicationConcept {
+class UserAnnotatedMedicationConcept with Payload {
   const UserAnnotatedMedicationConcept(
     this.identifier,
     this.domain,
@@ -77,6 +79,7 @@ class UserAnnotatedMedicationConcept {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'identifier': identifier,
         'domain': domain,
@@ -101,7 +104,7 @@ class UserAnnotatedMedicationConcept {
 ///
 /// One code of a medication concept, e.g. RxNorm.
 ///
-class UserAnnotatedMedicationCoding {
+class UserAnnotatedMedicationCoding with Payload {
   const UserAnnotatedMedicationCoding(
     this.system,
     this.version,
@@ -114,6 +117,7 @@ class UserAnnotatedMedicationCoding {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'system': system,
         'version': version,

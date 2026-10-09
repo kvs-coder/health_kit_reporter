@@ -31,6 +31,7 @@ import 'state_of_mind.dart';
 import 'vision_prescription.dart';
 import 'workout.dart';
 import 'workout_route.dart';
+import 'payload.dart';
 
 /// Equivalent of [Sample]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -69,7 +70,7 @@ import 'workout_route.dart';
 /// to save data in [HealthKit]
 ///
 ///
-abstract class Sample<Harmonized> {
+abstract class Sample<Harmonized> with Payload {
   const Sample(
     this.uuid,
     this.identifier,
@@ -97,6 +98,7 @@ abstract class Sample<Harmonized> {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map;
 
   /// General constructor from JSON payload

@@ -19,6 +19,10 @@ let package = Package(
             name: "health_kit_reporter",
             dependencies: [
                 .product(name: "HealthKitReporter", package: "HealthKitReporter")
+            ],
+            // Health data stays on the device: the plugin neither tracks nor collects it
+            resources: [
+                .process("PrivacyInfo.xcprivacy")
             ]
         )
     ]

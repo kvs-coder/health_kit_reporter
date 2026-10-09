@@ -1,10 +1,12 @@
+import 'payload.dart';
+
 /// Equivalent of [PreferredUnit]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
 ///
 /// Has a [PreferredUnit.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class PreferredUnit {
+class PreferredUnit with Payload {
   const PreferredUnit(
     this.identifier,
     this.unit,
@@ -15,6 +17,7 @@ class PreferredUnit {
 
   /// General map representation
   ///
+  @override
   Map<String, String> get map => {
         'identifier': identifier,
         'unit': unit,

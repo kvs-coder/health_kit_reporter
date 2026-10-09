@@ -2,6 +2,7 @@ import '../decorator/extensions.dart';
 import '../type/audiogram_type.dart';
 import 'metadata.dart';
 import 'sample.dart';
+import 'payload.dart';
 
 /// Equivalent of [Audiogram]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -60,7 +61,7 @@ class Audiogram extends Sample<AudiogramHarmonized> {
 ///
 /// HealthKit saves 1 to 30 points with unique, ascending frequencies.
 ///
-class AudiogramHarmonized {
+class AudiogramHarmonized with Payload {
   const AudiogramHarmonized(
     this.sensitivityPoints,
     this.metadata,
@@ -71,6 +72,7 @@ class AudiogramHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'sensitivityPoints': sensitivityPoints.map((e) => e.map).toList(),
         'metadata': metadata?.map,
@@ -89,7 +91,7 @@ class AudiogramHarmonized {
 ///
 /// Hearing sensitivity of both ears at one frequency.
 ///
-class AudiogramSensitivityPoint {
+class AudiogramSensitivityPoint with Payload {
   const AudiogramSensitivityPoint(
     this.frequency,
     this.leftEarSensitivity,
@@ -111,6 +113,7 @@ class AudiogramSensitivityPoint {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'frequency': frequency,
         'leftEarSensitivity': leftEarSensitivity,
@@ -134,7 +137,7 @@ class AudiogramSensitivityPoint {
 ///
 /// One test at a frequency (iOS 18.1+).
 ///
-class AudiogramTest {
+class AudiogramTest with Payload {
   const AudiogramTest(
     this.sensitivity,
     this.conductionType,
@@ -154,6 +157,7 @@ class AudiogramTest {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'sensitivity': sensitivity,
         'conductionType': conductionType,

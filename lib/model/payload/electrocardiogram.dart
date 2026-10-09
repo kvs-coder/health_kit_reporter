@@ -3,6 +3,7 @@ import 'package:health_kit_reporter/model/type/electrocardiogram_type.dart';
 
 import 'sample.dart';
 import 'metadata.dart';
+import 'payload.dart';
 
 /// Equivalent of [Electrocardiogram]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -58,7 +59,7 @@ class Electrocardiogram extends Sample<ElectrocardiogramHarmonized> {
 /// Has a [ElectrocardiogramHarmonized.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class ElectrocardiogramHarmonized {
+class ElectrocardiogramHarmonized with Payload {
   const ElectrocardiogramHarmonized(
     this.averageHeartRate,
     this.averageHeartRateUnit,
@@ -83,6 +84,7 @@ class ElectrocardiogramHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'averageHeartRate': averageHeartRate,
         'averageHeartRateUnit': averageHeartRateUnit,
@@ -118,7 +120,7 @@ class ElectrocardiogramHarmonized {
 /// Has a [ElectrocardiogramVoltageMeasurement.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class ElectrocardiogramVoltageMeasurement {
+class ElectrocardiogramVoltageMeasurement with Payload {
   const ElectrocardiogramVoltageMeasurement(
     this.harmonized,
     this.timeSinceSampleStart,
@@ -129,6 +131,7 @@ class ElectrocardiogramVoltageMeasurement {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'harmonized': harmonized.map,
         'timeSinceSampleStart': timeSinceSampleStart,
@@ -161,7 +164,7 @@ class ElectrocardiogramVoltageMeasurement {
 /// Has a [ElectrocardiogramVoltageMeasurementHarmonized.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class ElectrocardiogramVoltageMeasurementHarmonized {
+class ElectrocardiogramVoltageMeasurementHarmonized with Payload {
   const ElectrocardiogramVoltageMeasurementHarmonized(
     this.value,
     this.unit,
@@ -172,6 +175,7 @@ class ElectrocardiogramVoltageMeasurementHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'value': value,
         'unit': unit,

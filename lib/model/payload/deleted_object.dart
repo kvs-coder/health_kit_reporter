@@ -1,4 +1,5 @@
 import 'metadata.dart';
+import 'payload.dart';
 
 /// Equivalent of [DeletedObject]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -8,7 +9,7 @@ import 'metadata.dart';
 /// Has a [DeletedObject.fromJson] constructor
 /// to create instances from JSON payload coming from iOS native code.
 ///
-class DeletedObject {
+class DeletedObject with Payload {
   const DeletedObject(this.uuid, this.metadata);
 
   final String uuid;
@@ -16,6 +17,7 @@ class DeletedObject {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'uuid': uuid,
         'metadata': metadata?.map,

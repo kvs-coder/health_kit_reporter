@@ -1,4 +1,5 @@
 import 'package:health_kit_reporter/health_kit_reporter.dart';
+import 'payload/payload.dart';
 
 /// A time interval predicate used in
 /// most of query requests of [HealthKitReporter]
@@ -9,7 +10,7 @@ import 'package:health_kit_reporter/health_kit_reporter.dart';
 /// For native calls the instance will be mapped to [map]
 /// and timestamps values will be accepted as arguments.
 ///
-class Predicate {
+class Predicate with Payload {
   const Predicate(
     this.startDate,
     this.endDate,
@@ -20,6 +21,7 @@ class Predicate {
 
   /// General map representation
   ///
+  @override
   Map<String, int> get map => {
         'startTimestamp': startDate.millisecondsSinceEpoch,
         'endTimestamp': endDate.millisecondsSinceEpoch,

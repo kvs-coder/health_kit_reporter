@@ -1,5 +1,6 @@
 import 'sample.dart';
 import 'metadata.dart';
+import 'payload.dart';
 
 /// Equivalent of [Category]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -63,7 +64,7 @@ class Category extends Sample<CategoryHarmonized> {
 ///
 /// To create valid instances of [CategoryHarmonized] please refer to Apple documentation
 ///
-class CategoryHarmonized {
+class CategoryHarmonized with Payload {
   const CategoryHarmonized(
     this.value,
     this.description,
@@ -78,6 +79,7 @@ class CategoryHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'value': value,
         'description': description,

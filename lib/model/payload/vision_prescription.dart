@@ -2,6 +2,7 @@ import '../decorator/extensions.dart';
 import '../type/vision_prescription_type.dart';
 import 'metadata.dart';
 import 'sample.dart';
+import 'payload.dart';
 
 /// Equivalent of [VisionPrescription]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -62,7 +63,7 @@ class VisionPrescription extends Sample<VisionPrescriptionHarmonized> {
 ///
 /// [dateIssuedTimestamp] and [expirationDateTimestamp] are seconds since 1970.
 ///
-class VisionPrescriptionHarmonized {
+class VisionPrescriptionHarmonized with Payload {
   const VisionPrescriptionHarmonized(
     this.dateIssuedTimestamp,
     this.expirationDateTimestamp,
@@ -94,6 +95,7 @@ class VisionPrescriptionHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'dateIssuedTimestamp': dateIssuedTimestamp,
         'expirationDateTimestamp': expirationDateTimestamp,
@@ -120,7 +122,7 @@ class VisionPrescriptionHarmonized {
 /// Equivalent of [VisionPrescription.PrescriptionType]:
 /// glasses (id 1) or contacts (id 2)
 ///
-class PrescriptionType {
+class PrescriptionType with Payload {
   const PrescriptionType(this.id, this.detail);
 
   static const glasses = PrescriptionType(1, 'Glasses');
@@ -131,6 +133,7 @@ class PrescriptionType {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {'id': id, 'detail': detail};
 
   /// General constructor from JSON payload
@@ -144,7 +147,7 @@ class PrescriptionType {
 /// Glasses use the vertex distance, prism and pupillary distances;
 /// contacts the base curve and diameter
 ///
-class LensSpecification {
+class LensSpecification with Payload {
   const LensSpecification(
     this.sphere, {
     this.cylinder,
@@ -188,6 +191,7 @@ class LensSpecification {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'sphere': sphere,
         'cylinder': cylinder,
@@ -224,7 +228,7 @@ class LensSpecification {
 
 /// Equivalent of [VisionPrescription.Prism], correcting double vision
 ///
-class Prism {
+class Prism with Payload {
   const Prism(this.amount, this.angle, this.eye);
 
   /// pD
@@ -238,6 +242,7 @@ class Prism {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'amount': amount,
         'angle': angle,

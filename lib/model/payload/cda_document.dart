@@ -2,6 +2,7 @@ import '../decorator/extensions.dart';
 import '../type/document_type.dart';
 import 'metadata.dart';
 import 'sample.dart';
+import 'payload.dart';
 
 /// Equivalent of [CDADocument]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -60,7 +61,7 @@ class CDADocument extends Sample<CDADocumentHarmonized> {
 /// [HealthKit] extracts the title, patient, author and custodian
 /// from the CDA XML in [documentData] when saving.
 ///
-class CDADocumentHarmonized {
+class CDADocumentHarmonized with Payload {
   const CDADocumentHarmonized(
     this.title,
     this.patientName,
@@ -81,6 +82,7 @@ class CDADocumentHarmonized {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'title': title,
         'patientName': patientName,

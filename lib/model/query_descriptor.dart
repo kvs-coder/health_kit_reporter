@@ -1,4 +1,5 @@
 import 'predicate.dart';
+import 'payload/payload.dart';
 
 /// Equivalent of [QueryDescriptor]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -8,7 +9,7 @@ import 'predicate.dart';
 ///
 /// For native calls the instance will be mapped to [map].
 ///
-class QueryDescriptor {
+class QueryDescriptor with Payload {
   const QueryDescriptor(
     this.identifier, [
     this.predicate,
@@ -21,6 +22,7 @@ class QueryDescriptor {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'identifier': identifier,
         ...?predicate?.map,

@@ -1,5 +1,6 @@
 import '../decorator/extensions.dart';
 import 'metadata.dart';
+import 'payload.dart';
 
 /// Equivalent of [Attachment]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -12,7 +13,7 @@ import 'metadata.dart';
 /// to create instances from JSON payload coming from iOS native code.
 /// And supports multiple object creation by [collect] method from JSON list.
 ///
-class Attachment {
+class Attachment with Payload {
   const Attachment(
     this.identifier,
     this.name,
@@ -38,6 +39,7 @@ class Attachment {
 
   /// General map representation
   ///
+  @override
   Map<String, dynamic> get map => {
         'identifier': identifier,
         'name': name,

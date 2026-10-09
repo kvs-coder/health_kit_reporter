@@ -40,38 +40,62 @@ flutter run
 
 ## How to use
 
-### Preparation
+### Setup
 
-In Xcode, go to Runner > Signing and Capabilities and add the entitlement for Health Kit.
-If you want to read Clinical Records then also check "Clinical Health Records" under Health Kit.
+HealthKit needs a capability, entitlements and usage descriptions in the `Runner` target; without `NSHealthShareUsageDescription` / `NSHealthUpdateUsageDescription` iOS terminates the app when it requests authorization.
 
-***NOTE:*** *You can only tick the "Clinical Health Records" checkmark if your development team has a paid Apple developer subscription. To test on a real device, or to publish your application, you will need a paid Apple subscription, but you can still test on the iOS simulator without a subscription by setting the Development Team to None.*
+**Capabilities** (Xcode › Runner › Signing & Capabilities):
 
+| Capability | Needed for |
+| :--- | :--- |
+| HealthKit | every method |
+| HealthKit › Clinical Health Records | `requestClinicalRecordsAuthorization`, `clinicalRecordQuery` (paid developer account) |
+| HealthKit › Background Delivery | `enableBackgroundDelivery` |
+| Background Modes › Background fetch | waking the app for `observerQuery` updates in background |
 
-Then in your app's info.plist file add permissions:
+They add these **entitlements** to `Runner.entitlements`:
+
+```xml
+<key>com.apple.developer.healthkit</key>
+<true/>
+<key>com.apple.developer.healthkit.access</key>
+<array>
+	<string>health-records</string>
+</array>
+<key>com.apple.developer.healthkit.background-delivery</key>
+<true/>
+```
+
+**Info.plist keys:**
+
+| Key | Needed for |
+| :--- | :--- |
+| `NSHealthShareUsageDescription` | reading (required) |
+| `NSHealthUpdateUsageDescription` | writing (required) |
+| `NSHealthClinicalHealthRecordsShareUsageDescription` | clinical records |
+| `NSLocationWhenInUseUsageDescription`, `NSLocationAlwaysAndWhenInUseUsageDescription` | workout routes |
+| `UIBackgroundModes` with `fetch` | background delivery |
 
 ```xml
 <key>NSHealthShareUsageDescription</key>
-<string>WHY_YOU_NEED_TO_SHARE_DATA</string>
+<string>WHY_YOU_NEED_TO_READ_DATA</string>
 <key>NSHealthUpdateUsageDescription</key>
-<string>WHY_YOU_NEED_TO_USE_DATA</string>
-```
-
-If you plan to use **WorkoutRoute** **Series** please provide additionally CoreLocation permissions:
-
-```xml
-<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>WHY_YOU_NEED_TO_ALWAYS_SHARE_LOCATION</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>WHY_YOU_NEED_TO_SHARE_LOCATION</string>
-```
-
-If you plan to read **Clinical Records** please provide additionally:
-
-```xml
+<string>WHY_YOU_NEED_TO_WRITE_DATA</string>
 <key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
-<string>WHY_YOU_NEED_TO_SHARE_DATA</string>
+<string>WHY_YOU_NEED_TO_READ_RECORDS</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>WHY_YOU_NEED_THE_LOCATION</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>WHY_YOU_NEED_THE_LOCATION_ALWAYS</string>
+<key>UIBackgroundModes</key>
+<array>
+	<string>fetch</string>
+</array>
 ```
+
+***NOTE:*** *Clinical Health Records need a paid Apple developer account. In the simulator you can test everything else with the Development Team set to None.*
+
+**Privacy manifest:** the plugin ships a `PrivacyInfo.xcprivacy` declaring that it neither tracks nor collects data; health data stays on the device. If your app sends health data off the device, declare that in your app's own privacy manifest.
 
 ### Common usage
 
@@ -328,9 +352,43 @@ If you want to stop observation, you need to:
 - remove the subscription for **observerQuery**
 - call **disableBackgroundDelivery** or **disableAllBackgroundDelivery**
 
+## Testing your app
+
+`HealthKitReporter` is static methods over a `MethodChannel` named `health_kit_reporter_method_channel`, so tests mock the channel instead of the class; there is no instance to inject. Reply with what the native side sends: JSON strings of the payloads, maps or bools.
+
+```dart
+TestWidgetsFlutterBinding.ensureInitialized();
+final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+const channel = MethodChannel('health_kit_reporter_method_channel');
+
+messenger.setMockMethodCallHandler(channel, (call) async {
+  switch (call.method) {
+    case 'requestAuthorization':
+      return true;
+    case 'quantityQuery':
+      return jsonEncode([myQuantity.map]);
+    case 'save':
+      return {'status': true, 'uuid': 'NEW-UUID'};
+  }
+  throw PlatformException(code: call.method, message: 'Not mocked');
+});
+```
+
+A live query replies with the name of its own event channel; mock that channel with the events:
+
+```dart
+messenger.setMockMethodCallHandler(channel, (call) async => 'steps-observer');
+messenger.setMockStreamHandler(const EventChannel('steps-observer'),
+    MockStreamHandler.inline(onListen: (arguments, events) {
+  events.success({'identifier': QuantityType.stepCount.identifier});
+}));
+```
+
+The plugin's own `test/api_test.dart` mocks every method this way. To mock at the Dart level instead, wrap the methods your app uses in an interface of your own.
+
 ## Migrating to 4.0.0
 
-4.0.0 depends on HealthKitReporter 4.0.0, which changed its API and its JSON contract ([ADR 0004](https://github.com/kvs-coder/HealthKitReporter/blob/master/docs/adr/0004-contract-changes-for-the-next-major-release.md)):
+4.0.0 depends on HealthKitReporter 4.0.0, which changed its API and its JSON contract ([ADR 0004](https://github.com/kvs-coder/HealthKitReporter/blob/master/doc/adr/0004-contract-changes-for-the-next-major-release.md)):
 
 - **Swift Package Manager only, iOS 15.** Enable SPM (`flutter config --enable-swift-package-manager`), raise the deployment target, and drop the `HealthKitReporter` pod from your `Podfile`.
 - **Anchors are strings.** `anchoredObjectQuery`'s `onUpdate` receives a third argument, the anchor as a base64 string; pass it back as `anchor:` to continue from it.
