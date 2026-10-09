@@ -1,6 +1,6 @@
-## [4.0.0] - 09.10.2026
+## [3.0.0] - 09.10.2026
 
-Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitReporter) through Swift Package Manager. See "Migrating to 4.0.0" in the README.
+Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitReporter) through Swift Package Manager. See "Migrating to 3.0.0" in the README.
 
 ### BREAKING CHANGES
 

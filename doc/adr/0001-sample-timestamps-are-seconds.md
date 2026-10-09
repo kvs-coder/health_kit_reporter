@@ -4,7 +4,7 @@ Date: 09.10.2026
 
 ## Status
 
-Accepted. Ships with 4.0.0, which is not released yet, so the change stays within the HealthKitReporter-aligned major.
+Accepted. Ships with 3.0.0, a major release, since it changes what consumers send.
 
 ## Context
 
@@ -23,5 +23,5 @@ Arguments that aren't payloads keep milliseconds: `Predicate`, the `DateTime` ar
 ## Consequences
 
 - A sample read from HealthKit round-trips through `save` with its own dates.
-- Code that built samples with `millisecondsSinceEpoch` must switch to `secondsSinceEpoch`; otherwise its dates land about 50,000 years in the future and HealthKit rejects them. This is listed under the breaking changes of 4.0.0.
+- Code that built samples with `millisecondsSinceEpoch` must switch to `secondsSinceEpoch`; otherwise its dates land about 50,000 years in the future and HealthKit rejects them. This is listed under the breaking changes of 3.0.0.
 - One unit per payload, the library's, so the plugin no longer converts payloads at all.

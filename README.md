@@ -26,7 +26,7 @@ flutter config --enable-swift-package-manager
 
 ```yaml
 dependencies:
-  health_kit_reporter: ^4.0.0
+  health_kit_reporter: ^3.0.0 # x-release-please-version
 ```
 
 3. Get the dependencies and run the app. `flutter run` migrates the `Runner` project to Swift Package Manager the first time:
@@ -397,9 +397,9 @@ messenger.setMockStreamHandler(const EventChannel('steps-observer'),
 
 The plugin's own `test/api_test.dart` mocks every method this way. To mock at the Dart level instead, wrap the methods your app uses in an interface of your own.
 
-## Migrating to 4.0.0
+## Migrating to 3.0.0
 
-4.0.0 depends on HealthKitReporter 4.0.0, which changed its API and its JSON contract ([ADR 0004](https://github.com/kvs-coder/HealthKitReporter/blob/master/doc/adr/0004-contract-changes-for-the-next-major-release.md)):
+3.0.0 depends on HealthKitReporter 4.0.0, which changed its API and its JSON contract ([ADR 0004](https://github.com/kvs-coder/HealthKitReporter/blob/master/doc/adr/0004-contract-changes-for-the-next-major-release.md)):
 
 - **Swift Package Manager only, iOS 15.** Enable SPM (`flutter config --enable-swift-package-manager`), raise the deployment target, and drop the `HealthKitReporter` pod from your `Podfile`.
 - **Anchors are strings.** `anchoredObjectQuery`'s `onUpdate` receives a third argument, the anchor as a base64 string; pass it back as `anchor:` to continue from it.

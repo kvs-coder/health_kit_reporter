@@ -1,0 +1,39 @@
+name: Publish
+
+# Publishes a release tag to pub.dev. Requires automated publishing on pub.dev
+# (package admin > Automated publishing: GitHub Actions, repository kvs-coder/health_kit_reporter,
+# tag pattern v{{version}}).
+on:
+  push:
+    tags: [ 'v[0-9]+.[0-9]+.[0-9]+*' ]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: pub.dev
+    runs-on: ubuntu-latest
+    environment: pub.dev
+    permissions:
+      id-token: write # pub.dev authenticates the workflow by its OIDC token
+    steps:
+      - uses: actions/checkout@v4
+      # Provides the OIDC token to `pub publish`
+      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Tag matches pubspec.yaml
+        run: |
+          version=$(sed -n 's/^version: //p' pubspec.yaml)
+          [ "v$version" = "$GITHUB_REF_NAME" ] || {
+            echo "::error::Tag $GITHUB_REF_NAME doesn't match pubspec.yaml version $version"
+            exit 1
+          }
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - name: Publish
+        run: flutter pub publish --force

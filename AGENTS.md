@@ -1,6 +1,6 @@
 # AGENTS.md — System & AI Agent Directives
 
-> **Plugin Mission**: `health_kit_reporter` is a Flutter plugin (iOS only) that exposes the Swift library [HealthKitReporter](https://github.com/kvs-coder/HealthKitReporter) to Dart. The plugin's major version matches the library's (`4.x` ⇄ HealthKitReporter `from: "4.0.0"`), resolved through **Swift Package Manager** only (iOS 15+, Flutter 3.44+ / Dart 3.5+). CocoaPods is gone for good: HealthKitReporter stays frozen there at `3.1.0`, and trunk is read-only from 02.12.2026.
+> **Plugin Mission**: `health_kit_reporter` is a Flutter plugin (iOS only) that exposes the Swift library [HealthKitReporter](https://github.com/kvs-coder/HealthKitReporter) to Dart. The plugin follows semantic versioning of its own (`3.x`) and depends on HealthKitReporter `from: "4.0.0"`, resolved through **Swift Package Manager** only (iOS 15+, Flutter 3.44+ / Dart 3.5+). CocoaPods is gone for good: HealthKitReporter stays frozen there at `3.1.0`, and trunk is read-only from 02.12.2026.
 > The native side turns HealthKitReporter payloads into JSON (`encoded()`) and reads dictionaries back with `make(from:)`; the Dart side parses that JSON into plain models and sends their `map`s back.
 > `example/` hosts a Flutter demo app that lists every public method, grouped by area, and seeds simulator data.
 
@@ -224,10 +224,11 @@ Before any commit or PR creation, the codebase must pass all gates:
 
 ## 7. Release & Versioning
 
-* **Versions follow HealthKitReporter's major**: the plugin `X.y.z` depends on HealthKitReporter `from: "X.0.0"`. Within a major: new methods/fields → minor, fixes → patch; a breaking Dart API or JSON change → the next major.
-* `pubspec.yaml` `version` and the top `CHANGELOG.md` entry (`## [X.Y.Z] - dd.MM.yyyy`) always agree; the example's `pubspec.yaml` version follows.
-* `CHANGELOG.md` lists breaking changes first, then features and fixes, written for plugin consumers.
-* Publishing to pub.dev, tagging and pushing release branches happen only on the maintainer's request.
+* **Semantic versioning of the plugin's own**: new methods/fields → minor, fixes → patch, a breaking Dart API or JSON change → major. The plugin's major is independent of HealthKitReporter's; a new library major is a plugin major only when it breaks the plugin's API.
+* **release-please** (`.github/workflows/release.yml`, `release-please-config.json`, `.release-please-manifest.json`) derives the next version from the Conventional Commits on `master` and keeps a release PR open that bumps `pubspec.yaml`, the example's `pubspec.yaml`, the README's dependency line and `CHANGELOG.md` (headers reformatted to `## [X.Y.Z] - dd.MM.yyyy`). Never bump versions or write release changelog entries by hand.
+* Merging the release PR tags `vX.Y.Z`; `.github/workflows/publish.yml` publishes that tag to pub.dev through GitHub's OIDC token (automated publishing, enabled for the tag pattern `v{{version}}` on pub.dev). Merging the release PR and publishing happen only on the maintainer's request.
+* `pubspec.yaml` `version` and the top `CHANGELOG.md` entry always agree (CI's release guard checks it).
+* **Bootstrapping**: 3.0.0 is written by hand (`.release-please-manifest.json` starts at `3.0.0`). Release it once by tagging `v3.0.0` on `master` and creating its GitHub release; release-please continues from that tag.
 
 ---
 
@@ -335,7 +336,7 @@ Before outputting code or submitting PRs, explicitly verify:
 * [ ] Are timestamps seconds in every payload, also samples built in Dart, and milliseconds only in `Predicate` / `DateTime` arguments?
 * [ ] Does every new channel method have an API test, a dispatcher case, a `DemoRow` and a README snippet?
 * [ ] Are `flutter analyze` and `flutter test` green, coverage ≥ `COVERAGE_THRESHOLD`, the example building with SPM, SwiftLint clean and `RunnerTests` green?
-* [ ] Do `pubspec.yaml` and `CHANGELOG.md` agree on the version, aligned with HealthKitReporter's major?
+* [ ] Is the version left to release-please (no hand-made bumps), with `pubspec.yaml` and `CHANGELOG.md` agreeing?
 * [ ] Is the branch named strictly `<initials>/issue-<XXX>`?
 * [ ] Are git commits made without `--no-verify` and staged without blind `git add .`?
 * [ ] Was `gh pr create` used with structured title/body matching commit specs?

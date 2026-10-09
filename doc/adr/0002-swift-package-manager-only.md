@@ -4,7 +4,7 @@ Date: 08.10.2026
 
 ## Status
 
-Accepted. Ships with 4.0.0.
+Accepted. Ships with 3.0.0.
 
 ## Context
 
@@ -12,7 +12,7 @@ HealthKitReporter 4.0.0 is published through Swift Package Manager only; on Coco
 
 ## Decision
 
-The plugin ships only `ios/health_kit_reporter/Package.swift`, depending on HealthKitReporter `from: "4.0.0"`, with a Swift-only target (a SwiftPM target can't mix Swift and Objective-C, so the Objective-C registration is gone). The target depends on `FlutterFramework` (`path: "../FlutterFramework"`), so the minimum is iOS 15, Flutter 3.44, Dart 3.5. The plugin's major version follows the library's.
+The plugin ships only `ios/health_kit_reporter/Package.swift`, depending on HealthKitReporter `from: "4.0.0"`, with a Swift-only target (a SwiftPM target can't mix Swift and Objective-C, so the Objective-C registration is gone). The target depends on `FlutterFramework` (`path: "../FlutterFramework"`), so the minimum is iOS 15, Flutter 3.44, Dart 3.5.
 
 ## Consequences
 
