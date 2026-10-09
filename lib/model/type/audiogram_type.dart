@@ -1,7 +1,9 @@
 import '../../exceptions.dart';
 
-/// Equivalent of [DocumentType]
+/// Equivalent of [AudiogramType]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
+///
+/// All HealthKit audiogram types
 ///
 /// Supports [identifier] extension representing
 /// original [String] of the type.
@@ -9,22 +11,22 @@ import '../../exceptions.dart';
 /// Has a factory methods [from] and [tryFrom]
 /// Creating from [String]
 ///
-enum DocumentType {
-  cda,
+enum AudiogramType {
+  audiogram,
 }
 
-extension DocumentTypeIdentifier on DocumentType {
+extension AudiogramTypeIdentifier on AudiogramType {
   String get identifier {
     switch (this) {
-      case DocumentType.cda:
-        return 'HKDocumentTypeIdentifierCDA';
+      case AudiogramType.audiogram:
+        return 'HKDataTypeIdentifierAudiogram';
     }
   }
 }
 
-extension DocumentTypeFactory on DocumentType {
-  static DocumentType from(String identifier) {
-    for (final type in DocumentType.values) {
+extension AudiogramTypeFactory on AudiogramType {
+  static AudiogramType from(String identifier) {
+    for (final type in AudiogramType.values) {
       if (type.identifier == identifier) {
         return type;
       }
@@ -34,7 +36,7 @@ extension DocumentTypeFactory on DocumentType {
 
   /// The [from] exception handling
   ///
-  static DocumentType? tryFrom(String identifier) {
+  static AudiogramType? tryFrom(String identifier) {
     try {
       return from(identifier);
     } on InvalidValueException {

@@ -2,7 +2,21 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:health_kit_reporter/exceptions.dart';
 import 'package:health_kit_reporter/health_kit_reporter.dart';
+import 'package:health_kit_reporter/model/authorization_request_status.dart';
+import 'package:health_kit_reporter/model/payload/audiogram.dart';
+import 'package:health_kit_reporter/model/payload/cda_document.dart';
+import 'package:health_kit_reporter/model/payload/heartbeat_series.dart';
+import 'package:health_kit_reporter/model/payload/metadata.dart';
+import 'package:health_kit_reporter/model/payload/quantity_series_value.dart';
+import 'package:health_kit_reporter/model/payload/sample.dart';
+import 'package:health_kit_reporter/model/payload/scored_assessment.dart';
+import 'package:health_kit_reporter/model/payload/state_of_mind.dart';
+import 'package:health_kit_reporter/model/payload/workout_route.dart';
+import 'package:health_kit_reporter/model/query_descriptor.dart';
+import 'package:health_kit_reporter/model/type/scored_assessment_type.dart';
+import 'package:health_kit_reporter/model/type/series_type.dart';
 import 'package:health_kit_reporter/model/payload/category.dart';
 import 'package:health_kit_reporter/model/payload/date_components.dart';
 import 'package:health_kit_reporter/model/payload/device.dart';
@@ -55,6 +69,28 @@ void main() {
       jsonEncode(quantityJson()),
       jsonEncode(heartbeatSeriesJson()),
     ],
+    'sampleQueryWithDescriptors': [
+      jsonEncode(quantityJson()),
+      jsonEncode(heartbeatSeriesJson()),
+    ],
+    'quantitySeriesQuery': list(quantitySeriesValueJson()),
+    'verifiableClinicalRecordQuery': list(verifiableClinicalRecordJson()),
+    'cdaDocumentQuery': list(cdaDocumentJson()),
+    'audiogramQuery': list(audiogramJson()),
+    'stateOfMindQuery': list(stateOfMindJson()),
+    'scoredAssessmentQuery': list(scoredAssessmentJson()),
+    'medicationDoseEventQuery': list(medicationDoseEventJson()),
+    'userAnnotatedMedicationQuery': list(userAnnotatedMedicationJson()),
+    'authorizationRequestStatus': 1,
+    'earliestPermittedSampleDate': 1601065755.5,
+    'recalibrateEstimates': true,
+    'attachments': list(attachmentJson()),
+    'attachmentData': Uint8List.fromList([1, 2, 3]),
+    'addAttachment': jsonEncode(attachmentJson()),
+    'removeAttachment': true,
+    'saveWorkout': jsonEncode(workoutJson()),
+    'saveQuantitySeries': true,
+    'saveHeartbeatSeries': true,
     'statisticsQuery': jsonEncode(statisticsJson()),
     'queryActivitySummary': list(activitySummaryJson()),
     'clinicalRecordQuery': list(clinicalRecordJson()),
@@ -109,6 +145,118 @@ void main() {
         await HealthKitReporter.isAuthorizedToWrite(
             QuantityType.stepCount.identifier),
         isTrue);
+    expect(
+        await HealthKitReporter.authorizationRequestStatus(
+            [QuantityType.stepCount.identifier], []),
+        AuthorizationRequestStatus.shouldRequest);
+    expect(calls['authorizationRequestStatus'], {
+      'toRead': [QuantityType.stepCount.identifier],
+      'toWrite': [],
+    });
+  });
+
+  test('manager', () async {
+    expect((await HealthKitReporter.earliestPermittedSampleDate()).toUtc(),
+        DateTime.utc(2020, 9, 25, 20, 29, 15, 500));
+    final date = DateTime.utc(2026);
+    expect(
+        await HealthKitReporter.recalibrateEstimates(
+            QuantityType.vo2Max.identifier, date),
+        isTrue);
+    expect(calls['recalibrateEstimates'], {
+      'identifier': QuantityType.vo2Max.identifier,
+      'timestamp': date.millisecondsSinceEpoch,
+    });
+  });
+
+  test('attachments', () async {
+    const identifier = 'HKVisionPrescriptionTypeIdentifier';
+    expect(
+        (await HealthKitReporter.attachments(identifier, 'VISION-UUID'))
+            .single
+            .name,
+        'scan.jpg');
+    expect(calls['attachments'],
+        {'identifier': identifier, 'uuid': 'VISION-UUID'});
+    expect(
+        await HealthKitReporter.attachmentData(
+            identifier, 'VISION-UUID', 'ATTACHMENT-UUID'),
+        [1, 2, 3]);
+    expect(calls['attachmentData']['attachmentIdentifier'], 'ATTACHMENT-UUID');
+    final added = await HealthKitReporter.addAttachment(
+        identifier, 'VISION-UUID', 'scan.jpg', 'public.jpeg', '/tmp/scan.jpg',
+        metadata: const Metadata({'source': MetadataString('camera')}));
+    expect(added.identifier, 'ATTACHMENT-UUID');
+    expect(calls['addAttachment'], {
+      'identifier': identifier,
+      'uuid': 'VISION-UUID',
+      'name': 'scan.jpg',
+      'contentType': 'public.jpeg',
+      'filePath': '/tmp/scan.jpg',
+      'metadata': {'source': 'camera'},
+    });
+    expect(
+        await HealthKitReporter.removeAttachment(
+            identifier, 'VISION-UUID', 'ATTACHMENT-UUID'),
+        isTrue);
+    expect(calls['removeAttachment']['uuid'], 'VISION-UUID');
+  });
+
+  test('records_wellbeing_and_medications', () async {
+    final records = await HealthKitReporter.verifiableClinicalRecordQuery(
+        ['https://smarthealth.cards#immunization'],
+        sourceTypes: ['https://smarthealth.cards'], predicate: predicate);
+    expect(
+        records.single.harmonized.issuerIdentifier, 'https://issuer.example');
+    expect(calls['verifiableClinicalRecordQuery'], {
+      'recordTypes': ['https://smarthealth.cards#immunization'],
+      'sourceTypes': ['https://smarthealth.cards'],
+      ...predicate.map,
+    });
+    expect(
+        (await HealthKitReporter.cdaDocumentQuery(includeDocumentData: false))
+            .single
+            .harmonized
+            .title,
+        'Summary');
+    expect(calls['cdaDocumentQuery'], {'includeDocumentData': false});
+    expect(
+        (await HealthKitReporter.audiogramQuery(predicate: predicate))
+            .single
+            .harmonized
+            .sensitivityPoints,
+        hasLength(2));
+    expect(calls['audiogramQuery'], predicate.map);
+    expect(
+        (await HealthKitReporter.stateOfMindQuery()).single.harmonized.kind, 1);
+    expect(calls['stateOfMindQuery'], <String, dynamic>{});
+    expect(
+        (await HealthKitReporter.scoredAssessmentQuery(
+                ScoredAssessmentType.gad7))
+            .single
+            .harmonized
+            .score,
+        9);
+    expect(calls['scoredAssessmentQuery'],
+        {'identifier': 'HKScoredAssessmentTypeIdentifierGAD7'});
+    expect(
+        (await HealthKitReporter.medicationDoseEventQuery(
+                medicationConceptIdentifier: 'Q09OQ0VQVA==',
+                predicate: predicate))
+            .single
+            .harmonized
+            .logStatus,
+        4);
+    expect(calls['medicationDoseEventQuery'], {
+      'medicationConceptIdentifier': 'Q09OQ0VQVA==',
+      ...predicate.map,
+    });
+    expect(
+        (await HealthKitReporter.userAnnotatedMedicationQuery())
+            .single
+            .medication
+            .displayText,
+        'Ibuprofen 200 mg');
   });
 
   test('reader', () async {
@@ -166,12 +314,32 @@ void main() {
             .classification,
         'Sinus rhythm');
     expect(calls['electrocardiogramQuery']['withVoltageMeasurements'], isTrue);
-    // heartbeat series aren't returned as generic samples
+    // every sample kind, also heartbeat series, is returned
     expect(
-        (await HealthKitReporter.sampleQuery(
-                QuantityType.stepCount.identifier, predicate))
-            .single,
-        isA<Quantity>());
+        await HealthKitReporter.sampleQuery(
+            QuantityType.stepCount.identifier, predicate),
+        [isA<Quantity>(), isA<HeartbeatSeries>()]);
+    expect(
+        await HealthKitReporter.sampleQueryWithDescriptors([
+          QueryDescriptor(QuantityType.stepCount.identifier, predicate),
+          QueryDescriptor(SeriesType.heartbeatSeries.identifier),
+        ]),
+        hasLength(2));
+    expect(calls['sampleQueryWithDescriptors'], {
+      'descriptors': [
+        {'identifier': QuantityType.stepCount.identifier, ...predicate.map},
+        {'identifier': SeriesType.heartbeatSeries.identifier},
+      ]
+    });
+    final values = await HealthKitReporter.quantitySeriesQuery(
+        QuantityType.stepCount, 'count',
+        predicate: predicate);
+    expect(values.single.sampleUUID, 'SERIES-UUID');
+    expect(calls['quantitySeriesQuery'], {
+      'identifier': QuantityType.stepCount.identifier,
+      'unit': 'count',
+      ...predicate.map,
+    });
     final statistics = await HealthKitReporter.statisticsQuery(
         QuantityType.stepCount, 'count', predicate,
         separateBySource: true);
@@ -246,26 +414,74 @@ void main() {
             52, 2, 0, WorkoutConfigurationHarmonized(25, 'm'))),
         isTrue);
     expect(calls['startWatchApp']['activityValue'], 52);
+    final route = WorkoutRoute.fromJson(workoutRouteJson())
+        .harmonized
+        .routes
+        .single
+        .locations;
+    final saved = await HealthKitReporter.saveWorkout(workout,
+        samples: [steps], route: route);
+    expect(saved.uuid, workout.uuid);
+    expect(calls['saveWorkout']['workout']['startTimestamp'], 1601065755.0);
+    expect(calls['saveWorkout']['samples'].single['uuid'], steps.uuid);
+    expect(calls['saveWorkout']['route'].single['latitude'], 52.5);
+    const values = [QuantitySeriesValue(12, 'count', 1601065755, 1601065815)];
+    expect(
+        await HealthKitReporter.saveQuantitySeries(
+            QuantityType.stepCount, values,
+            device: device,
+            metadata: const Metadata({'HKWasUserEntered': MetadataBool(true)})),
+        isTrue);
+    expect(calls['saveQuantitySeries'], {
+      'identifier': QuantityType.stepCount.identifier,
+      'values': [values.single.map],
+      'device': device.map,
+      'metadata': {'HKWasUserEntered': true},
+    });
+    final series = HeartbeatSeries.fromJson(heartbeatSeriesJson());
+    expect(await HealthKitReporter.saveHeartbeatSeries(series), isTrue);
+    expect(calls['saveHeartbeatSeries'], {'series': series.map});
+  });
+
+  test('new_sample_kinds_are_saved_by_their_kind', () async {
+    for (final (sample, kind) in <(Sample, String)>[
+      (Audiogram.fromJson(audiogramJson()), 'audiogram'),
+      (StateOfMind.fromJson(stateOfMindJson()), 'stateOfMind'),
+      (ScoredAssessment.fromJson(scoredAssessmentJson()), 'scoredAssessment'),
+      (CDADocument.fromJson(cdaDocumentJson()), 'cdaDocument'),
+    ]) {
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        calls[call.method] = call.arguments;
+        return {'status': true, 'uuid': 'NEW'};
+      });
+      expect(await HealthKitReporter.save(sample), 'NEW');
+      expect(calls['save'], {kind: sample.map});
+    }
   });
 
   group('streams', () {
-    void stream(String name, List<Object?> events) {
-      messenger.setMockStreamHandler(EventChannel(name),
-          MockStreamHandler.inline(onListen: (arguments, sink) {
-        calls[name] = arguments;
-        for (final event in events) {
-          event is PlatformException
-              ? sink.error(code: event.code, message: event.message)
-              : sink.success(event);
-        }
-      }));
+    /// The native side replies with a channel of the subscription's own,
+    /// which sends [events] once Dart listens
+    void stream(String method, String name, List<Object?> events,
+        {List<String>? cancelled}) {
+      replies[method] = name;
+      messenger.setMockStreamHandler(
+          EventChannel(name),
+          MockStreamHandler.inline(
+              onListen: (arguments, sink) {
+                for (final event in events) {
+                  event is PlatformException
+                      ? sink.error(code: event.code, message: event.message)
+                      : sink.success(event);
+                }
+              },
+              onCancel: (_) => cancelled?.add(name)));
     }
 
     test('observer_query_reports_identifiers_and_errors', () async {
-      const name = 'health_kit_reporter_event_channel_observer_query';
-      stream(name, [
+      stream('observerQuery', 'observer', [
         {'identifier': QuantityType.stepCount.identifier},
-        PlatformException(code: 'ObserverQuery', message: 'not determined'),
+        PlatformException(code: 'observerQuery', message: 'not determined'),
       ]);
       final identifiers = <String>[];
       final errors = <Object>[];
@@ -273,28 +489,112 @@ void main() {
           [QuantityType.stepCount.identifier], predicate,
           onUpdate: identifiers.add, onError: errors.add);
       await pumpEventQueue();
-      expect(calls[name]['startTimestamp'], predicate.map['startTimestamp']);
+      expect(calls['observerQuery']['startTimestamp'],
+          predicate.map['startTimestamp']);
       expect(identifiers, [QuantityType.stepCount.identifier]);
-      expect((errors.single as PlatformException).message, 'not determined');
+      expect(
+          errors.single,
+          isA<PlatformException>()
+              .having((e) => e.code, 'code', 'observerQuery'));
+      await subscription.cancel();
+    });
+
+    test('subscriptions_of_one_method_run_independently', () async {
+      final cancelled = <String>[];
+      final identifiers = <String>[];
+      var opened = 0;
+      for (final name in ['first', 'second']) {
+        stream(
+            'observerQuery',
+            name,
+            [
+              {'identifier': name}
+            ],
+            cancelled: cancelled);
+      }
+      messenger.setMockMethodCallHandler(
+          channel, (call) async => ['first', 'second'][opened++]);
+      final first = HealthKitReporter.observerQuery(['A'], null,
+          onUpdate: identifiers.add);
+      await pumpEventQueue();
+      final second = HealthKitReporter.observerQuery(['B'], null,
+          onUpdate: identifiers.add);
+      await pumpEventQueue();
+      await first.cancel();
+      await pumpEventQueue();
+      expect(cancelled, ['first']);
+      expect(identifiers, ['first', 'second']);
+      await second.cancel();
+      expect(cancelled, ['first', 'second']);
+    });
+
+    test('planning_failures_reach_on_error_with_the_method_code', () async {
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        throw PlatformException(
+            code: call.method, message: 'HealthKit data is not available');
+      });
+      final errors = <Object>[];
+      final subscription = HealthKitReporter.queryActivitySummaryUpdates(
+          predicate,
+          onUpdate: (_) {},
+          onError: errors.add);
+      await pumpEventQueue();
+      expect(
+          errors.single,
+          isA<PlatformException>()
+              .having((e) => e.code, 'code', 'queryActivitySummaryUpdates')
+              .having((e) => e.message, 'message',
+                  'HealthKit data is not available'));
+      await subscription.cancel();
+    });
+
+    test('cancelling_while_planning_releases_the_native_queries', () async {
+      final cancelled = <String>[];
+      stream('observerQuery', 'late', [], cancelled: cancelled);
+      final subscription =
+          HealthKitReporter.observerQuery(['A'], null, onUpdate: (_) {});
+      await subscription.cancel();
+      await pumpEventQueue();
+      expect(cancelled, ['late']);
+    });
+
+    test('anchored_object_query_reports_unknown_samples', () async {
+      stream('anchoredObjectQuery', 'anchored', [
+        {
+          'samples': [
+            jsonEncode(quantityJson(identifier: 'HKFutureTypeIdentifier'))
+          ],
+          'deletedObjects': [],
+          'anchor': 'TkVYVA==',
+        }
+      ]);
+      final updates = <String?>[];
+      final errors = <Object>[];
+      final subscription = HealthKitReporter.anchoredObjectQuery(['A'], null,
+          onUpdate: (_, __, anchor) => updates.add(anchor),
+          onError: errors.add);
+      await pumpEventQueue();
+      expect(updates, isEmpty);
+      expect(errors.single, isA<InvalidValueException>());
       await subscription.cancel();
     });
 
     test('activity_summary_updates', () async {
-      const name = 'health_kit_reporter_event_channel_query_activity_summary';
-      stream(name, [list(activitySummaryJson())]);
+      stream('queryActivitySummaryUpdates', 'summaries',
+          [list(activitySummaryJson())]);
       final updates = <int>[];
       final subscription = HealthKitReporter.queryActivitySummaryUpdates(
           predicate,
           onUpdate: (summaries) => updates.add(summaries.length));
       await pumpEventQueue();
+      expect(calls['queryActivitySummaryUpdates'], predicate.map);
       expect(updates, [1]);
       await subscription.cancel();
     });
 
     test('statistics_collection_query', () async {
-      const name =
-          'health_kit_reporter_event_channel_statistics_collection_query';
-      stream(name, [jsonEncode(statisticsJson())]);
+      stream('statisticsCollectionQuery', 'statistics',
+          [jsonEncode(statisticsJson())]);
       final updates = <Statistics>[];
       final subscription = HealthKitReporter.statisticsCollectionQuery(
         [const PreferredUnit('HKQuantityTypeIdentifierStepCount', 'count')],
@@ -307,8 +607,9 @@ void main() {
         onUpdate: updates.add,
       );
       await pumpEventQueue();
-      expect(calls[name]['separateBySource'], isTrue);
-      expect(calls[name]['intervalComponents']['day'], 1);
+      expect(calls['statisticsCollectionQuery']['separateBySource'], isTrue);
+      expect(
+          calls['statisticsCollectionQuery']['intervalComponents']['day'], 1);
       expect(updates.single.harmonized.summary, 1200);
       await subscription.cancel();
     });

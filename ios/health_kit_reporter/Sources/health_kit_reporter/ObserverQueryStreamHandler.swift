@@ -12,6 +12,8 @@ public final class ObserverQueryStreamHandler: NSObject {
     public let reporter: HealthKitReporter
     public var activeQueries = [QueryHandle]()
     public var plannedQueries = [QueryHandle]()
+    public var eventSink: FlutterEventSink?
+    public var onClose: (() -> Void)?
 
     init(reporter: HealthKitReporter) {
         self.reporter = reporter
@@ -28,7 +30,7 @@ extension ObserverQueryStreamHandler: StreamHandlerProtocol {
             ) { (_, identifier, error, completion) in
                 defer { completion() }
                 if let error = error {
-                    events(FlutterError(code: "ObserverQuery", error: error))
+                    events(FlutterError(code: EventChannel.observerQuery.rawValue, error: error))
                     return
                 }
                 guard let identifier = identifier else {
@@ -50,9 +52,9 @@ extension ObserverQueryStreamHandler: FlutterStreamHandler {
         withArguments arguments: Any?,
         eventSink events: @escaping FlutterEventSink
     ) -> FlutterError? {
-        handleOnListen(withArguments: arguments, eventSink: events)
+        handleOnListen(eventSink: events)
     }
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        handleOnCancel(withArguments: arguments)
+        handleOnCancel()
     }
 }

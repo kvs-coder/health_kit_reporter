@@ -14,6 +14,8 @@ void main() {
   const presentsSheet = {
     'requestClinicalRecordsAuthorization',
     'requestPerObjectReadAuthorization',
+    'requestPerObjectReadAuthorization for medications',
+    'verifiableClinicalRecordQuery',
   };
 
   // Rows that need hardware, an Apple Account or a watch app
@@ -24,6 +26,8 @@ void main() {
     'clinicalRecordQuery',
     'visionPrescriptionQuery',
     'startWatchApp',
+    // allowed for VO2 max estimated by Apple Watch only
+    'recalibrateEstimates',
   };
 
   for (final section in catalog.sections) {

@@ -12,6 +12,10 @@ public protocol StreamHandlerProtocol: FlutterStreamHandler & NSObjectProtocol {
     var reporter: HealthKitReporter { get }
     var activeQueries: [QueryHandle] { get set }
     var plannedQueries: [QueryHandle] { get set }
+    /// The sink of the subscription, set while Dart listens
+    var eventSink: FlutterEventSink? { get set }
+    /// Called once Dart cancelled the subscription
+    var onClose: (() -> Void)? { get set }
 
     func setQueries(arguments: [String: Any], events: @escaping FlutterEventSink) throws
 

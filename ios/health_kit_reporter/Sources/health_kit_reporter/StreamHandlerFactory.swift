@@ -15,7 +15,7 @@ final class StreamHandlerFactory: NSObject {
             return ObserverQueryStreamHandler.make(with: reporter)
         case .statisticsCollectionQuery:
             return StatisticsCollectionQueryStreamHandler.make(with: reporter)
-        case .activitySummaryQuery:
+        case .queryActivitySummaryUpdates:
             return QueryActivitySummaryStreamHandler.make(with: reporter)
         case .anchoredObjectQuery:
             return AnchoredObjectQueryStreamHandler.make(with: reporter)

@@ -34,13 +34,13 @@ All proposals, comments, and PR descriptions must adhere to:
 
 ```
 Dart: HealthKitReporter (lib/health_kit_reporter.dart, static methods)
-   ├──► MethodChannel  'health_kit_reporter_method_channel'        one-shot calls
-   └──► EventChannels  'health_kit_reporter_event_channel_<query>'  live queries
+   ├──► MethodChannel  'health_kit_reporter_method_channel'        one-shot calls; live queries open their channel
+   └──► EventChannels  'health_kit_reporter_event_channel_<method>_<uuid>'  one per live subscription
             │   arguments: maps of primitives / model `map`s      replies: JSON strings, maps, bools
             ▼
 Swift: SwiftHealthKitReporterPlugin (ios/health_kit_reporter/Sources/health_kit_reporter/)
    ├──► Extensions+SwiftHealthKitReporterPlugin.swift   `Method` enum + dispatcher, one case per Dart method
-   ├──► <Query>StreamHandler.swift                      one FlutterStreamHandler per EventChannel
+   ├──► <Query>StreamHandler.swift                      one FlutterStreamHandler per live subscription
    └──► HealthKitReporter (SwiftPM dependency)          reader / writer / observer / manager
             │
             ▼
@@ -76,6 +76,8 @@ test/
 ├── api_test.dart, health_kit_reporter_test.dart   (every method against mocked channels)
 └── model_round_trip_test.dart, metadata_test.dart, non_finite_test.dart, uuid_round_trip_test.dart, ...
 
+docs/adr/                             (decisions of the plugin, numbered: 0001-sample-timestamps-are-seconds.md)
+
 example/
 ├── lib/main.dart
 ├── lib/demo/                         (DemoRow / DemoSection, Catalog of rows, DemoPage, HealthTypes, Seeding, DemoSamples)
@@ -87,11 +89,12 @@ example/
 * **The library owns HealthKit**: plugin Swift imports `HealthKitReporter` (and `Flutter`, `Foundation`) — never `HealthKit`. Mapping between HK objects and payloads happens in the library.
 * **One reporter**: `SwiftHealthKitReporterPlugin.register` creates one `HealthKitReporter` and injects it into the dispatcher and every stream handler.
 * **JSON contract**: payloads cross the channel as the library's `encoded()` JSON and come back as model `map`s read by `make(from:)`. Keys and value shapes follow the library exactly: flat metadata, seconds since 1970 in payloads, `"Infinity"` / `"-Infinity"` / `"NaN"` for non-finite numbers.
-* **Timestamps**: payload timestamps are seconds since 1970. Arguments Dart sends — `Predicate`, `DateTime` arguments and the start/end of samples built in Dart for saving — are milliseconds (`millisecondsSinceEpoch`); the dispatcher converts them (`Date.make(from:)`, `fromDart()`).
+* **Timestamps**: payload timestamps are seconds since 1970 in both directions, also in samples built in Dart for saving (`DateTime.secondsSinceEpoch`); the dispatcher never converts payloads ([ADR 0001](docs/adr/0001-sample-timestamps-are-seconds.md)). Arguments that aren't payloads — `Predicate` and `DateTime` arguments — are milliseconds (`millisecondsSinceEpoch`), converted by `Date.make(from:)`.
 * **Identity**: a payload's `uuid` names the stored HealthKit sample. Delete, add-to-workout and unrelate send the stored sample's `map`, so Dart models always keep and send `uuid`.
 * **Errors**: every failure reaches Dart as a `PlatformException` whose `code` is the method name and whose `message` is `error.localizedDescription` (`FlutterError(code:error:)`); `details` is always a `String`.
 * **Threads**: results and events are delivered on the platform thread (`DispatchQueue.main`).
-* **Queries**: stream handlers keep `QueryHandle`s, execute them on listen and stop them on cancel; anchored queries take and hand back the anchor as its base64 string.
+* **Queries**: a live query is a dispatcher method of its own: it plans the stream handler's `QueryHandle`s (invalid arguments fail the call) and replies with the name of a new event channel (`EventChannel.combinedWith(identifier:)`). Dart listens to it to execute the queries and cancels it to stop them and close the channel, so subscriptions never share queries. Anchored queries take and hand back the anchor as its base64 string.
+* **Sample kinds**: `Sample.factory` reads every sample payload the library encodes and throws `InvalidValueException` for an unknown identifier; nothing is dropped silently.
 
 ---
 
@@ -126,7 +129,7 @@ example/
 ### A. Swift (`ios/health_kit_reporter/Sources/`)
 * **Header**: every file starts with the Xcode header block (`//  <File>.swift`, `//  health_kit_reporter`, `//  Created by <Name> on dd.MM.yy.`), then imports.
 * **Indentation** 4 spaces; once a call doesn't fit on one line, put **every** argument on its own line and the closing `)` on its own line.
-* **Dispatcher**: one `Method` case per Dart method, named like it. The handler reads arguments with the `[String: Any]` helpers (`string`, `double`, `date`, `samplesPredicate()`, `anchor()`), which throw `HealthKitError.invalidValue` for missing keys; reply through `encoded(_:_:)`, `status(_:_:)` or `send(_:code:to:)`.
+* **Dispatcher**: one `Method` case per Dart method, named like it; live queries reply through `openEventChannel`. The handler reads arguments with the `[String: Any]` helpers (`string`, `double`, `date`, `samplesPredicate()`, `anchor()`), which throw `HealthKitError.invalidValue` for missing keys; reply through `encoded(_:_:)`, `status(_:_:)` or `send(_:code:to:)`.
 * **Name clashes**: `Category` is ambiguous with the Objective-C runtime and the module name is shadowed by the `HealthKitReporter` class, so import it as `import struct HealthKitReporter.Category`.
 * **Conformances / helpers** live in `// MARK: -` sections or `Extensions+<Type>.swift` files, one extended type per file.
 
@@ -145,14 +148,14 @@ example/
 ### C. Adding a Channel Method
 1. A failing test in `test/api_test.dart` (arguments sent, reply parsed).
 2. The Dart method in `health_kit_reporter.dart`.
-3. The `Method` case and handler in the Swift dispatcher (or a stream handler + `EventChannel` case).
+3. The `Method` case and handler in the Swift dispatcher (for a live query also a stream handler and an `EventChannel` case named like the method, opened with `openEventChannel`, and `_subscribe` on the Dart side).
 4. A `DemoRow` in `example/lib/demo/catalog.dart`.
 5. A usage snippet in `README.md` and an entry in `CHANGELOG.md`.
 
 ### D. Example App (`example/`)
 * `Catalog` builds `DemoSection`s of `DemoRow`s; a row either `run`s once (returns a `String`) or `listen`s (a live query reporting until stopped). `DemoPage` only renders rows and their results.
 * Authorization reads every sample type, characteristic and activity summary, and writes the types whose `isWritable` is true (`HealthTypes`); clinical records and vision prescriptions have their own rows.
-* Samples the demo writes carry an `HKExternalUUID` starting with `hkr-demo-` or `hkr-seed-`, so only the demo's own data is deleted.
+* Samples the demo writes hold seconds (`secondsSinceEpoch`) and carry an `HKExternalUUID` starting with `hkr-demo-` or `hkr-seed-`, so only the demo's own data is deleted.
 * Every public plugin method has a row.
 
 ---
@@ -173,6 +176,7 @@ The codebase enforces test-first **TDD**. Code without tests will be rejected.
 ### B. Test Conventions
 * Name the object under test `sut`; test names describe the flow (`metadata_round_trips_in_the_same_flat_shape`).
 * Fixtures live in `test/fixtures.dart` with fixed timestamps (`1601065755.0`); assert every field that changed.
+* Live queries are tested by replying a channel name to the method call and mocking that `EventChannel`.
 
 ### C. Official CLI Commands
 
@@ -312,7 +316,7 @@ Before outputting code or submitting PRs, explicitly verify:
 * [ ] Are APIs newer than iOS 15.0 guarded with `#available` and a `HealthKitError.notAvailable` reply?
 * [ ] Does every error reach Dart as `FlutterError(code:error:)` with the localized description and a `String` detail, and every result/event on the platform thread?
 * [ ] Do Dart models keep `final` fields, the library's JSON keys, `parseNum` for numbers, nullable new fields, and `uuid`?
-* [ ] Are timestamps seconds in payloads and milliseconds in arguments built in Dart?
+* [ ] Are timestamps seconds in every payload, also samples built in Dart, and milliseconds only in `Predicate` / `DateTime` arguments?
 * [ ] Does every new channel method have an API test, a dispatcher case, a `DemoRow` and a README snippet?
 * [ ] Are `flutter analyze` and `flutter test` green, coverage ≥ `COVERAGE_THRESHOLD`, and the example building with SPM?
 * [ ] Do `pubspec.yaml` and `CHANGELOG.md` agree on the version, aligned with HealthKitReporter's major?

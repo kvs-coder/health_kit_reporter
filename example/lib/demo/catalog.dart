@@ -1,18 +1,28 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:health_kit_reporter/health_kit_reporter.dart';
+import 'package:health_kit_reporter/model/decorator/extensions.dart';
 import 'package:health_kit_reporter/model/payload/date_components.dart';
+import 'package:health_kit_reporter/model/payload/metadata.dart';
+import 'package:health_kit_reporter/model/payload/quantity_series_value.dart';
 import 'package:health_kit_reporter/model/payload/preferred_unit.dart';
 import 'package:health_kit_reporter/model/payload/sample.dart';
 import 'package:health_kit_reporter/model/payload/workout.dart';
 import 'package:health_kit_reporter/model/payload/workout_activity_type.dart';
 import 'package:health_kit_reporter/model/payload/workout_configuration.dart';
+import 'package:health_kit_reporter/model/payload/workout_route.dart';
 import 'package:health_kit_reporter/model/predicate.dart';
+import 'package:health_kit_reporter/model/query_descriptor.dart';
 import 'package:health_kit_reporter/model/sample_query_option.dart';
 import 'package:health_kit_reporter/model/type/category_type.dart';
 import 'package:health_kit_reporter/model/type/clinical_type.dart';
 import 'package:health_kit_reporter/model/type/correlation_type.dart';
+import 'package:health_kit_reporter/model/type/medication_type.dart';
 import 'package:health_kit_reporter/model/type/quantity_type.dart';
+import 'package:health_kit_reporter/model/type/scored_assessment_type.dart';
+import 'package:health_kit_reporter/model/type/series_type.dart';
 import 'package:health_kit_reporter/model/type/vision_prescription_type.dart';
 import 'package:health_kit_reporter/model/update_frequency.dart';
 
@@ -90,6 +100,27 @@ class Catalog {
           'Pick the vision prescriptions the app may read (iOS 16)',
           run: () async =>
               '${await HealthKitReporter.requestPerObjectReadAuthorization(VisionPrescriptionType.visionPrescription.identifier)}'),
+      DemoRow('requestPerObjectReadAuthorization for medications',
+          'Pick the medications the app may read (iOS 26)',
+          run: () async =>
+              '${await HealthKitReporter.requestPerObjectReadAuthorization(MedicationType.userAnnotatedMedication.identifier)}'),
+      DemoRow('authorizationRequestStatus',
+          'Whether requestAuthorization would still show the sheet for the demo types',
+          run: () async {
+        final types = await HealthTypes.load();
+        final status = await HealthKitReporter.authorizationRequestStatus(
+            types.read, types.write);
+        return status.name;
+      }),
+      DemoRow('earliestPermittedSampleDate',
+          'The oldest date samples can be saved or read for',
+          run: () async =>
+              (await HealthKitReporter.earliestPermittedSampleDate())
+                  .toIso8601String()),
+      DemoRow('recalibrateEstimates',
+          'Recalibrates the VO2 max estimates from today on',
+          run: () async =>
+              '${await HealthKitReporter.recalibrateEstimates(QuantityType.vo2Max.identifier, _startOfToday)}'),
     ]),
     DemoSection(
       'Steps: save, read, delete',
@@ -187,6 +218,47 @@ class Catalog {
       DemoRow('workoutRouteQuery', 'Routes of the last 7 days',
           run: () async =>
               _describe(await HealthKitReporter.workoutRouteQuery(_lastWeek))),
+      DemoRow('sampleQueryWithDescriptors',
+          'Steps of today and every heartbeat series in one query',
+          run: () async {
+        final samples = await HealthKitReporter.sampleQueryWithDescriptors([
+          QueryDescriptor(_steps.identifier, _today),
+          QueryDescriptor(SeriesType.heartbeatSeries.identifier),
+        ]);
+        final kinds = <String, int>{};
+        for (final sample in samples) {
+          kinds.update(_short(sample.identifier), (count) => count + 1,
+              ifAbsent: () => 1);
+        }
+        return '${samples.length} samples\n$kinds';
+      }),
+      DemoRow('quantitySeriesQuery',
+          'The individual step counts inside the step samples of the last 7 days',
+          run: () async {
+        final values = await HealthKitReporter.quantitySeriesQuery(
+            _steps, 'count',
+            predicate: _lastWeek);
+        return '${values.length} values'
+            '${values.isEmpty ? '' : '\nfirst: ${_json(values.first.map)}'}';
+      }),
+      DemoRow('audiogramQuery', 'Hearing tests of the last 7 days',
+          run: () async => _describe(
+              await HealthKitReporter.audiogramQuery(predicate: _lastWeek))),
+      DemoRow('stateOfMindQuery', 'iOS 18: logged emotions and moods',
+          run: () async => _describe(
+              await HealthKitReporter.stateOfMindQuery(predicate: _lastWeek))),
+      DemoRow('scoredAssessmentQuery',
+          'iOS 18: GAD-7 assessments with the score HealthKit computed',
+          run: () async {
+        final assessments = await HealthKitReporter.scoredAssessmentQuery(
+            ScoredAssessmentType.gad7,
+            predicate: _lastWeek);
+        return [
+          '${assessments.length} assessments',
+          for (final assessment in assessments.take(3))
+            'score ${assessment.harmonized.score}, risk ${assessment.harmonized.risk}',
+        ].join('\n');
+      }),
     ]),
     DemoSection('Health records', [
       DemoRow('clinicalRecordQuery',
@@ -211,6 +283,36 @@ class Catalog {
                 'right sphere ${prescription.harmonized.rightEye?.sphere}',
         ].join('\n');
       }),
+      DemoRow('verifiableClinicalRecordQuery',
+          'SMART Health Card immunizations; the system asks which to share',
+          run: () async => _describe(
+              await HealthKitReporter.verifiableClinicalRecordQuery(
+                  ['https://smarthealth.cards#immunization']))),
+      DemoRow('cdaDocumentQuery', 'CDA documents, with their XML',
+          run: () async {
+        final documents = await HealthKitReporter.cdaDocumentQuery();
+        return [
+          '${documents.length} documents',
+          ...documents.take(3).map((e) => '${e.harmonized.title}'),
+        ].join('\n');
+      }),
+      DemoRow('userAnnotatedMedicationQuery',
+          'iOS 26: the medications the user picked to share', run: () async {
+        final medications =
+            await HealthKitReporter.userAnnotatedMedicationQuery();
+        return [
+          '${medications.length} medications',
+          ...medications.take(3).map((e) => e.medication.displayText),
+        ].join('\n');
+      }),
+      DemoRow(
+          'medicationDoseEventQuery', 'iOS 26: logged doses of the last 7 days',
+          run: () async => _describe(
+              await HealthKitReporter.medicationDoseEventQuery(
+                  predicate: _lastWeek))),
+      DemoRow('attachments / addAttachment / attachmentData / removeAttachment',
+          'iOS 16: saves a prescription, attaches a text file, reads it back and removes it',
+          run: _attachmentsRoundTrip),
     ]),
     DemoSection('Writer', [
       DemoRow('save', 'Saves 120 steps and returns the stored sample\'s uuid',
@@ -298,6 +400,72 @@ class Catalog {
         return '${result.relationships.length} relationships '
             '${previous == null ? 'from the beginning' : 'since the last anchor'}\nanchor: ${result.anchor}';
       }),
+      DemoRow('saveWorkout',
+          'Saves a run with a workout builder, with heart rate samples and a route',
+          run: () async {
+        final start = _now.subtract(const Duration(minutes: 20));
+        final workout = await HealthKitReporter.saveWorkout(
+          _demo.workout(
+              WorkoutActivityType.running, start, const Duration(minutes: 15)),
+          samples: [
+            for (var minute = 0; minute < 15; minute += 5)
+              _demo.quantity(QuantityType.heartRate.identifier, 140 + minute,
+                  'count/min', start.add(Duration(minutes: minute))),
+          ],
+          route: [
+            for (var i = 0; i < 5; i++)
+              WorkoutRouteLocation(
+                  52.52 + i * 0.001,
+                  13.405,
+                  35,
+                  0,
+                  null,
+                  null,
+                  5,
+                  3,
+                  null,
+                  start.add(Duration(minutes: i * 3)).secondsSinceEpoch,
+                  5),
+          ],
+        );
+        return 'workout ${workout.uuid}: ${workout.duration.round()} s, '
+            '${workout.harmonized.totalEnergyBurned} kcal';
+      }),
+      DemoRow('saveQuantitySeries',
+          'Saves 10 step counts of one minute each as one series sample',
+          run: () async {
+        final start = _now.subtract(const Duration(minutes: 12));
+        return '${await HealthKitReporter.saveQuantitySeries(_steps, [
+              for (var minute = 0; minute < 10; minute++)
+                QuantitySeriesValue(
+                    50 + minute,
+                    'count',
+                    start.add(Duration(minutes: minute)).secondsSinceEpoch,
+                    start.add(Duration(minutes: minute + 1)).secondsSinceEpoch),
+            ], metadata: _demo.metadata())}';
+      }),
+      DemoRow('saveHeartbeatSeries', 'Saves 20 beats, one every 0.8 s',
+          run: () async =>
+              '${await HealthKitReporter.saveHeartbeatSeries(_demo.heartbeatSeries(_now.subtract(const Duration(minutes: 1))))}'),
+      DemoRow('save audiogram / state of mind / GAD-7',
+          'Saves a hearing test, and on iOS 18 a mood and a GAD-7 assessment',
+          run: () async {
+        final date = _now.subtract(const Duration(minutes: 1));
+        final log = [
+          'audiogram ${await HealthKitReporter.save(_demo.audiogram(date))}'
+        ];
+        for (final (name, sample) in <(String, Sample)>[
+          ('state of mind', _demo.stateOfMind(date)),
+          ('GAD-7', _demo.gad7(date)),
+        ]) {
+          try {
+            log.add('$name ${await HealthKitReporter.save(sample)}');
+          } on PlatformException catch (error) {
+            log.add('$name: ${error.message}');
+          }
+        }
+        return log.join('\n');
+      }),
       DemoRow('deleteObjects', 'Deletes the steps this app wrote today',
           run: () async =>
               '${await HealthKitReporter.deleteObjects(_steps.identifier, _today)}'),
@@ -332,6 +500,9 @@ class Catalog {
             onError: (error) => report('$error'),
           );
         }),
+        DemoRow('Two anchoredObjectQuery subscriptions',
+            'Starts two, stops the first and saves steps: the second still reports them',
+            run: _independentSubscriptions),
         DemoRow('statisticsCollectionQuery',
             'Daily step sums of the last 7 days, live', listen: (report) {
           final start = _startOfToday.subtract(const Duration(days: 6));
@@ -402,6 +573,53 @@ class Catalog {
         await HealthKitReporter.quantityQuery(_steps, 'count', _today);
     log.add('still stored: ${after.any((e) => e.uuid == uuid)}');
     return log.join('\n');
+  }
+
+  /// Every subscription runs its own native queries, so stopping one
+  /// leaves the other running
+  Future<String> _independentSubscriptions() async {
+    final reported = [<String>{}, <String>{}];
+    final errors = <Object>[];
+    final subscriptions = [
+      for (final uuids in reported)
+        HealthKitReporter.anchoredObjectQuery([_steps.identifier],
+            Predicate(_startOfToday, _now.add(const Duration(hours: 1))),
+            onUpdate: (samples, _, __) =>
+                uuids.addAll(samples.map((e) => e.uuid)),
+            onError: errors.add),
+    ];
+    await Future<void>.delayed(const Duration(seconds: 2));
+    await subscriptions.first.cancel();
+    final uuid = await HealthKitReporter.save(_demo.quantity(_steps.identifier,
+        7, 'count', _now.subtract(const Duration(seconds: 30)),
+        end: _now));
+    await Future<void>.delayed(const Duration(seconds: 3));
+    await subscriptions.last.cancel();
+    if (errors.isNotEmpty) throw errors.first;
+    if (!reported.last.contains(uuid)) {
+      throw StateError('The second subscription missed the saved sample $uuid');
+    }
+    return 'saved $uuid; stopped subscription reported it: '
+        '${reported.first.contains(uuid)}, running one: true';
+  }
+
+  Future<String> _attachmentsRoundTrip() async {
+    final prescription = VisionPrescriptionType.visionPrescription.identifier;
+    final uuid =
+        await HealthKitReporter.save(_demo.visionPrescription(_startOfToday));
+    if (uuid == null) return 'prescription not saved';
+    final file = File('${Directory.systemTemp.path}/hkr-demo-attachment.txt')
+      ..writeAsStringSync('health_kit_reporter attachment');
+    final added = await HealthKitReporter.addAttachment(
+        prescription, uuid, 'note.txt', 'public.plain-text', file.path,
+        metadata: const Metadata({'source': MetadataString('demo')}));
+    final listed = await HealthKitReporter.attachments(prescription, uuid);
+    final data = await HealthKitReporter.attachmentData(
+        prescription, uuid, added.identifier);
+    final removed = await HealthKitReporter.removeAttachment(
+        prescription, uuid, added.identifier);
+    return 'attached ${added.name} (${added.size} bytes) to $uuid\n'
+        'listed ${listed.length}, read "${utf8.decode(data)}", removed: $removed';
   }
 
   /// Saves a 30 minute walk and reads the stored workout back by its uuid

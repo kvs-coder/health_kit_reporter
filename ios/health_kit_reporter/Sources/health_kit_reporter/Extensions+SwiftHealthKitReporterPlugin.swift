@@ -48,6 +48,29 @@ extension SwiftHealthKitReporterPlugin {
         case deleteObjects
         case save
         case saveSamples
+        case authorizationRequestStatus
+        case earliestPermittedSampleDate
+        case recalibrateEstimates
+        case attachments
+        case attachmentData
+        case addAttachment
+        case removeAttachment
+        case sampleQueryWithDescriptors
+        case quantitySeriesQuery
+        case verifiableClinicalRecordQuery
+        case cdaDocumentQuery
+        case audiogramQuery
+        case stateOfMindQuery
+        case scoredAssessmentQuery
+        case medicationDoseEventQuery
+        case userAnnotatedMedicationQuery
+        case saveWorkout
+        case saveQuantitySeries
+        case saveHeartbeatSeries
+        case observerQuery
+        case anchoredObjectQuery
+        case queryActivitySummaryUpdates
+        case statisticsCollectionQuery
     }
 
     public func handle(_ call: FlutterMethodCall, result flutterResult: @escaping FlutterResult) {
@@ -149,11 +172,7 @@ extension SwiftHealthKitReporterPlugin {
                 type: try arguments.string("identifier").asSampleType(),
                 predicate: try arguments.requiredSamplesPredicate()
             ) { (_, samples, error) in
-                if let error = error {
-                    result(FlutterError(code: code, error: error))
-                    return
-                }
-                result(samples.compactMap { try? $0.encoded() })
+                self.send(samples, error: error, code: code, to: result)
             }
             reporter.manager.executeQuery(query)
         case .statisticsQuery:
@@ -288,7 +307,7 @@ extension SwiftHealthKitReporterPlugin {
                 throw HealthKitError.invalidValue("Missing or invalid argument categories in \(arguments)")
             }
             reporter.writer.addCategory(
-                try categories.map { try Category.make(from: $0).fromDart() },
+                try categories.map { try Category.make(from: $0) },
                 from: try (arguments["device"] as? [String: Any]).map { try Device.make(from: $0) },
                 to: try Workout.make(from: try arguments.dictionary("workout")),
                 completion: status(code, result)
@@ -298,7 +317,7 @@ extension SwiftHealthKitReporterPlugin {
                 throw HealthKitError.invalidValue("Missing or invalid argument quantities in \(arguments)")
             }
             reporter.writer.addQuantity(
-                try quantities.map { try Quantity.make(from: $0).fromDart() },
+                try quantities.map { try Quantity.make(from: $0) },
                 from: try (arguments["device"] as? [String: Any]).map { try Device.make(from: $0) },
                 to: try Workout.make(from: try arguments.dictionary("workout")),
                 completion: status(code, result)
@@ -308,7 +327,7 @@ extension SwiftHealthKitReporterPlugin {
                 throw HealthKitError.notAvailable("Workout effort is available from iOS 18")
             }
             reporter.writer.relateWorkoutEffort(
-                try Quantity.make(from: try arguments.dictionary("sample")).fromDart(),
+                try Quantity.make(from: try arguments.dictionary("sample")),
                 toWorkout: try arguments.string("workoutUUID"),
                 activity: arguments["activityUUID"] as? String,
                 completion: status(code, result)
@@ -318,7 +337,7 @@ extension SwiftHealthKitReporterPlugin {
                 throw HealthKitError.notAvailable("Workout effort is available from iOS 18")
             }
             reporter.writer.unrelateWorkoutEffort(
-                try Quantity.make(from: try arguments.dictionary("sample")).fromDart(),
+                try Quantity.make(from: try arguments.dictionary("sample")),
                 fromWorkout: try arguments.string("workoutUUID"),
                 activity: arguments["activityUUID"] as? String,
                 completion: status(code, result)
@@ -354,6 +373,218 @@ extension SwiftHealthKitReporterPlugin {
                 }
                 result(["status": success, "uuids": uuids])
             }
+        case .authorizationRequestStatus:
+            reporter.manager.authorizationRequestStatus(
+                toRead: try (arguments["toRead"] as? [String] ?? []).map { try $0.asObjectType() },
+                toWrite: try (arguments["toWrite"] as? [String] ?? []).map { try $0.asSampleType() }
+            ) { (status, error) in
+                if let error = error {
+                    result(FlutterError(code: code, error: error))
+                    return
+                }
+                result(status.rawValue)
+            }
+        case .earliestPermittedSampleDate:
+            result(reporter.manager.earliestPermittedSampleDate().timeIntervalSince1970)
+        case .recalibrateEstimates:
+            reporter.manager.recalibrateEstimates(
+                for: try arguments.string("identifier").asSampleType(),
+                at: try arguments.date("timestamp"),
+                completion: status(code, result)
+            )
+        case .attachments, .attachmentData, .addAttachment, .removeAttachment:
+            guard #available(iOS 16.0, *) else {
+                throw HealthKitError.notAvailable("Attachments are available from iOS 16")
+            }
+            try handleAttachments(method, reporter: reporter, arguments: arguments, result: result)
+        case .sampleQueryWithDescriptors:
+            guard let descriptors = arguments["descriptors"] as? [[String: Any]] else {
+                throw HealthKitError.invalidValue("Missing or invalid argument descriptors in \(arguments)")
+            }
+            let query = try reporter.reader.sampleQuery(
+                descriptors: try descriptors.map {
+                    QueryDescriptor(
+                        type: try $0.string("identifier").asSampleType(),
+                        predicate: try $0.samplesPredicate()
+                    )
+                }
+            ) { (_, samples, error) in
+                self.send(samples, error: error, code: code, to: result)
+            }
+            reporter.manager.executeQuery(query)
+        case .quantitySeriesQuery:
+            let query = try reporter.reader.quantitySeriesQuery(
+                type: try QuantityType.make(from: try arguments.string("identifier")),
+                unit: try arguments.string("unit"),
+                predicate: try arguments.samplesPredicate() ?? .allSamples,
+                resultsHandler: encoded(code, result)
+            )
+            reporter.manager.executeQuery(query)
+        case .verifiableClinicalRecordQuery:
+            let query = reporter.reader.verifiableClinicalRecordQuery(
+                recordTypes: try arguments.strings("recordTypes"),
+                sourceTypes: arguments["sourceTypes"] as? [String] ?? [],
+                predicate: try arguments.samplesPredicate(),
+                resultsHandler: encoded(code, result)
+            )
+            reporter.manager.executeQuery(query)
+        case .cdaDocumentQuery:
+            var documents = [CDADocument]()
+            let query = try reporter.reader.cdaDocumentQuery(
+                predicate: try arguments.samplesPredicate() ?? .allSamples,
+                includeDocumentData: arguments["includeDocumentData"] as? Bool ?? true
+            ) { (batch, done, error) in
+                if let error = error {
+                    result(FlutterError(code: code, error: error))
+                    return
+                }
+                documents += batch
+                if done {
+                    self.send(documents, code: code, to: result)
+                }
+            }
+            reporter.manager.executeQuery(query)
+        case .audiogramQuery:
+            let query = try reporter.reader.audiogramQuery(
+                predicate: try arguments.samplesPredicate() ?? .allSamples,
+                resultsHandler: encoded(code, result)
+            )
+            reporter.manager.executeQuery(query)
+        case .stateOfMindQuery:
+            guard #available(iOS 18.0, *) else {
+                throw HealthKitError.notAvailable("State of mind is available from iOS 18")
+            }
+            let query = try reporter.reader.stateOfMindQuery(
+                predicate: try arguments.samplesPredicate() ?? .allSamples,
+                resultsHandler: encoded(code, result)
+            )
+            reporter.manager.executeQuery(query)
+        case .scoredAssessmentQuery:
+            guard #available(iOS 18.0, *) else {
+                throw HealthKitError.notAvailable("Scored assessments are available from iOS 18")
+            }
+            let identifier = try arguments.string("identifier")
+            guard let type = identifier.objectType as? ScoredAssessmentType else {
+                throw HealthKitError.invalidType("Not a scored assessment type: \(identifier)")
+            }
+            let query = try reporter.reader.scoredAssessmentQuery(
+                type: type,
+                predicate: try arguments.samplesPredicate() ?? .allSamples,
+                resultsHandler: encoded(code, result)
+            )
+            reporter.manager.executeQuery(query)
+        case .medicationDoseEventQuery:
+            guard #available(iOS 26.0, *) else {
+                throw HealthKitError.notAvailable("Medications are available from iOS 26")
+            }
+            let query = try reporter.reader.medicationDoseEventQuery(
+                medicationConceptIdentifier: arguments["medicationConceptIdentifier"] as? String,
+                predicate: try arguments.samplesPredicate() ?? .allSamples,
+                resultsHandler: encoded(code, result)
+            )
+            reporter.manager.executeQuery(query)
+        case .userAnnotatedMedicationQuery:
+            guard #available(iOS 26.0, *) else {
+                throw HealthKitError.notAvailable("Medications are available from iOS 26")
+            }
+            let query = reporter.reader.userAnnotatedMedicationQuery(resultsHandler: encoded(code, result))
+            reporter.manager.executeQuery(query)
+        case .saveWorkout:
+            reporter.writer.saveWorkout(
+                try Workout.make(from: try arguments.dictionary("workout")),
+                samples: try (arguments["samples"] as? [[String: Any]] ?? []).map { try Quantity.make(from: $0) },
+                route: try (arguments["route"] as? [[String: Any]] ?? []).map {
+                    try WorkoutRoute.Location.make(from: $0)
+                }
+            ) { (workout, error) in
+                self.sendSavedWorkout(workout, error: error, code: code, to: result)
+            }
+        case .saveQuantitySeries:
+            guard let values = arguments["values"] as? [[String: Any]] else {
+                throw HealthKitError.invalidValue("Missing or invalid argument values in \(arguments)")
+            }
+            reporter.writer.saveQuantitySeries(
+                type: try QuantityType.make(from: try arguments.string("identifier")),
+                values: try values.map { try QuantitySeriesValue.make(from: $0) },
+                device: try (arguments["device"] as? [String: Any]).map { try Device.make(from: $0) },
+                metadata: try (arguments["metadata"] as? [String: Any]).map { try Metadata.make(from: $0) },
+                completion: status(code, result)
+            )
+        case .saveHeartbeatSeries:
+            reporter.writer.saveHeartbeatSeries(
+                try HeartbeatSeries.make(from: try arguments.dictionary("series")),
+                completion: status(code, result)
+            )
+        case .observerQuery:
+            result(try openEventChannel(.observerQuery, reporter: reporter, arguments: arguments))
+        case .anchoredObjectQuery:
+            result(try openEventChannel(.anchoredObjectQuery, reporter: reporter, arguments: arguments))
+        case .queryActivitySummaryUpdates:
+            result(try openEventChannel(.queryActivitySummaryUpdates, reporter: reporter, arguments: arguments))
+        case .statisticsCollectionQuery:
+            result(try openEventChannel(.statisticsCollectionQuery, reporter: reporter, arguments: arguments))
+        }
+    }
+
+    @available(iOS 16.0, *)
+    private func handleAttachments(
+        _ method: Method,
+        reporter: HealthKitReporter,
+        arguments: [String: Any],
+        result: @escaping FlutterResult
+    ) throws {
+        let code = method.rawValue
+        let type = try arguments.string("identifier").asSampleType()
+        let uuid = try arguments.string("uuid")
+        switch method {
+        case .attachments:
+            reporter.manager.attachments(forSampleOf: type, uuid: uuid, completion: encoded(code, result))
+        case .attachmentData:
+            reporter.manager.attachmentData(
+                forSampleOf: type,
+                uuid: uuid,
+                attachmentIdentifier: try arguments.string("attachmentIdentifier")
+            ) { (data, error) in
+                guard let data = data else {
+                    result(
+                        FlutterError(
+                            code: code,
+                            error: error ?? HealthKitError.invalidValue("No attachment data")
+                        )
+                    )
+                    return
+                }
+                result(FlutterStandardTypedData(bytes: data))
+            }
+        case .addAttachment:
+            reporter.manager.addAttachment(
+                toSampleOf: type,
+                uuid: uuid,
+                name: try arguments.string("name"),
+                contentType: try arguments.string("contentType"),
+                url: URL(fileURLWithPath: try arguments.string("filePath")),
+                metadata: try (arguments["metadata"] as? [String: Any]).map { try Metadata.make(from: $0) }
+            ) { (attachment, error) in
+                guard let attachment = attachment else {
+                    result(
+                        FlutterError(
+                            code: code,
+                            error: error ?? HealthKitError.invalidValue("No attachment added")
+                        )
+                    )
+                    return
+                }
+                self.send(attachment, code: code, to: result)
+            }
+        case .removeAttachment:
+            reporter.manager.removeAttachment(
+                fromSampleOf: type,
+                uuid: uuid,
+                attachmentIdentifier: try arguments.string("attachmentIdentifier"),
+                completion: status(code, result)
+            )
+        default:
+            throw HealthKitError.invalidValue("Not an attachment method: \(code)")
         }
     }
 }
@@ -363,6 +594,36 @@ extension SwiftHealthKitReporterPlugin {
     private func send<T: Encodable>(_ value: T, code: String, to result: FlutterResult) {
         do {
             result(try value.encoded())
+        } catch {
+            result(FlutterError(code: code, error: error))
+        }
+    }
+    /// Replies with every sample as JSON, or the error; a sample that can't be encoded fails the reply
+    private func send(_ samples: [Sample], error: Error?, code: String, to result: FlutterResult) {
+        if let error = error {
+            result(FlutterError(code: code, error: error))
+            return
+        }
+        do {
+            result(try samples.map { try $0.encoded() })
+        } catch {
+            result(FlutterError(code: code, error: error))
+        }
+    }
+    /// Replies with the saved workout as JSON. The workout is saved even when its route fails;
+    /// then the error's details hold the stored workout's JSON
+    private func sendSavedWorkout(_ workout: Workout?, error: Error?, code: String, to result: FlutterResult) {
+        guard let workout = workout else {
+            result(FlutterError(code: code, error: error ?? HealthKitError.unknown("No workout saved")))
+            return
+        }
+        do {
+            let json = try workout.encoded()
+            guard let error = error else {
+                result(json)
+                return
+            }
+            result(FlutterError(code: code, message: error.localizedDescription, details: json))
         } catch {
             result(FlutterError(code: code, error: error))
         }
@@ -394,81 +655,46 @@ extension SwiftHealthKitReporterPlugin {
         return try samples.map(parseSample)
     }
     /**
-     The sample Dart sends, keyed by its kind, e.g. ["quantity": [...]].
+     The sample Dart sends, keyed by its kind, e.g. ["quantity": [...]], with timestamps in seconds.
      `make(from:)` keeps its "uuid", so delete and unrelate find the stored sample
      */
     private func parseSample(_ arguments: [String: Any]) throws -> Sample {
         if let quantity = arguments["quantity"] as? [String: Any] {
-            return try Quantity.make(from: quantity).fromDart()
+            return try Quantity.make(from: quantity)
         }
         if let category = arguments["category"] as? [String: Any] {
-            return try Category.make(from: category).fromDart()
+            return try Category.make(from: category)
         }
         if let workout = arguments["workout"] as? [String: Any] {
-            return try Workout.make(from: workout).fromDart()
+            return try Workout.make(from: workout)
         }
         if let correlation = arguments["correlation"] as? [String: Any] {
-            return try Correlation.make(from: correlation).fromDart()
+            return try Correlation.make(from: correlation)
+        }
+        if let audiogram = arguments["audiogram"] as? [String: Any] {
+            return try Audiogram.make(from: audiogram)
+        }
+        if let document = arguments["cdaDocument"] as? [String: Any] {
+            return try CDADocument.make(from: document)
         }
         if let prescription = arguments["visionPrescription"] as? [String: Any] {
             guard #available(iOS 16.0, *) else {
                 throw HealthKitError.notAvailable("Vision prescriptions are available from iOS 16")
             }
-            return try VisionPrescription.make(from: prescription).fromDart()
+            return try VisionPrescription.make(from: prescription)
+        }
+        if let stateOfMind = arguments["stateOfMind"] as? [String: Any] {
+            guard #available(iOS 18.0, *) else {
+                throw HealthKitError.notAvailable("State of mind is available from iOS 18")
+            }
+            return try StateOfMind.make(from: stateOfMind)
+        }
+        if let assessment = arguments["scoredAssessment"] as? [String: Any] {
+            guard #available(iOS 18.0, *) else {
+                throw HealthKitError.notAvailable("Scored assessments are available from iOS 18")
+            }
+            return try ScoredAssessment.make(from: assessment)
         }
         throw HealthKitError.invalidValue("Invalid arguments: \(arguments)")
-    }
-}
-// MARK: - Dart timestamps
-// Dart builds samples with DateTime.millisecondsSinceEpoch; the payloads hold seconds
-extension Quantity {
-    func fromDart() -> Quantity {
-        return copyWith(
-            startTimestamp: startTimestamp.secondsSince1970,
-            endTimestamp: endTimestamp.secondsSince1970
-        )
-    }
-}
-extension Category {
-    func fromDart() -> Category {
-        return copyWith(
-            startTimestamp: startTimestamp.secondsSince1970,
-            endTimestamp: endTimestamp.secondsSince1970
-        )
-    }
-}
-extension Workout {
-    func fromDart() -> Workout {
-        return copyWith(
-            startTimestamp: startTimestamp.secondsSince1970,
-            endTimestamp: endTimestamp.secondsSince1970,
-            workoutEvents: workoutEvents.map { event in
-                event.copyWith(
-                    startTimestamp: event.startTimestamp.secondsSince1970,
-                    endTimestamp: event.endTimestamp.secondsSince1970
-                )
-            }
-        )
-    }
-}
-extension Correlation {
-    func fromDart() -> Correlation {
-        return copyWith(
-            startTimestamp: startTimestamp.secondsSince1970,
-            endTimestamp: endTimestamp.secondsSince1970,
-            harmonized: harmonized.copyWith(
-                quantitySamples: harmonized.quantitySamples.map { $0.fromDart() },
-                categorySamples: harmonized.categorySamples.map { $0.fromDart() }
-            )
-        )
-    }
-}
-@available(iOS 16.0, *)
-extension VisionPrescription {
-    func fromDart() -> VisionPrescription {
-        return copyWith(
-            startTimestamp: startTimestamp.secondsSince1970,
-            endTimestamp: endTimestamp.secondsSince1970
-        )
     }
 }

@@ -3,7 +3,22 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
+import 'model/authorization_request_status.dart';
+import 'model/decorator/extensions.dart';
+import 'model/payload/attachment.dart';
+import 'model/payload/audiogram.dart';
+import 'model/payload/cda_document.dart';
+import 'model/payload/medication_dose_event.dart';
+import 'model/payload/metadata.dart';
+import 'model/payload/quantity_series_value.dart';
+import 'model/payload/scored_assessment.dart';
+import 'model/payload/state_of_mind.dart';
+import 'model/payload/user_annotated_medication.dart';
+import 'model/payload/verifiable_clinical_record.dart';
+import 'model/query_descriptor.dart';
 import 'model/sample_query_option.dart';
+import 'model/type/medication_type.dart';
+import 'model/type/scored_assessment_type.dart';
 import 'model/payload/activity_summary.dart';
 import 'model/payload/category.dart';
 import 'model/payload/clinical_record.dart';
@@ -77,6 +92,25 @@ import 'model/update_frequency.dart';
 /// - [deleteObjects]
 /// - [save]
 /// - [saveSamples]
+/// - [authorizationRequestStatus]
+/// - [earliestPermittedSampleDate]
+/// - [recalibrateEstimates]
+/// - [attachments]
+/// - [attachmentData]
+/// - [addAttachment]
+/// - [removeAttachment]
+/// - [sampleQueryWithDescriptors]
+/// - [quantitySeriesQuery]
+/// - [verifiableClinicalRecordQuery]
+/// - [cdaDocumentQuery]
+/// - [audiogramQuery]
+/// - [stateOfMindQuery]
+/// - [scoredAssessmentQuery]
+/// - [medicationDoseEventQuery]
+/// - [userAnnotatedMedicationQuery]
+/// - [saveWorkout]
+/// - [saveQuantitySeries]
+/// - [saveHeartbeatSeries]
 ///
 /// Functions [enableBackgroundDelivery], [disableAllBackgroundDelivery], [disableBackgroundDelivery]
 /// are preferred to use with [observerQuery] set up, since they allow
@@ -95,8 +129,10 @@ import 'model/update_frequency.dart';
 /// the [quantityQuery], [statisticsQuery] will fail to retrieve the data.
 ///
 /// The plugin requires iOS 15.0 and higher.
-/// [visionPrescriptionQuery] and [requestPerObjectReadAuthorization] require iOS 16.0,
-/// [workoutEffortRelationshipQuery], [relateWorkoutEffort] and [unrelateWorkoutEffort] iOS 18.0.
+/// [visionPrescriptionQuery], [requestPerObjectReadAuthorization] and the attachments require iOS 16.0,
+/// [workoutEffortRelationshipQuery], [relateWorkoutEffort], [unrelateWorkoutEffort],
+/// [stateOfMindQuery] and [scoredAssessmentQuery] iOS 18.0,
+/// [medicationDoseEventQuery] and [userAnnotatedMedicationQuery] iOS 26.0.
 ///
 /// Errors arrive as [PlatformException]s whose message is the native error's
 /// localized description.
@@ -114,14 +150,16 @@ import 'model/update_frequency.dart';
 /// Call the listed methods above to maintain the stream events from the native side.
 /// The workflow:
 /// 1. Function is called in you Flutter app on the Flutter side with Dart.
-/// 2. The registration callback [onListen] is triggered on iOS Side. See [HealthKitReporterStreamHandler.swift]
-/// 3. When the appropriate event is detected, the [FlutterEventSink] will sink the event.
+/// 2. The native side plans the queries and replies with the name of a new event channel.
+/// 3. Listening to it runs the queries; when the appropriate event is detected, the [FlutterEventSink] will sink the event.
 /// 4. The new event will be handled in [listen] callback of the received broadcast stream
 /// 5. After handling, the mapped event will be transferred as a ready result in the function's callback [onUpdate]
 ///
 /// This workflow allows you not to call methods on native side in [AppDelegate.swift]
 ///
-/// Please do not keep active multiple event streams, only one at once.
+/// Every subscription runs its own native queries on an [EventChannel] of its own,
+/// so several of them, also of the same method, run side by side
+/// and cancelling one doesn't stop the others.
 ///
 class HealthKitReporter {
   /// [MethodChannel] link to [SwiftHealthKitReporterPlugin.swift]
@@ -130,34 +168,52 @@ class HealthKitReporter {
   static const MethodChannel _methodChannel =
       MethodChannel('health_kit_reporter_method_channel');
 
-  /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
-  /// Will invoke a bridge function of the plugin.
+  /// Starts a live query: the native side plans the queries of [method]
+  /// and replies with the name of an [EventChannel] of their own,
+  /// so every subscription runs and stops independently.
+  /// Failures, also while planning, reach [onError] as [PlatformException]s
+  /// whose code is [method]; so do events [parse] can't read.
   ///
-  static const EventChannel _observerQueryChannel =
-      EventChannel('health_kit_reporter_event_channel_observer_query');
-
-  /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
-  /// Will handle event exchanges of the plugin.
-  ///
-  static const EventChannel _statisticsCollectionQueryChannel = EventChannel(
-      'health_kit_reporter_event_channel_statistics_collection_query');
-
-  /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
-  /// Will handle event exchanges of the plugin.
-  ///
-  static const EventChannel _queryActivitySummaryChannel =
-      EventChannel('health_kit_reporter_event_channel_query_activity_summary');
-
-  /// [EventChannel] link to [SwiftHealthKitReporterPlugin.swift]
-  /// Will handle event exchanges of the plugin.
-  ///
-  static const EventChannel _anchoredObjectQueryChannel =
-      EventChannel('health_kit_reporter_event_channel_anchored_object_query');
+  static StreamSubscription<dynamic> _subscribe<T>(
+      String method,
+      Map<String, dynamic> arguments,
+      T Function(dynamic event) parse,
+      void Function(T update) onUpdate,
+      Function? onError) {
+    StreamSubscription<dynamic>? events;
+    var cancelled = false;
+    late final StreamController<T> controller;
+    controller = StreamController<T>(
+      onListen: () async {
+        try {
+          final String name =
+              await _methodChannel.invokeMethod(method, arguments);
+          // Listening and cancelling releases the native queries
+          // of a subscription cancelled while they were planned
+          events = EventChannel(name).receiveBroadcastStream().listen((event) {
+            try {
+              controller.add(parse(event));
+            } catch (error, stackTrace) {
+              controller.addError(error, stackTrace);
+            }
+          }, onError: controller.addError);
+          if (cancelled) await events?.cancel();
+        } catch (error, stackTrace) {
+          controller.addError(error, stackTrace);
+        }
+      },
+      onCancel: () async {
+        cancelled = true;
+        await events?.cancel();
+      },
+    );
+    return controller.stream.listen(onUpdate, onError: onError);
+  }
 
   /// Sets subscription for data changes.
   /// Will call [onUpdate] callback, if
-  /// there were changes regarding to the provided [identifier]
-  /// inside [HealthKit].
+  /// there were changes regarding to the provided [identifiers]
+  /// inside [HealthKit], once per changed type.
   /// Provide the [predicate] to set the date interval.
   ///
   static StreamSubscription<dynamic> observerQuery(
@@ -169,12 +225,12 @@ class HealthKitReporter {
     if (predicate != null) {
       arguments.addAll(predicate.map);
     }
-    return _observerQueryChannel.receiveBroadcastStream(arguments).listen(
-        (event) {
-      final map = Map<String, dynamic>.from(event);
-      final identifier = map['identifier'];
-      onUpdate(identifier);
-    }, onError: onError);
+    return _subscribe<String>(
+        'observerQuery',
+        arguments,
+        (event) => Map<String, dynamic>.from(event)['identifier'],
+        onUpdate,
+        onError);
   }
 
   /// Will fetch the actual values as a first data snapshot
@@ -188,6 +244,9 @@ class HealthKitReporter {
   /// Persist it and pass it as [anchor] to the next query to receive only
   /// the changes since; without [anchor] the query starts from the beginning.
   /// Deleted objects carry only their uuid, so match it against the samples you keep.
+  ///
+  /// A sample of a kind the plugin can't read fails the whole update
+  /// through [onError], so no sample is skipped behind the anchor.
   ///
   static StreamSubscription<dynamic> anchoredObjectQuery(
       List<String> identifiers, Predicate? predicate,
@@ -205,22 +264,18 @@ class HealthKitReporter {
     if (anchor != null) {
       arguments['anchor'] = anchor;
     }
-    return _anchoredObjectQueryChannel.receiveBroadcastStream(arguments).listen(
-        (event) {
+    return _subscribe<(List<Sample>, List<DeletedObject>, String?)>(
+        'anchoredObjectQuery', arguments, (event) {
       final map = Map<String, dynamic>.from(event);
-      final samples = <Sample>[];
-      for (final String element in List.from(map['samples'])) {
-        final sample = Sample.factory(jsonDecode(element));
-        if (sample != null) {
-          samples.add(sample);
-        }
-      }
-      final deletedObjects = <DeletedObject>[
-        for (final String element in List.from(map['deletedObjects']))
-          DeletedObject.fromJson(jsonDecode(element))
-      ];
-      onUpdate(samples, deletedObjects, map['anchor']);
-    }, onError: onError);
+      return (
+        Sample.collect(map['samples']),
+        [
+          for (final String element in List.from(map['deletedObjects']))
+            DeletedObject.fromJson(jsonDecode(element))
+        ],
+        map['anchor'] as String?,
+      );
+    }, (update) => onUpdate(update.$1, update.$2, update.$3), onError);
   }
 
   /// Will fetch the actual values as a first data snapshot
@@ -234,18 +289,12 @@ class HealthKitReporter {
       Predicate predicate,
       {required Function(List<ActivitySummary>) onUpdate,
       Function? onError}) {
-    final arguments = predicate.map;
-    return _queryActivitySummaryChannel
-        .receiveBroadcastStream(arguments)
-        .listen((event) {
-      final List<dynamic> list = jsonDecode(event);
-      final activitySummaries = <ActivitySummary>[];
-      for (final Map<String, dynamic> map in list) {
-        final activitySummary = ActivitySummary.fromJson(map);
-        activitySummaries.add(activitySummary);
-      }
-      onUpdate(activitySummaries);
-    }, onError: onError);
+    return _subscribe<List<ActivitySummary>>(
+        'queryActivitySummaryUpdates',
+        predicate.map,
+        (event) => parseList(jsonDecode(event), ActivitySummary.fromJson),
+        onUpdate,
+        onError);
   }
 
   /// Will fetch the actual values as a first data snapshot
@@ -269,7 +318,7 @@ class HealthKitReporter {
       {required Function(Statistics) onUpdate,
       bool separateBySource = false,
       Function? onError}) {
-    final arguments = {
+    final arguments = <String, dynamic>{
       'preferredUnits': preferredUnits.map((e) => e.map).toList(),
       'anchorTimestamp': anchorDate.millisecondsSinceEpoch,
       'enumerateFrom': enumerateFrom.millisecondsSinceEpoch,
@@ -278,13 +327,8 @@ class HealthKitReporter {
       'separateBySource': separateBySource,
     };
     arguments.addAll(predicate.map);
-    return _statisticsCollectionQueryChannel
-        .receiveBroadcastStream(arguments)
-        .listen((event) {
-      final json = jsonDecode(event);
-      final statistics = Statistics.fromJson(json);
-      onUpdate(statistics);
-    }, onError: onError);
+    return _subscribe<Statistics>('statisticsCollectionQuery', arguments,
+        (event) => Statistics.fromJson(jsonDecode(event)), onUpdate, onError);
   }
 
   /// Verify whether HealthKit is available.
@@ -484,6 +528,10 @@ class HealthKitReporter {
   /// If [identifier] was recognized as one of [QuantityType], the
   /// units will be set automatically by original
   /// library [HealthKitReporter] according to SI.
+  /// Heartbeat series, workout routes and ECGs come without their
+  /// measurements, which their own queries deliver.
+  /// A sample of a kind the plugin can't read fails the query
+  /// with an [InvalidValueException] instead of being skipped.
   ///
   static Future<List<Sample>> sampleQuery(
       String identifier, Predicate predicate) async {
@@ -492,14 +540,20 @@ class HealthKitReporter {
     };
     arguments.addAll(predicate.map);
     final result = await _methodChannel.invokeMethod('sampleQuery', arguments);
-    final samples = <Sample>[];
-    for (final String element in List.from(result)) {
-      final sample = Sample.factory(jsonDecode(element));
-      if (sample != null) {
-        samples.add(sample);
-      }
-    }
-    return samples;
+    return Sample.collect(result);
+  }
+
+  /// Returns the samples of several types at once, newest first:
+  /// every [QueryDescriptor] names a type and narrows it with its own predicate.
+  ///
+  static Future<List<Sample>> sampleQueryWithDescriptors(
+      List<QueryDescriptor> descriptors) async {
+    final arguments = {
+      'descriptors': descriptors.map((e) => e.map).toList(),
+    };
+    final result = await _methodChannel.invokeMethod(
+        'sampleQueryWithDescriptors', arguments);
+    return Sample.collect(result);
   }
 
   /// Returns [Statistics] for the provided [type] and the,
@@ -797,5 +851,263 @@ class HealthKitReporter {
     final result = Map<String, dynamic>.from(
         await _methodChannel.invokeMethod('saveSamples', arguments));
     return List<String>.from(result['uuids']);
+  }
+
+  /// Tells whether requesting authorization for [toRead] and [toWrite]
+  /// would show the permission sheet.
+  /// Types [requestAuthorization] refuses fail the same way.
+  ///
+  static Future<AuthorizationRequestStatus> authorizationRequestStatus(
+      List<String> toRead, List<String> toWrite) async {
+    final arguments = {
+      'toRead': toRead,
+      'toWrite': toWrite,
+    };
+    final int result = await _methodChannel.invokeMethod(
+        'authorizationRequestStatus', arguments);
+    return AuthorizationRequestStatusFactory.from(result);
+  }
+
+  /// The oldest date samples can be saved or queried for on this device.
+  ///
+  static Future<DateTime> earliestPermittedSampleDate() async {
+    final num result =
+        await _methodChannel.invokeMethod('earliestPermittedSampleDate');
+    return dateFromSeconds(result);
+  }
+
+  /// Recalibrates the estimates [HealthKit] computes for the type with
+  /// [identifier] from [date] on, e.g. [QuantityType.vo2Max] after a change
+  /// in the user's health. Fails for types that don't allow recalibration.
+  ///
+  static Future<bool> recalibrateEstimates(
+      String identifier, DateTime date) async {
+    final arguments = {
+      'identifier': identifier,
+      'timestamp': date.millisecondsSinceEpoch,
+    };
+    return await _methodChannel.invokeMethod('recalibrateEstimates', arguments);
+  }
+
+  /// Lists the files attached to the stored sample with [uuid]
+  /// of the type with [identifier]. Requires iOS 16.
+  ///
+  static Future<List<Attachment>> attachments(
+      String identifier, String uuid) async {
+    final arguments = {
+      'identifier': identifier,
+      'uuid': uuid,
+    };
+    final result = await _methodChannel.invokeMethod('attachments', arguments);
+    return Attachment.collect(jsonDecode(result));
+  }
+
+  /// Reads the content of the attachment with [attachmentIdentifier]
+  /// of the stored sample with [uuid]. Requires iOS 16.
+  ///
+  static Future<Uint8List> attachmentData(
+      String identifier, String uuid, String attachmentIdentifier) async {
+    final arguments = {
+      'identifier': identifier,
+      'uuid': uuid,
+      'attachmentIdentifier': attachmentIdentifier,
+    };
+    return await _methodChannel.invokeMethod('attachmentData', arguments);
+  }
+
+  /// Attaches the local file at [filePath] to the stored sample with [uuid]
+  /// of the type with [identifier] and returns the new [Attachment].
+  /// [name] is shown to the user, [contentType] is a uniform type identifier,
+  /// e.g. "public.jpeg". Requires iOS 16.
+  ///
+  static Future<Attachment> addAttachment(String identifier, String uuid,
+      String name, String contentType, String filePath,
+      {Metadata? metadata}) async {
+    final arguments = <String, dynamic>{
+      'identifier': identifier,
+      'uuid': uuid,
+      'name': name,
+      'contentType': contentType,
+      'filePath': filePath,
+    };
+    if (metadata != null) arguments['metadata'] = metadata.map;
+    final result =
+        await _methodChannel.invokeMethod('addAttachment', arguments);
+    return Attachment.fromJson(jsonDecode(result));
+  }
+
+  /// Removes the attachment with [attachmentIdentifier]
+  /// from the stored sample with [uuid]. Requires iOS 16.
+  ///
+  static Future<bool> removeAttachment(
+      String identifier, String uuid, String attachmentIdentifier) async {
+    final arguments = {
+      'identifier': identifier,
+      'uuid': uuid,
+      'attachmentIdentifier': attachmentIdentifier,
+    };
+    return await _methodChannel.invokeMethod('removeAttachment', arguments);
+  }
+
+  /// Returns the individual quantities inside the quantity series samples
+  /// of [type] in [unit], ordered by sample start date,
+  /// optionally narrowed by [predicate].
+  ///
+  /// Warning: The [unit] should be valid. See [preferredUnits].
+  ///
+  static Future<List<QuantitySeriesValue>> quantitySeriesQuery(
+      QuantityType type, String unit,
+      {Predicate? predicate}) async {
+    final arguments = <String, dynamic>{
+      'identifier': type.identifier,
+      'unit': unit,
+    };
+    if (predicate != null) arguments.addAll(predicate.map);
+    final result =
+        await _methodChannel.invokeMethod('quantitySeriesQuery', arguments);
+    return QuantitySeriesValue.collect(jsonDecode(result));
+  }
+
+  /// Returns verifiable clinical records, such as SMART Health Cards, of
+  /// [recordTypes] (e.g. "https://smarthealth.cards#immunization"),
+  /// optionally limited to [sourceTypes] (e.g. "https://smarthealth.cards")
+  /// and narrowed by [predicate].
+  /// The system asks the user which records to share each time.
+  ///
+  static Future<List<VerifiableClinicalRecord>> verifiableClinicalRecordQuery(
+      List<String> recordTypes,
+      {List<String> sourceTypes = const [],
+      Predicate? predicate}) async {
+    final arguments = <String, dynamic>{
+      'recordTypes': recordTypes,
+      'sourceTypes': sourceTypes,
+    };
+    if (predicate != null) arguments.addAll(predicate.map);
+    final result = await _methodChannel.invokeMethod(
+        'verifiableClinicalRecordQuery', arguments);
+    return VerifiableClinicalRecord.collect(jsonDecode(result));
+  }
+
+  /// Returns CDA documents, optionally narrowed by [predicate].
+  /// [includeDocumentData] includes the CDA XML.
+  /// The user authorizes each document the first time it matches.
+  ///
+  static Future<List<CDADocument>> cdaDocumentQuery(
+      {Predicate? predicate, bool includeDocumentData = true}) async {
+    final arguments = <String, dynamic>{
+      'includeDocumentData': includeDocumentData,
+    };
+    if (predicate != null) arguments.addAll(predicate.map);
+    final result =
+        await _methodChannel.invokeMethod('cdaDocumentQuery', arguments);
+    return CDADocument.collect(jsonDecode(result));
+  }
+
+  /// Returns [Audiogram] samples, optionally narrowed by [predicate].
+  ///
+  static Future<List<Audiogram>> audiogramQuery({Predicate? predicate}) async {
+    final result = await _methodChannel.invokeMethod(
+        'audiogramQuery', predicate?.map ?? <String, dynamic>{});
+    return Audiogram.collect(jsonDecode(result));
+  }
+
+  /// Returns logged emotions and moods, optionally narrowed by [predicate].
+  /// Requires iOS 18.
+  ///
+  static Future<List<StateOfMind>> stateOfMindQuery(
+      {Predicate? predicate}) async {
+    final result = await _methodChannel.invokeMethod(
+        'stateOfMindQuery', predicate?.map ?? <String, dynamic>{});
+    return StateOfMind.collect(jsonDecode(result));
+  }
+
+  /// Returns GAD-7 or PHQ-9 assessments of [type],
+  /// optionally narrowed by [predicate]. Requires iOS 18.
+  ///
+  static Future<List<ScoredAssessment>> scoredAssessmentQuery(
+      ScoredAssessmentType type,
+      {Predicate? predicate}) async {
+    final arguments = <String, dynamic>{
+      'identifier': type.identifier,
+    };
+    if (predicate != null) arguments.addAll(predicate.map);
+    final result =
+        await _methodChannel.invokeMethod('scoredAssessmentQuery', arguments);
+    return ScoredAssessment.collect(jsonDecode(result));
+  }
+
+  /// Returns logged medication doses, optionally of the medication with
+  /// [medicationConceptIdentifier] (see [UserAnnotatedMedicationConcept.identifier])
+  /// and narrowed by [predicate]. Requires iOS 26.
+  ///
+  /// Requires per-object read authorization, see [requestPerObjectReadAuthorization]
+  /// with [MedicationType.userAnnotatedMedication].
+  ///
+  static Future<List<MedicationDoseEvent>> medicationDoseEventQuery(
+      {String? medicationConceptIdentifier, Predicate? predicate}) async {
+    final arguments = <String, dynamic>{};
+    if (medicationConceptIdentifier != null) {
+      arguments['medicationConceptIdentifier'] = medicationConceptIdentifier;
+    }
+    if (predicate != null) arguments.addAll(predicate.map);
+    final result = await _methodChannel.invokeMethod(
+        'medicationDoseEventQuery', arguments);
+    return MedicationDoseEvent.collect(jsonDecode(result));
+  }
+
+  /// Returns the medications the user tracks. Requires iOS 26.
+  ///
+  /// Requires per-object read authorization, see [requestPerObjectReadAuthorization]
+  /// with [MedicationType.userAnnotatedMedication].
+  ///
+  static Future<List<UserAnnotatedMedication>>
+      userAnnotatedMedicationQuery() async {
+    final result =
+        await _methodChannel.invokeMethod('userAnnotatedMedicationQuery');
+    return UserAnnotatedMedication.collect(jsonDecode(result));
+  }
+
+  /// Saves [workout] through a workout builder and returns the stored workout.
+  /// Its totals become samples for the types [samples] doesn't contain,
+  /// its activities are added (iOS 16) and [route] is saved as its route.
+  ///
+  /// The workout is saved even when its route fails; then the
+  /// [PlatformException]'s details hold the JSON of the stored workout.
+  ///
+  static Future<Workout> saveWorkout(Workout workout,
+      {List<Quantity> samples = const [],
+      List<WorkoutRouteLocation> route = const []}) async {
+    final arguments = {
+      'workout': workout.map,
+      'samples': samples.map((e) => e.map).toList(),
+      'route': route.map((e) => e.map).toList(),
+    };
+    final result = await _methodChannel.invokeMethod('saveWorkout', arguments);
+    return Workout.fromJson(jsonDecode(result));
+  }
+
+  /// Saves [values] of [type] as one quantity series sample.
+  /// [device] and [metadata] are optional.
+  ///
+  static Future<bool> saveQuantitySeries(
+      QuantityType type, List<QuantitySeriesValue> values,
+      {Device? device, Metadata? metadata}) async {
+    final arguments = <String, dynamic>{
+      'identifier': type.identifier,
+      'values': values.map((e) => e.map).toList(),
+    };
+    if (device != null) arguments['device'] = device.map;
+    if (metadata != null) arguments['metadata'] = metadata.map;
+    return await _methodChannel.invokeMethod('saveQuantitySeries', arguments);
+  }
+
+  /// Saves [series] beat by beat: 1 to max ascending, non-negative
+  /// [HeartbeatSeriesMeasurement.timeSinceSeriesStart]s.
+  ///
+  static Future<bool> saveHeartbeatSeries(HeartbeatSeries series) async {
+    final arguments = {
+      'series': series.map,
+    };
+    return await _methodChannel.invokeMethod('saveHeartbeatSeries', arguments);
   }
 }

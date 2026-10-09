@@ -15,7 +15,7 @@ permissions:
 
 env:
   # Minimum Dart line coverage of lib/ in percent. Only ever raise it, to the level the latest test PR reaches.
-  COVERAGE_THRESHOLD: "93.0"
+  COVERAGE_THRESHOLD: "94.8"
 
 jobs:
   release-guard:

@@ -64,4 +64,37 @@ void main() {
             }),
         throwsFormatException);
   });
+
+  test('metadata_values_compare_hash_and_print_by_value', () {
+    const values = <(MetadataValue, String)>[
+      (MetadataString('a'), 'MetadataString(a)'),
+      (MetadataNumber(1), 'MetadataNumber(1)'),
+      (MetadataBool(true), 'MetadataBool(true)'),
+      (MetadataDate(1601065755.5), 'MetadataDate(1601065755.5)'),
+      (MetadataQuantity(120, 'count/min'), 'MetadataQuantity(120 count/min)'),
+    ];
+    for (final (sut, printed) in values) {
+      final copy = MetadataValue.fromJson(sut.json);
+      expect(copy, sut);
+      expect(copy.hashCode, sut.hashCode);
+      expect(sut.toString(), printed);
+      expect(values.where((other) => other.$1 == sut), hasLength(1));
+    }
+  });
+
+  test('metadata_compares_hashes_and_prints_by_its_values', () {
+    final sut = Metadata.fromJson(json);
+    final same = Metadata.fromJson(Map<String, dynamic>.from(json));
+    expect(same, sut);
+    expect(same.hashCode, sut.hashCode);
+    expect(Metadata.fromJson({'HKTimeZone': 'UTC'}), isNot(sut));
+    expect(const Metadata({'a': MetadataBool(false)}).toString(),
+        'Metadata({a: MetadataBool(false)})');
+  });
+
+  test('metadata_rejects_values_of_no_kind', () {
+    expect(() => MetadataValue.fromJson(null), throwsFormatException);
+    expect(() => MetadataValue.fromJson([1]), throwsFormatException);
+    expect(() => MetadataValue.fromJson({'value': 1}), throwsFormatException);
+  });
 }

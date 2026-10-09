@@ -14,7 +14,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   const methodChannel = MethodChannel('health_kit_reporter_method_channel');
   const anchoredChannel =
-      EventChannel('health_kit_reporter_event_channel_anchored_object_query');
+      EventChannel('health_kit_reporter_event_channel_anchoredObjectQuery_1');
   final messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
   final calls = <MethodCall>[];
@@ -117,10 +117,9 @@ void main() {
   });
 
   test('anchored_object_query_round_trips_the_anchor', () async {
-    Object? listenArguments;
+    reply((_) => anchoredChannel.name);
     messenger.setMockStreamHandler(anchoredChannel,
         MockStreamHandler.inline(onListen: (arguments, events) {
-      listenArguments = arguments;
       events.success({
         'samples': [jsonEncode(quantityJson())],
         'deletedObjects': [
@@ -138,7 +137,8 @@ void main() {
           .add((samples, deletedObjects.map((e) => e.uuid).toList(), anchor)),
     );
     await pumpEventQueue();
-    expect((listenArguments as Map)['anchor'], 'U0FWRUQ=');
+    expect(calls.single.method, 'anchoredObjectQuery');
+    expect(calls.single.arguments['anchor'], 'U0FWRUQ=');
     expect(updates.single.$1.single, isA<Quantity>());
     expect(updates.single.$2, ['DELETED-UUID']);
     expect(updates.single.$3, 'TkVYVA==');

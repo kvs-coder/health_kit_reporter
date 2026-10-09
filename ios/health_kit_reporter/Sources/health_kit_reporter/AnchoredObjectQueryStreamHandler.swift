@@ -12,6 +12,8 @@ public final class AnchoredObjectQueryStreamHandler: NSObject {
     public let reporter: HealthKitReporter
     public var activeQueries = [QueryHandle]()
     public var plannedQueries = [QueryHandle]()
+    public var eventSink: FlutterEventSink?
+    public var onClose: (() -> Void)?
 
     init(reporter: HealthKitReporter) {
         self.reporter = reporter
@@ -31,14 +33,18 @@ extension AnchoredObjectQueryStreamHandler: StreamHandlerProtocol {
             monitorUpdates: true
         ) { (_, samples, deletedObjects, anchor, error) in
             if let error = error {
-                events(FlutterError(code: "AnchoredObjectQuery", error: error))
+                events(FlutterError(code: EventChannel.anchoredObjectQuery.rawValue, error: error))
                 return
             }
-            events([
-                "samples": samples.compactMap { try? $0.encoded() },
-                "deletedObjects": deletedObjects.compactMap { try? $0.encoded() },
-                "anchor": anchor.asArgument as Any
-            ])
+            do {
+                events([
+                    "samples": try samples.map { try $0.encoded() },
+                    "deletedObjects": try deletedObjects.map { try $0.encoded() },
+                    "anchor": anchor.asArgument as Any
+                ])
+            } catch {
+                events(FlutterError(code: EventChannel.anchoredObjectQuery.rawValue, error: error))
+            }
         }
         plannedQueries.append(query)
     }
@@ -53,9 +59,9 @@ extension AnchoredObjectQueryStreamHandler: FlutterStreamHandler {
         withArguments arguments: Any?,
         eventSink events: @escaping FlutterEventSink
     ) -> FlutterError? {
-        handleOnListen(withArguments: arguments, eventSink: events)
+        handleOnListen(eventSink: events)
     }
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        handleOnCancel(withArguments: arguments)
+        handleOnCancel()
     }
 }

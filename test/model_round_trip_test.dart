@@ -1,4 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:health_kit_reporter/exceptions.dart';
+import 'package:health_kit_reporter/model/authorization_request_status.dart';
+import 'package:health_kit_reporter/model/decorator/extensions.dart';
+import 'package:health_kit_reporter/model/payload/audiogram.dart';
+import 'package:health_kit_reporter/model/payload/cda_document.dart';
+import 'package:health_kit_reporter/model/payload/medication_dose_event.dart';
+import 'package:health_kit_reporter/model/payload/scored_assessment.dart';
+import 'package:health_kit_reporter/model/payload/state_of_mind.dart';
+import 'package:health_kit_reporter/model/predicate.dart';
+import 'package:health_kit_reporter/model/query_descriptor.dart';
+import 'package:health_kit_reporter/model/type/audiogram_type.dart';
+import 'package:health_kit_reporter/model/type/medication_type.dart';
+import 'package:health_kit_reporter/model/type/scored_assessment_type.dart';
+import 'package:health_kit_reporter/model/type/state_of_mind_type.dart';
 import 'package:health_kit_reporter/model/payload/activity_summary.dart';
 import 'package:health_kit_reporter/model/payload/category.dart';
 import 'package:health_kit_reporter/model/payload/characteristic/characteristic.dart';
@@ -59,6 +75,15 @@ void main() {
       VisionPrescription.fromJson, (e) => e.map);
   roundTrips('workout', workoutJson(), Workout.fromJson, (e) => e.map);
   roundTrips('statistics', statisticsJson(), Statistics.fromJson, (e) => e.map);
+  roundTrips('audiogram', audiogramJson(), Audiogram.fromJson, (e) => e.map);
+  roundTrips(
+      'state_of_mind', stateOfMindJson(), StateOfMind.fromJson, (e) => e.map);
+  roundTrips('scored_assessment', scoredAssessmentJson(),
+      ScoredAssessment.fromJson, (e) => e.map);
+  roundTrips(
+      'cda_document', cdaDocumentJson(), CDADocument.fromJson, (e) => e.map);
+  roundTrips('medication_dose_event', medicationDoseEventJson(),
+      MedicationDoseEvent.fromJson, (e) => e.map);
   roundTrips(
       'workout_effort_relationship',
       {
@@ -88,7 +113,49 @@ void main() {
     expect(Sample.factory(electrocardiogramJson()), isA<Electrocardiogram>());
     expect(Sample.factory(clinicalRecordJson()), isA<ClinicalRecord>());
     expect(Sample.factory(workoutJson()), isA<Workout>());
-    expect(Sample.factory(heartbeatSeriesJson()), isNull);
+    expect(Sample.factory(quantityJson()), isA<Quantity>());
+    expect(Sample.factory(visionPrescriptionJson()), isA<VisionPrescription>());
+    expect(Sample.factory(heartbeatSeriesJson()), isA<HeartbeatSeries>());
+    expect(Sample.factory(workoutRouteJson()), isA<WorkoutRoute>());
+    expect(Sample.factory(audiogramJson()), isA<Audiogram>());
+    expect(Sample.factory(cdaDocumentJson()), isA<CDADocument>());
+    expect(Sample.factory(stateOfMindJson()), isA<StateOfMind>());
+    expect(Sample.factory(scoredAssessmentJson()), isA<ScoredAssessment>());
+    expect(
+        Sample.factory(medicationDoseEventJson()), isA<MedicationDoseEvent>());
+  });
+
+  test('sample_factory_reports_an_unknown_identifier', () {
+    expect(
+        () =>
+            Sample.factory(quantityJson(identifier: 'HKFutureTypeIdentifier')),
+        throwsA(isA<InvalidValueException>().having(
+            (e) => e.cause, 'cause', contains('HKFutureTypeIdentifier'))));
+  });
+
+  test('sample_collect_parses_json_strings', () {
+    final sut = Sample.collect(
+        [jsonEncode(quantityJson()), jsonEncode(workoutRouteJson())]);
+    expect(sut.map((e) => e.uuid), [
+      '8B1F9C1E-4E0A-4C38-9D57-1B2F4A6C7D10',
+      'ROUTE-UUID',
+    ]);
+  });
+
+  test('read_sample_is_sent_back_with_the_same_seconds', () {
+    final sut = Quantity.fromJson(quantityJson());
+    final sent = sut.parsed()['quantity'];
+    expect(sent['startTimestamp'], 1601065755.8829093);
+    expect(sent['endTimestamp'], 1601066077.5886581);
+    final workout = Workout.fromJson(workoutJson()).parsed()['workout'];
+    expect(workout['startTimestamp'], 1601065755.0);
+    expect(workout['workoutEvents'].single['startTimestamp'], 1601066000.0);
+  });
+
+  test('samples_built_in_dart_hold_seconds', () {
+    final date = DateTime.utc(2020, 9, 25, 20, 29, 15, 500);
+    expect(date.secondsSinceEpoch, 1601065755.5);
+    expect(dateFromSeconds(date.secondsSinceEpoch).toUtc(), date);
   });
 
   test('parsed_keys_by_kind', () {
@@ -96,6 +163,10 @@ void main() {
     expect(
         Correlation.fromJson(correlationJson()).parsed().keys, ['correlation']);
     expect(Workout.fromJson(workoutJson()).parsed().keys, ['workout']);
+    expect(Quantity.fromJson(quantityJson()).parsed().keys, ['quantity']);
+    expect(VisionPrescription.fromJson(visionPrescriptionJson()).parsed().keys,
+        ['visionPrescription']);
+    expect(HeartbeatSeries.fromJson(heartbeatSeriesJson()).parsed(), isEmpty);
   });
 
   test('characteristic_round_trip', () {
@@ -126,6 +197,16 @@ void main() {
     expect(SampleQueryOption.values.map((e) => e.value),
         ['strictStartDate', 'strictEndDate', 'notStrict']);
     expect(UpdateFrequency.values.map((e) => e.value), [1, 2, 3, 4]);
+    expect(AuthorizationRequestStatus.values.map((e) => e.value), [0, 1, 2]);
+    expect(AuthorizationRequestStatusFactory.from(2),
+        AuthorizationRequestStatus.unnecessary);
+    expect(() => AuthorizationRequestStatusFactory.from(9),
+        throwsA(isA<InvalidValueException>()));
+    final predicate = Predicate(DateTime.utc(2026), DateTime.utc(2026, 2));
+    expect(QueryDescriptor('HKQuantityTypeIdentifierStepCount', predicate).map,
+        {'identifier': 'HKQuantityTypeIdentifierStepCount', ...predicate.map});
+    expect(const QueryDescriptor('HKQuantityTypeIdentifierStepCount').map,
+        {'identifier': 'HKQuantityTypeIdentifierStepCount'});
   });
 
   test('type_identifiers', () {
@@ -139,5 +220,39 @@ void main() {
     ]);
     expect(CharacteristicType.values.map((e) => e.identifier),
         everyElement(startsWith('HKCharacteristicTypeIdentifier')));
+    expect(AudiogramType.audiogram.identifier, 'HKDataTypeIdentifierAudiogram');
+    expect(StateOfMindType.stateOfMind.identifier, 'HKDataTypeStateOfMind');
+    expect(ScoredAssessmentType.values.map((e) => e.identifier), [
+      'HKScoredAssessmentTypeIdentifierGAD7',
+      'HKScoredAssessmentTypeIdentifierPHQ9'
+    ]);
+    expect(MedicationType.values.map((e) => e.identifier), [
+      'HKMedicationDoseEventTypeIdentifierMedicationDoseEvent',
+      'HKDataTypeUserAnnotatedMedicationConcept'
+    ]);
+  });
+
+  test('type_factories', () {
+    for (final type in AudiogramType.values) {
+      expect(AudiogramTypeFactory.from(type.identifier), type);
+    }
+    for (final type in StateOfMindType.values) {
+      expect(StateOfMindTypeFactory.from(type.identifier), type);
+    }
+    for (final type in ScoredAssessmentType.values) {
+      expect(ScoredAssessmentTypeFactory.from(type.identifier), type);
+    }
+    for (final type in MedicationType.values) {
+      expect(MedicationTypeFactory.from(type.identifier), type);
+    }
+    for (final type in DocumentType.values) {
+      expect(DocumentTypeFactory.from(type.identifier), type);
+    }
+    for (final type in SeriesType.values) {
+      expect(SeriesTypeFactory.from(type.identifier), type);
+    }
+    expect(MedicationTypeFactory.tryFrom('unknown'), isNull);
+    expect(() => AudiogramTypeFactory.from('unknown'),
+        throwsA(isA<InvalidValueException>()));
   });
 }

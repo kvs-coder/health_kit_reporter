@@ -246,3 +246,151 @@ Map<String, dynamic> visionPrescriptionJson() => {
         'metadata': null,
       },
     };
+
+Map<String, dynamic> audiogramJson() => {
+      'uuid': 'AUDIOGRAM-UUID',
+      'identifier': 'HKDataTypeIdentifierAudiogram',
+      'startTimestamp': 1601065755.0,
+      'endTimestamp': 1601065755.0,
+      'sourceRevision': sourceRevisionJson(),
+      'harmonized': {
+        'sensitivityPoints': [
+          {
+            'frequency': 1000,
+            'leftEarSensitivity': 20,
+            'rightEarSensitivity': 25.5,
+            'tests': [
+              {
+                'sensitivity': 20,
+                'conductionType': 0,
+                'masked': false,
+                'side': 0
+              }
+            ],
+          },
+          {'frequency': 2000, 'leftEarSensitivity': 30},
+        ],
+        'metadata': null,
+      },
+    };
+
+Map<String, dynamic> stateOfMindJson() => {
+      'uuid': 'MIND-UUID',
+      'identifier': 'HKDataTypeStateOfMind',
+      'startTimestamp': 1601065755.0,
+      'endTimestamp': 1601065755.0,
+      'sourceRevision': sourceRevisionJson(),
+      'harmonized': {
+        'kind': 1,
+        'valence': 0.5,
+        'valenceClassification': 6,
+        'labels': [1, 14],
+        'associations': [3],
+        'metadata': null,
+      },
+    };
+
+Map<String, dynamic> scoredAssessmentJson() => {
+      'uuid': 'GAD7-UUID',
+      'identifier': 'HKScoredAssessmentTypeIdentifierGAD7',
+      'startTimestamp': 1601065755.0,
+      'endTimestamp': 1601065755.0,
+      'sourceRevision': sourceRevisionJson(),
+      'harmonized': {
+        'answers': [0, 1, 2, 3, 0, 1, 2],
+        'score': 9,
+        'risk': 2,
+        'metadata': null,
+      },
+    };
+
+Map<String, dynamic> cdaDocumentJson() => {
+      'uuid': 'CDA-UUID',
+      'identifier': 'HKDocumentTypeIdentifierCDA',
+      'startTimestamp': 1601065755.0,
+      'endTimestamp': 1601065755.0,
+      'sourceRevision': sourceRevisionJson(),
+      'harmonized': {
+        'title': 'Summary',
+        'patientName': 'Jane Doe',
+        'authorName': 'Dr. Who',
+        'custodianName': 'Clinic',
+        'documentData': 'PENsaW5pY2FsRG9jdW1lbnQvPg==',
+        'metadata': null,
+      },
+    };
+
+Map<String, dynamic> medicationDoseEventJson() => {
+      'uuid': 'DOSE-UUID',
+      'identifier': 'HKMedicationDoseEventTypeIdentifierMedicationDoseEvent',
+      'startTimestamp': 1601065755.0,
+      'endTimestamp': 1601065755.0,
+      'sourceRevision': sourceRevisionJson(),
+      'harmonized': {
+        'scheduleType': 2,
+        'medicationConceptIdentifier': 'Q09OQ0VQVA==',
+        'scheduledTimestamp': 1601065700.0,
+        'scheduledDoseQuantity': 1,
+        'doseQuantity': 1,
+        'logStatus': 4,
+        'unit': 'count',
+        'metadata': null,
+      },
+    };
+
+Map<String, dynamic> userAnnotatedMedicationJson() => {
+      'nickname': 'Morning pill',
+      'isArchived': false,
+      'hasSchedule': true,
+      'medication': {
+        'identifier': 'Q09OQ0VQVA==',
+        'domain': 'medication',
+        'displayText': 'Ibuprofen 200 mg',
+        'generalForm': 'tablet',
+        'relatedCodings': [
+          {
+            'system': 'http://www.nlm.nih.gov/research/umls/rxnorm',
+            'version': null,
+            'code': '310965'
+          }
+        ],
+      },
+    };
+
+Map<String, dynamic> verifiableClinicalRecordJson() => {
+      'uuid': 'SHC-UUID',
+      'identifier': 'HKVerifiableClinicalRecordTypeIdentifier',
+      'startTimestamp': 1601065755.0,
+      'endTimestamp': 1601065755.0,
+      'sourceRevision': sourceRevisionJson(),
+      'harmonized': {
+        'recordTypes': ['https://smarthealth.cards#immunization'],
+        'issuerIdentifier': 'https://issuer.example',
+        'subject': {
+          'fullName': 'Jane Doe',
+          'dateOfBirth': '1990-01-01T00:00:00.000+01:00'
+        },
+        'issuedTimestamp': 1601065755.0,
+        'relevantTimestamp': 1601065755.0,
+        'itemNames': ['COVID-19'],
+        'sourceType': 'https://smarthealth.cards',
+        'dataRepresentation': 'ZXlK',
+      },
+    };
+
+Map<String, dynamic> attachmentJson() => {
+      'identifier': 'ATTACHMENT-UUID',
+      'name': 'scan.jpg',
+      'contentType': 'public.jpeg',
+      'size': 2048,
+      'creationTimestamp': 1601065755.0,
+      'metadata': {'source': 'camera'},
+    };
+
+Map<String, dynamic> quantitySeriesValueJson() => {
+      'value': 12,
+      'unit': 'count',
+      'startTimestamp': 1601065755.0,
+      'endTimestamp': 1601065815.0,
+      'sampleUUID': 'SERIES-UUID',
+    };

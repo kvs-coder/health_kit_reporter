@@ -1,4 +1,4 @@
-## [4.0.0] - 08.10.2026
+## [4.0.0] - 09.10.2026
 
 Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitReporter) through Swift Package Manager. See "Migrating to 4.0.0" in the README.
 
@@ -9,7 +9,10 @@ Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitRepor
 * `delete`, `addQuantity` / `addCategory` and `unrelateWorkoutEffort` act on the stored sample with the payload's uuid.
 * `anchoredObjectQuery` takes an optional `anchor` string and passes the new anchor to `onUpdate` as a third argument.
 * Metadata is a flat object, modelled as `Metadata` / `MetadataValue` (strings, numbers, booleans, `{"timestamp"}` dates, `{"value", "unit"}` quantities) instead of `Map<String, dynamic>`.
-* Vision prescription dates are seconds since 1970.
+* Sample timestamps are seconds since 1970 in both directions: samples built in Dart for saving hold seconds too (`DateTime.secondsSinceEpoch`), so a sample read from HealthKit saves with its own dates instead of landing in 1970. Vision prescription dates are seconds as well. `Predicate` and `DateTime` arguments are unchanged.
+* `Sample.factory` returns a non-null `Sample` for every kind the library encodes (heartbeat series, workout routes, audiograms, CDA documents, states of mind, scored assessments, medication doses) and throws `InvalidValueException` for an unknown identifier; `sampleQuery` and `anchoredObjectQuery` surface it instead of silently dropping the sample behind the anchor.
+* Live queries open an event channel per subscription: several subscriptions, also of the same method, run side by side and cancelling one no longer stops the others. Their errors, including invalid arguments and unavailable Health data, reach `onError` as `PlatformException`s coded with the Dart method name (`observerQuery`, `anchoredObjectQuery`, `queryActivitySummaryUpdates`, `statisticsCollectionQuery`).
+* `lib/model/payload/document.dart` is replaced by `cda_document.dart` (`CDADocument`).
 * Non-finite numbers arrive as `"Infinity"`, `"-Infinity"` and `"NaN"` and are parsed into doubles.
 * Corrected strings: "Pickleball", "Hand Cycling", "Preparation and Recovery", "Pause or resume request"; ECG "Sinus rhythm" and the environmental audio exposure event strings come from the library.
 * `requestAuthorization` fails with a `PlatformException` for types HealthKit can't authorize and for unknown identifiers instead of ignoring them; errors carry the native localized description.
@@ -23,6 +26,10 @@ Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitRepor
 * New optional fields: statistics `min`, `duration` and `sourceStatistics` (`separateBySource`), activity summary move time and `paused`, workout `statistics` and `activities`.
 * 17 quantity types and 4 category types the library supports; coverage and clinical note records.
 * `onError` callbacks for the stream queries.
+* Manager: `authorizationRequestStatus`, `earliestPermittedSampleDate`, `recalibrateEstimates`; attachments (iOS 16): `attachments`, `attachmentData`, `addAttachment`, `removeAttachment`.
+* Reader: `sampleQueryWithDescriptors`, `quantitySeriesQuery`, `verifiableClinicalRecordQuery`, `cdaDocumentQuery`, `audiogramQuery`, `stateOfMindQuery` and `scoredAssessmentQuery` (iOS 18), `medicationDoseEventQuery` and `userAnnotatedMedicationQuery` (iOS 26).
+* Writer: `saveWorkout` (workout builder with samples, activities and route), `saveQuantitySeries`, `saveHeartbeatSeries`; `save` / `saveSamples` store audiograms, CDA documents, states of mind and scored assessments.
+* Types `AudiogramType`, `StateOfMindType`, `ScoredAssessmentType`, `MedicationType`, factories for `DocumentType` and `SeriesType`; models `Audiogram`, `CDADocument`, `StateOfMind`, `ScoredAssessment`, `MedicationDoseEvent`, `UserAnnotatedMedication`, `VerifiableClinicalRecord`, `Attachment`, `QuantitySeriesValue`, `AuthorizationRequestStatus`, `QueryDescriptor`.
 * The example app lists every method grouped by area and seeds simulator data.
 
 ### Fixes
@@ -30,6 +37,8 @@ Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitRepor
 * `correlationQuery` sends its `typePredicates`; they couldn't be encoded before.
 * `environmentalAudioExposureEvent` uses HealthKit's identifier.
 * Results and events are delivered on the platform thread.
+* Samples or deleted objects that fail to encode fail the reply or the event instead of disappearing.
+* Live queries work when Health data is unavailable: they report `HealthKitError.notAvailable` instead of a `MissingPluginException`.
 
 ## [2.3.1] - 12.12.2024
 

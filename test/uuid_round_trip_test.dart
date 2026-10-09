@@ -39,7 +39,7 @@ void main() {
   });
 
   test('sample_factory_keeps_uuid', () {
-    final sample = Sample.factory(quantityJson(uuid: 'F-UUID'))!;
+    final sample = Sample.factory(quantityJson(uuid: 'F-UUID'));
     expect(sample.uuid, 'F-UUID');
   });
 

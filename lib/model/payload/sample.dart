@@ -1,22 +1,36 @@
-import 'package:health_kit_reporter/health_kit_reporter.dart';
+import 'dart:convert';
 
+import '../../exceptions.dart';
 import '../decorator/extensions.dart';
+import '../type/audiogram_type.dart';
 import '../type/category_type.dart';
 import '../type/clinical_type.dart';
 import '../type/correlation_type.dart';
+import '../type/document_type.dart';
 import '../type/electrocardiogram_type.dart';
+import '../type/medication_type.dart';
 import '../type/quantity_type.dart';
+import '../type/scored_assessment_type.dart';
+import '../type/series_type.dart';
+import '../type/state_of_mind_type.dart';
 import '../type/vision_prescription_type.dart';
 import '../type/workout_type.dart';
+import 'audiogram.dart';
 import 'category.dart';
+import 'cda_document.dart';
 import 'clinical_record.dart';
 import 'correlation.dart';
 import 'device.dart';
 import 'electrocardiogram.dart';
+import 'heartbeat_series.dart';
+import 'medication_dose_event.dart';
 import 'quantity.dart';
+import 'scored_assessment.dart';
 import 'source_revision.dart';
+import 'state_of_mind.dart';
 import 'vision_prescription.dart';
 import 'workout.dart';
+import 'workout_route.dart';
 
 /// Equivalent of [Sample]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
@@ -34,6 +48,13 @@ import 'workout.dart';
 /// - [Electrocardiogram]
 /// - [ClinicalRecord]
 /// - [VisionPrescription]
+/// - [HeartbeatSeries]
+/// - [WorkoutRoute]
+/// - [Audiogram]
+/// - [CDADocument]
+/// - [StateOfMind]
+/// - [ScoredAssessment]
+/// - [MedicationDoseEvent]
 /// Every type conforms the requirement
 /// to have an associated type [Harmonized]implemented.
 ///
@@ -63,7 +84,12 @@ abstract class Sample<Harmonized> {
   /// Send the sample back with it to delete it or to unrelate it.
   final String uuid;
   final String identifier;
+
+  /// Seconds since 1970, also for samples built in Dart
+  /// (see [SecondsSinceEpoch.secondsSinceEpoch])
   final num startTimestamp;
+
+  /// Seconds since 1970
   final num endTimestamp;
   final Device? device;
   final SourceRevision sourceRevision;
@@ -96,42 +122,68 @@ abstract class Sample<Harmonized> {
     if (this is Workout) arguments['workout'] = map;
     if (this is Correlation) arguments['correlation'] = map;
     if (this is VisionPrescription) arguments['visionPrescription'] = map;
+    if (this is Audiogram) arguments['audiogram'] = map;
+    if (this is StateOfMind) arguments['stateOfMind'] = map;
+    if (this is ScoredAssessment) arguments['scoredAssessment'] = map;
+    if (this is CDADocument) arguments['cdaDocument'] = map;
     return arguments;
   }
 
   /// Factory method to create instances as a result of
-  /// [HealthKitReporter.sampleQuery]
+  /// [HealthKitReporter.sampleQuery] and [HealthKitReporter.anchoredObjectQuery].
+  /// Throws an [InvalidValueException] for an identifier it doesn't know,
+  /// so no sample is dropped silently.
   ///
-  static Sample? factory(Map<String, dynamic> json) {
-    final identifier = json['identifier'];
-    final quantityType = QuantityTypeFactory.tryFrom(identifier);
-    if (quantityType != null) {
+  static Sample factory(Map<String, dynamic> json) {
+    final String identifier = json['identifier'];
+    if (QuantityTypeFactory.tryFrom(identifier) != null) {
       return Quantity.fromJson(json);
     }
-    final categoryType = CategoryTypeFactory.tryFrom(identifier);
-    if (categoryType != null) {
+    if (CategoryTypeFactory.tryFrom(identifier) != null) {
       return Category.fromJson(json);
     }
-    final workoutType = WorkoutTypeFactory.tryFrom(identifier);
-    if (workoutType != null) {
+    if (WorkoutTypeFactory.tryFrom(identifier) != null) {
       return Workout.fromJson(json);
     }
-    final correlationType = CorrelationTypeFactory.tryFrom(identifier);
-    if (correlationType != null) {
+    if (CorrelationTypeFactory.tryFrom(identifier) != null) {
       return Correlation.fromJson(json);
     }
-    final electrocardiogramType =
-        ElectrocardiogramTypeFactory.tryFrom(identifier);
-    if (electrocardiogramType != null) {
+    if (ElectrocardiogramTypeFactory.tryFrom(identifier) != null) {
       return Electrocardiogram.fromJson(json);
     }
-    final clinicalRecordType = ClinicalTypeFactory.tryFrom(identifier);
-    if (clinicalRecordType != null) {
+    if (ClinicalTypeFactory.tryFrom(identifier) != null) {
       return ClinicalRecord.fromJson(json);
+    }
+    if (AudiogramTypeFactory.tryFrom(identifier) != null) {
+      return Audiogram.fromJson(json);
+    }
+    if (StateOfMindTypeFactory.tryFrom(identifier) != null) {
+      return StateOfMind.fromJson(json);
+    }
+    if (ScoredAssessmentTypeFactory.tryFrom(identifier) != null) {
+      return ScoredAssessment.fromJson(json);
+    }
+    if (DocumentTypeFactory.tryFrom(identifier) != null) {
+      return CDADocument.fromJson(json);
     }
     if (identifier == VisionPrescriptionType.visionPrescription.identifier) {
       return VisionPrescription.fromJson(json);
     }
-    return null;
+    if (identifier == MedicationType.medicationDoseEvent.identifier) {
+      return MedicationDoseEvent.fromJson(json);
+    }
+    switch (SeriesTypeFactory.tryFrom(identifier)) {
+      case SeriesType.heartbeatSeries:
+        return HeartbeatSeries.fromJson(json);
+      case SeriesType.workoutRoute:
+        return WorkoutRoute.fromJson(json);
+      case null:
+        throw InvalidValueException('Unknown sample identifier: $identifier');
+    }
   }
+
+  /// [factory] for a list of JSON strings, as the sample queries reply.
+  ///
+  static List<Sample> collect(List<dynamic> list) =>
+      [for (final String element in list) factory(jsonDecode(element))];
 }

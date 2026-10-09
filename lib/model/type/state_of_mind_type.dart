@@ -1,7 +1,9 @@
 import '../../exceptions.dart';
 
-/// Equivalent of [DocumentType]
+/// Equivalent of [StateOfMindType]
 /// from [HealthKitReporter] https://github.com/kvs-coder/HealthKitReporter
+///
+/// All HealthKit state of mind types (iOS 18+)
 ///
 /// Supports [identifier] extension representing
 /// original [String] of the type.
@@ -9,22 +11,22 @@ import '../../exceptions.dart';
 /// Has a factory methods [from] and [tryFrom]
 /// Creating from [String]
 ///
-enum DocumentType {
-  cda,
+enum StateOfMindType {
+  stateOfMind,
 }
 
-extension DocumentTypeIdentifier on DocumentType {
+extension StateOfMindTypeIdentifier on StateOfMindType {
   String get identifier {
     switch (this) {
-      case DocumentType.cda:
-        return 'HKDocumentTypeIdentifierCDA';
+      case StateOfMindType.stateOfMind:
+        return 'HKDataTypeStateOfMind';
     }
   }
 }
 
-extension DocumentTypeFactory on DocumentType {
-  static DocumentType from(String identifier) {
-    for (final type in DocumentType.values) {
+extension StateOfMindTypeFactory on StateOfMindType {
+  static StateOfMindType from(String identifier) {
+    for (final type in StateOfMindType.values) {
       if (type.identifier == identifier) {
         return type;
       }
@@ -34,7 +36,7 @@ extension DocumentTypeFactory on DocumentType {
 
   /// The [from] exception handling
   ///
-  static DocumentType? tryFrom(String identifier) {
+  static StateOfMindType? tryFrom(String identifier) {
     try {
       return from(identifier);
     } on InvalidValueException {

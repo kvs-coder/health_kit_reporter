@@ -36,3 +36,18 @@ List<T> parseList<T>(
 ///
 DateTime dateFromSeconds(num seconds) =>
     DateTime.fromMicrosecondsSinceEpoch((seconds * 1000000).round());
+
+/// Reads a list of JSON integers, e.g. answers or labels.
+///
+List<int> parseInts(dynamic value) {
+  if (value == null) return <int>[];
+  return List<dynamic>.from(value).map((e) => parseNum(e).toInt()).toList();
+}
+
+/// Payload timestamps are seconds since 1970, also for samples built in Dart.
+///
+extension SecondsSinceEpoch on DateTime {
+  /// Seconds since 1970, as the payload timestamps hold them.
+  ///
+  num get secondsSinceEpoch => microsecondsSinceEpoch / 1000000;
+}

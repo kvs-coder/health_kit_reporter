@@ -7,13 +7,14 @@
 
 import Foundation
 
+/// Live queries, named like their Dart methods. Every subscription gets an event channel of its own
 enum EventChannel: String, CaseIterable {
-    case observerQuery = "health_kit_reporter_event_channel_observer_query"
-    case statisticsCollectionQuery = "health_kit_reporter_event_channel_statistics_collection_query"
-    case activitySummaryQuery = "health_kit_reporter_event_channel_query_activity_summary"
-    case anchoredObjectQuery = "health_kit_reporter_event_channel_anchored_object_query"
+    case observerQuery
+    case statisticsCollectionQuery
+    case queryActivitySummaryUpdates
+    case anchoredObjectQuery
 
     func combinedWith(identifier: String) -> String {
-        "\(self.rawValue)_\(identifier)"
+        "health_kit_reporter_event_channel_\(self.rawValue)_\(identifier)"
     }
 }

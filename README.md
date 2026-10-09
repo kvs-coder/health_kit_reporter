@@ -10,7 +10,7 @@ A Flutter wrapper for [HealthKitReporter](https://github.com/kvs-coder/HealthKit
 
 ## Requirements
 
-- iOS 15 or newer (vision prescriptions need iOS 16, workout effort iOS 18).
+- iOS 15 or newer (vision prescriptions and attachments need iOS 16, workout effort, state of mind and scored assessments iOS 18, medications iOS 26).
 - Flutter 3.24 / Dart 3.5 or newer.
 - **Swift Package Manager.** The plugin resolves HealthKitReporter `from: "4.0.0"` through SwiftPM; it is not available through CocoaPods (CocoaPods trunk becomes read-only on 2 December 2026, and HealthKitReporter stays on CocoaPods at 3.1.0).
 
@@ -106,6 +106,13 @@ Future<bool> requestAuthorization() async {
 }
 ```
 
+**authorizationRequestStatus** tells whether **requestAuthorization** would still show the sheet for the types. **earliestPermittedSampleDate** is the oldest date samples can be saved or read for; **recalibrateEstimates** recalibrates estimates such as `QuantityType.vo2Max` from a date on.
+
+```dart
+final status = await HealthKitReporter.authorizationRequestStatus(readTypes, writeTypes);
+if (status == AuthorizationRequestStatus.shouldRequest) await requestAuthorization();
+```
+
 **Warning: Apple Health does not tell apps whether reading permissions were granted.** The user can decline some of them and the result is still **true**. See [Authorization status](https://developer.apple.com/documentation/healthkit/hkhealthstore/1614154-authorizationstatus).
 
 **Clinical records** are requested in a separate call, since they start Health's records flow, which needs an Apple Account and the Clinical Health Records entitlement:
@@ -155,7 +162,32 @@ final bloodPressure = await HealthKitReporter.correlationQuery(
     CorrelationType.bloodPressure.identifier, predicate);
 ```
 
-**preferredUnits** returns the units of the current locale for quantity types. A unit that doesn't fit the type fails the query. **sampleQuery** returns quantities in SI units.
+**preferredUnits** returns the units of the current locale for quantity types. A unit that doesn't fit the type fails the query. **sampleQuery** returns quantities in SI units and every sample kind (heartbeat series, workout routes, audiograms, ... without their measurements); a sample of a kind the plugin can't read fails the query with an `InvalidValueException` instead of being dropped. **sampleQueryWithDescriptors** reads several types at once, each with its own predicate.
+
+```dart
+final samples = await HealthKitReporter.sampleQueryWithDescriptors([
+  QueryDescriptor(QuantityType.stepCount.identifier, predicate),
+  QueryDescriptor(SeriesType.heartbeatSeries.identifier),
+]);
+final steps = await HealthKitReporter.quantitySeriesQuery(
+    QuantityType.stepCount, 'count', predicate: predicate);
+final audiograms = await HealthKitReporter.audiogramQuery(predicate: predicate);
+final moods = await HealthKitReporter.stateOfMindQuery(); // iOS 18
+final anxiety = await HealthKitReporter.scoredAssessmentQuery(ScoredAssessmentType.gad7); // iOS 18
+final documents = await HealthKitReporter.cdaDocumentQuery(includeDocumentData: false);
+final cards = await HealthKitReporter.verifiableClinicalRecordQuery(
+    ['https://smarthealth.cards#immunization']);
+```
+
+**Medications** (iOS 26) use per-object authorization too:
+
+```dart
+await HealthKitReporter.requestPerObjectReadAuthorization(
+    MedicationType.userAnnotatedMedication.identifier);
+final medications = await HealthKitReporter.userAnnotatedMedicationQuery();
+final doses = await HealthKitReporter.medicationDoseEventQuery(
+    medicationConceptIdentifier: medications.first.medication.identifier);
+```
 
 **Metadata** is a flat JSON object, modelled as `Metadata`, a map of `MetadataValue`s: `MetadataString`, `MetadataNumber`, `MetadataBool`, `MetadataDate` (`{"timestamp": <seconds since 1970>}`) and `MetadataQuantity` (`{"value": <number>, "unit": <unit>}`). Saving sends it back in the same shape.
 
@@ -172,15 +204,15 @@ Numbers that JSON can't represent arrive as `"Infinity"`, `"-Infinity"` and `"Na
 
 Activity summaries, ECGs, characteristics and clinical records are read-only. Check **isAuthorizedToWrite** before writing.
 
-Build a **Sample** and call **save**. It returns the uuid HealthKit gave the stored sample; keep it to delete the sample later. The timestamps of samples you build are milliseconds since 1970 (`DateTime.millisecondsSinceEpoch`); a new sample has no uuid yet, so pass an empty string.
+Build a **Sample** and call **save**. It returns the uuid HealthKit gave the stored sample; keep it to delete the sample later. Sample timestamps are seconds since 1970, whether you read the sample or build it (`DateTime.secondsSinceEpoch` from `model/decorator/extensions.dart`), so a sample you read can be saved again as it is. A new sample has no uuid yet, so pass an empty string.
 
 ```dart
 final now = DateTime.now();
 final steps = Quantity(
   '',
   QuantityType.stepCount.identifier,
-  now.subtract(const Duration(minutes: 1)).millisecondsSinceEpoch,
-  now.millisecondsSinceEpoch,
+  now.subtract(const Duration(minutes: 1)).secondsSinceEpoch,
+  now.secondsSinceEpoch,
   null,
   const SourceRevision(Source('myApp', 'com.example.app'), null, null, '18.0',
       OperatingSystem(18, 0, 0)),
@@ -202,6 +234,38 @@ await HealthKitReporter.delete(stored);
 
 ```dart
 final uuids = await HealthKitReporter.saveSamples([morningSteps, eveningSteps]);
+```
+
+**save** also stores audiograms, CDA documents, and on iOS 18 states of mind and GAD-7 / PHQ-9 assessments (HealthKit computes their `score` and `risk`).
+
+```dart
+await HealthKitReporter.save(StateOfMind('', StateOfMindType.stateOfMind.identifier,
+    now.secondsSinceEpoch, now.secondsSinceEpoch, null, sourceRevision,
+    StateOfMindHarmonized(1, 0.4, null, [14], [18], null)));
+```
+
+**saveWorkout** saves a workout through a workout builder and returns the stored workout: the samples you recorded, the workout's totals for the other types, its activities (iOS 16) and a route. **saveQuantitySeries** stores quantities as one series sample, **saveHeartbeatSeries** a heartbeat series beat by beat.
+
+```dart
+final workout = await HealthKitReporter.saveWorkout(run,
+    samples: heartRates, route: locations);
+await HealthKitReporter.saveQuantitySeries(QuantityType.stepCount, [
+  QuantitySeriesValue(50, 'count', start.secondsSinceEpoch,
+      start.add(const Duration(minutes: 1)).secondsSinceEpoch),
+]);
+await HealthKitReporter.saveHeartbeatSeries(series);
+```
+
+**Attachments** (iOS 16): attach a local file to a stored sample, list, read and remove its attachments by the sample's identifier and uuid.
+
+```dart
+final attachment = await HealthKitReporter.addAttachment(
+    prescription.identifier, prescription.uuid, 'scan.jpg', 'public.jpeg', path);
+final files = await HealthKitReporter.attachments(prescription.identifier, prescription.uuid);
+final bytes = await HealthKitReporter.attachmentData(
+    prescription.identifier, prescription.uuid, attachment.identifier);
+await HealthKitReporter.removeAttachment(
+    prescription.identifier, prescription.uuid, attachment.identifier);
 ```
 
 Workout effort (iOS 18): relate an effort score sample to a stored workout with **relateWorkoutEffort**, read the relationships with **workoutEffortRelationshipQuery** and remove one with **unrelateWorkoutEffort**.
@@ -229,7 +293,7 @@ If you want to know, that something was changed in HealthKit, you can observe th
 
 Try simple **observerQuery** to get notifications if something is changed.
 
-This call is a subscription for EventChannel of the plugin, so don't forget to cancel it as soon as you don't need it anymore.
+This call is a subscription to an EventChannel of its own, so don't forget to cancel it as soon as you don't need it anymore. Every subscription runs its own native queries: several of them, also of the same method, run side by side, and cancelling one doesn't stop the others. Failures, also of invalid arguments or when Health data isn't available, reach `onError` as a `PlatformException` whose `code` is the method's name (`observerQuery`, `anchoredObjectQuery`, `queryActivitySummaryUpdates`, `statisticsCollectionQuery`).
 
 ```dart
  Future<void> observerQuery() async {
@@ -273,7 +337,9 @@ If you want to stop observation, you need to:
 - **`save` returns the uuid** of the stored sample (`Future<String?>` instead of `Future<bool>`).
 - **`delete` needs the uuid.** It deletes the stored sample with the payload's uuid; samples you built yourself must carry the uuid `save` returned. The same holds for `addQuantity` / `addCategory` (the workout's uuid) and `unrelateWorkoutEffort`.
 - **Flat metadata.** Metadata fields are `Metadata` instead of `Map<String, dynamic>`; the old `{"string": {"dictionary": ...}}` shape is gone.
-- **Vision prescription dates are seconds**, not milliseconds.
+- **Sample timestamps are seconds**, also in samples you build to save (`DateTime.secondsSinceEpoch` instead of `millisecondsSinceEpoch`), so a sample you read can be saved again; vision prescription dates are seconds too. `Predicate` and the other `DateTime` arguments stay as they are.
+- **`Sample.factory` returns every sample kind** (heartbeat series, workout routes, audiograms, CDA documents, states of mind, scored assessments, medication doses) and throws `InvalidValueException` for an unknown identifier instead of returning null; `sampleQuery` and `anchoredObjectQuery` report it instead of dropping the sample.
+- **Live queries run independently.** Each subscription gets an event channel of its own; errors use the Dart method names as codes.
 - **Corrected strings**: "Pickleball", "Hand Cycling", "Preparation and Recovery", "Pause or resume request", "Sinus rhythm"; audio exposure events are described as `HKCategoryValueEnvironmentalAudioExposureEvent` / "Momentary Limit". Update comparisons against the old strings.
 - `requestAuthorization` fails for types HealthKit can't authorize (read-only types to write, correlations, per-object types) and for unknown identifiers, instead of ignoring them or crashing; use `isWritable`.
 - `preferredUnits` and the other methods report errors with the native error's localized description.

@@ -12,6 +12,8 @@ public final class QueryActivitySummaryStreamHandler: NSObject {
     public let reporter: HealthKitReporter
     public var activeQueries = [QueryHandle]()
     public var plannedQueries = [QueryHandle]()
+    public var eventSink: FlutterEventSink?
+    public var onClose: (() -> Void)?
 
     init(reporter: HealthKitReporter) {
         self.reporter = reporter
@@ -25,13 +27,13 @@ extension QueryActivitySummaryStreamHandler: StreamHandlerProtocol {
             monitorUpdates: true
         ) { (activitySummaries, error) in
             if let error = error {
-                events(FlutterError(code: "QueryActivitySummary", error: error))
+                events(FlutterError(code: EventChannel.queryActivitySummaryUpdates.rawValue, error: error))
                 return
             }
             do {
                 events(try activitySummaries.encoded())
             } catch {
-                events(FlutterError(code: "QueryActivitySummary", error: error))
+                events(FlutterError(code: EventChannel.queryActivitySummaryUpdates.rawValue, error: error))
             }
         }
         plannedQueries.append(query)
@@ -47,9 +49,9 @@ extension QueryActivitySummaryStreamHandler: FlutterStreamHandler {
         withArguments arguments: Any?,
         eventSink events: @escaping FlutterEventSink
     ) -> FlutterError? {
-        handleOnListen(withArguments: arguments, eventSink: events)
+        handleOnListen(eventSink: events)
     }
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        handleOnCancel(withArguments: arguments)
+        handleOnCancel()
     }
 }

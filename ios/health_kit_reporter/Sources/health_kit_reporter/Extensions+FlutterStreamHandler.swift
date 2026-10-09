@@ -8,49 +8,37 @@
 import Flutter
 import Foundation
 
-extension FlutterStreamHandler where Self: NSObject & StreamHandlerProtocol {
-    private func executePlannedQueries() {
+extension StreamHandlerProtocol {
+    /// Plans the queries before Dart listens, so invalid arguments fail the method call
+    func plan(arguments: [String: Any]) throws {
+        do {
+            // Flutter expects events on the platform thread; HealthKit calls back on its own queues
+            try setQueries(arguments: arguments) { [weak self] event in
+                DispatchQueue.main.async { self?.eventSink?(event) }
+            }
+        } catch {
+            plannedQueries.removeAll()
+            throw error
+        }
+    }
+
+    func handleOnListen(eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        eventSink = events
         for plannedQuery in plannedQueries {
             reporter.manager.executeQuery(plannedQuery)
             activeQueries.append(plannedQuery)
         }
         plannedQueries.removeAll()
-    }
-
-    func handleOnListen(
-        withArguments arguments: Any?,
-        eventSink events: @escaping FlutterEventSink
-    ) -> FlutterError? {
-        guard let arguments = arguments as? [String: Any] else {
-            return FlutterError(
-                code: self.className,
-                message: "Error call arguments.",
-                details: "No arguments"
-            )
-        }
-        // Flutter expects events on the platform thread; HealthKit calls back on its own queues
-        let mainThreadEvents: FlutterEventSink = { event in
-            DispatchQueue.main.async { events(event) }
-        }
-        do {
-            try setQueries(
-                arguments: arguments,
-                events: mainThreadEvents
-            )
-            executePlannedQueries()
-        } catch {
-            plannedQueries.removeAll()
-            return FlutterError(
-                code: className,
-                message: error.localizedDescription,
-                details: String(describing: error)
-            )
-        }
         return nil
     }
-    func handleOnCancel(withArguments arguments: Any?) -> FlutterError? {
+
+    func handleOnCancel() -> FlutterError? {
         activeQueries.forEach { reporter.manager.stopQuery($0) }
         activeQueries.removeAll()
+        plannedQueries.removeAll()
+        eventSink = nil
+        onClose?()
+        onClose = nil
         return nil
     }
 }
