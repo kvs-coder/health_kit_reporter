@@ -1,9 +1,9 @@
 # Changelog
 
-## [3.0.0](https://github.com/kvs-coder/health_kit_reporter/compare/v2.3.1...v3.0.0) (2026-10-09)
+## [3.0.0] - 09.10.2026
 
 
-### ⚠ BREAKING CHANGES
+### BREAKING CHANGES
 
 * the plugin's version is 3.0.0 instead of 4.0.0; depend on health_kit_reporter ^3.0.0.
 * sample timestamps built in Dart are seconds since 1970 (use DateTime.secondsSinceEpoch instead of millisecondsSinceEpoch); Sample.factory returns non-null and throws for unknown identifiers; live query error codes are the Dart method names.
