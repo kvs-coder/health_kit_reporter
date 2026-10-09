@@ -1,6 +1,6 @@
 ## [3.0.0] - 09.10.2026
 
-Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitReporter) through Swift Package Manager. See "Migrating to 3.0.0" in the README.
+Depends on [HealthKitReporter 4.1.0](https://github.com/kvs-coder/HealthKitReporter) through Swift Package Manager. See "Migrating to 3.0.0" in the README.
 
 ### BREAKING CHANGES
 
@@ -26,6 +26,7 @@ Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitRepor
 * New optional fields: statistics `min`, `duration` and `sourceStatistics` (`separateBySource`), activity summary move time and `paused`, workout `statistics` and `activities`.
 * 17 quantity types and 4 category types the library supports; coverage and clinical note records.
 * `onError` callbacks for the stream queries.
+* `workoutRouteQueryForWorkout`: the routes of a stored workout, looked up by its uuid (HealthKitReporter 4.1.0).
 * `limit` on every sample query the library limits; `queryOption` on `quantityQuery`, `categoryQuery` and `sampleQuery`, so samples crossing the predicate's bounds (e.g. sleep) can be read.
 * Manager: `authorizationRequestStatus`, `earliestPermittedSampleDate`, `recalibrateEstimates`; attachments (iOS 16): `attachments`, `attachmentData`, `addAttachment`, `removeAttachment`.
 * Reader: `sampleQueryWithDescriptors`, `quantitySeriesQuery`, `verifiableClinicalRecordQuery`, `cdaDocumentQuery`, `audiogramQuery`, `stateOfMindQuery` and `scoredAssessmentQuery` (iOS 18), `medicationDoseEventQuery` and `userAnnotatedMedicationQuery` (iOS 26).

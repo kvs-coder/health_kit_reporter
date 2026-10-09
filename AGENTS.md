@@ -1,6 +1,6 @@
 # AGENTS.md — System & AI Agent Directives
 
-> **Plugin Mission**: `health_kit_reporter` is a Flutter plugin (iOS only) that exposes the Swift library [HealthKitReporter](https://github.com/kvs-coder/HealthKitReporter) to Dart. The plugin follows semantic versioning of its own (`3.x`) and depends on HealthKitReporter `from: "4.0.0"`, resolved through **Swift Package Manager** only (iOS 15+, Flutter 3.44+ / Dart 3.5+). CocoaPods is gone for good: HealthKitReporter stays frozen there at `3.1.0`, and trunk is read-only from 02.12.2026.
+> **Plugin Mission**: `health_kit_reporter` is a Flutter plugin (iOS only) that exposes the Swift library [HealthKitReporter](https://github.com/kvs-coder/HealthKitReporter) to Dart. The plugin follows semantic versioning of its own (`3.x`) and depends on HealthKitReporter `from: "4.1.0"`, resolved through **Swift Package Manager** only (iOS 15+, Flutter 3.44+ / Dart 3.5+). CocoaPods is gone for good: HealthKitReporter stays frozen there at `3.1.0`, and trunk is read-only from 02.12.2026.
 > The native side turns HealthKitReporter payloads into JSON (`encoded()`) and reads dictionaries back with `make(from:)`; the Dart side parses that JSON into plain models and sends their `map`s back.
 > `example/` hosts a Flutter demo app that lists every public method, grouped by area, and seeds simulator data.
 
@@ -62,7 +62,7 @@ lib/
     └── type/<type_name>.dart         (QuantityType, CategoryType, ... → HealthKit identifiers)
 
 ios/health_kit_reporter/
-├── Package.swift                     (iOS 15, HealthKitReporter from: "4.0.0", FlutterFramework; one resource: the privacy manifest)
+├── Package.swift                     (iOS 15, HealthKitReporter from: "4.1.0", FlutterFramework; one resource: the privacy manifest)
 └── Sources/health_kit_reporter/
     ├── SwiftHealthKitReporterPlugin.swift            (registration: one reporter, channels)
     ├── Extensions+SwiftHealthKitReporterPlugin.swift (Method enum, dispatcher, reply helpers)

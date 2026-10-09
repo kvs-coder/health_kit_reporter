@@ -61,6 +61,7 @@ void main() {
     'characteristicsQuery': jsonEncode({'biologicalSex': 'Female'}),
     'heartbeatSeriesQuery': list(heartbeatSeriesJson()),
     'workoutRouteQuery': list(workoutRouteJson()),
+    'workoutRouteQueryForWorkout': list(workoutRouteJson()),
     'quantityQuery': list(quantityJson()),
     'categoryQuery': list(categoryJson()),
     'workoutQuery': list(workoutJson()),
@@ -209,6 +210,17 @@ void main() {
           'userAnnotatedMedicationQuery',
         ].map((method) => calls[method]['limit']),
         [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]);
+  });
+
+  test('workout_route_query_for_workout_sends_the_workout_uuid', () async {
+    final routes = await HealthKitReporter.workoutRouteQueryForWorkout(
+        workout.uuid,
+        limit: 2);
+    expect(routes.single.uuid, 'ROUTE-UUID');
+    expect(calls['workoutRouteQueryForWorkout'],
+        {'workoutUUID': workout.uuid, 'limit': 2});
+    await HealthKitReporter.workoutRouteQueryForWorkout(workout.uuid);
+    expect(calls['workoutRouteQueryForWorkout'], {'workoutUUID': workout.uuid});
   });
 
   test('manager', () async {

@@ -28,6 +28,7 @@ extension SwiftHealthKitReporterPlugin {
         case statisticsQuery
         case heartbeatSeriesQuery
         case workoutRouteQuery
+        case workoutRouteQueryForWorkout
         case queryActivitySummary
         case sourceQuery
         case correlationQuery
@@ -209,6 +210,13 @@ extension SwiftHealthKitReporterPlugin {
         case .workoutRouteQuery:
             let query = try reporter.reader.workoutRouteQuery(
                 predicate: try arguments.requiredSamplesPredicate(),
+                limit: try arguments.limit(),
+                resultsHandler: encoded(code, result)
+            )
+            reporter.manager.executeQuery(query)
+        case .workoutRouteQueryForWorkout:
+            let query = try reporter.reader.workoutRouteQuery(
+                workoutUUID: try arguments.string("workoutUUID"),
                 limit: try arguments.limit(),
                 resultsHandler: encoded(code, result)
             )

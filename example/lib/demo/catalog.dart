@@ -228,6 +228,37 @@ class Catalog {
           DemoRow('workoutRouteQuery', 'Routes of the last 7 days',
               run: () async => _describe(
                   await HealthKitReporter.workoutRouteQuery(_lastWeek))),
+          DemoRow('workoutRouteQueryForWorkout',
+              'Saves a run with a route, then reads the routes of that workout by its uuid',
+              run: () async {
+            final start = _now.subtract(const Duration(minutes: 20));
+            final workout = await HealthKitReporter.saveWorkout(
+              _demo.workout(WorkoutActivityType.running, start,
+                  const Duration(minutes: 15)),
+              route: [
+                for (var i = 0; i < 5; i++)
+                  WorkoutRouteLocation(
+                      52.52 + i * 0.001,
+                      13.405,
+                      35,
+                      0,
+                      null,
+                      null,
+                      5,
+                      3,
+                      null,
+                      start.add(Duration(minutes: i * 3)).secondsSinceEpoch,
+                      5),
+              ],
+            );
+            final routes = await HealthKitReporter.workoutRouteQueryForWorkout(
+                workout.uuid);
+            final locations = routes
+                .expand((route) => route.harmonized.routes)
+                .expand((batch) => batch.locations)
+                .length;
+            return 'workout ${workout.uuid}\n${routes.length} routes, $locations locations';
+          }),
           DemoRow('sampleQueryWithDescriptors',
               'Steps of today and every heartbeat series in one query',
               run: () async {

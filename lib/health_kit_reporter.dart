@@ -72,6 +72,8 @@ import 'model/update_frequency.dart';
 /// - [sampleQuery]
 /// - [statisticsQuery]
 /// - [heartbeatSeriesQuery]
+/// - [workoutRouteQuery]
+/// - [workoutRouteQueryForWorkout]
 /// - [queryActivitySummary]
 /// - [enableBackgroundDelivery]
 /// - [disableAllBackgroundDelivery]
@@ -465,6 +467,24 @@ class HealthKitReporter {
       {int? limit}) async {
     final result = await _methodChannel.invokeMethod(
         'workoutRouteQuery', _queryArguments({...predicate.map}, limit: limit));
+    final List<dynamic> list = jsonDecode(result);
+    return list.map((e) => WorkoutRoute.fromJson(e)).toList();
+  }
+
+  /// Returns the routes of the stored workout with [workoutUUID]
+  /// (see [Workout.uuid]), newest first, with their locations;
+  /// [limit] returns at most that many routes.
+  /// Fails with a [PlatformException] when no workout with that uuid is stored.
+  ///
+  /// Requires [SeriesType.workoutRoute] and [WorkoutType] read permissions
+  /// and the location usage descriptions, as [workoutRouteQuery] does.
+  ///
+  static Future<List<WorkoutRoute>> workoutRouteQueryForWorkout(
+      String workoutUUID,
+      {int? limit}) async {
+    final result = await _methodChannel.invokeMethod(
+        'workoutRouteQueryForWorkout',
+        _queryArguments({'workoutUUID': workoutUUID}, limit: limit));
     final List<dynamic> list = jsonDecode(result);
     return list.map((e) => WorkoutRoute.fromJson(e)).toList();
   }

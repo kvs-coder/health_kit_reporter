@@ -58,6 +58,14 @@ final class DispatcherTests: XCTestCase {
         XCTAssertTrue(error?.details is String)
     }
 
+    func testWorkoutRoutesNeedAWellFormedWorkoutUUID() {
+        let (missing, _) = reply("workoutRouteQueryForWorkout", [:])
+        XCTAssertEqual((missing as? FlutterError)?.code, "workoutRouteQueryForWorkout")
+        XCTAssertTrue((missing as? FlutterError)?.message?.contains("workoutUUID") == true)
+        let (malformed, _) = reply("workoutRouteQueryForWorkout", ["workoutUUID": "not-a-uuid"])
+        XCTAssertEqual((malformed as? FlutterError)?.code, "workoutRouteQueryForWorkout")
+    }
+
     func testSaveRejectsAnUnknownSampleKind() {
         let (result, _) = reply("save", ["unknown": [:]])
         XCTAssertEqual((result as? FlutterError)?.code, "save")
