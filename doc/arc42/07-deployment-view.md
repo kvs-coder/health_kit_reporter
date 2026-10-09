@@ -36,8 +36,8 @@ flowchart LR
 | Workflow | Trigger | Jobs |
 | :--- | :--- | :--- |
 | `ci.yml` | PR and push to `master` | **Version / Changelog** (top `CHANGELOG.md` entry matches `pubspec.yaml`); **Analyze / Test** (plugin analyze, tests, coverage ≥ `COVERAGE_THRESHOLD`, example tests); **Example** on macOS (SwiftPM build, `RunnerTests` in a simulator, integration rows without authorization); **SwiftLint**. |
-| `release.yml` | push to `master` | release-please keeps a release PR (version in `pubspec.yaml`, example `pubspec.yaml`, README; `CHANGELOG.md` reformatted to `## [X.Y.Z] - dd.MM.yyyy`). Merging it tags `vX.Y.Z`. |
-| `publish.yml` | push of a `vX.Y.Z` tag | Checks the tag against `pubspec.yaml`, analyzes, tests and publishes to pub.dev with GitHub's OIDC token (automated publishing, environment `pub.dev`). |
+| `release.yml` | push to `master` | release-please keeps a release PR (version in `pubspec.yaml`, example `pubspec.yaml`, README; `CHANGELOG.md` reformatted to `## [X.Y.Z] - dd.MM.yyyy`). Merging it tags `vX.Y.Z`, creates the GitHub release and starts `publish.yml` on the tag. |
+| `publish.yml` | a pushed `vX.Y.Z` tag, or `workflow_dispatch` on it from `release.yml` | Checks the tag against `pubspec.yaml`, analyzes, tests and publishes to pub.dev with GitHub's OIDC token (automated publishing, environment `pub.dev`). |
 
 The full integration catalog runs by hand in a simulator whose app has been authorized once
 (AGENTS.md §6C), since HealthKit's authorization sheet can't be answered in CI.

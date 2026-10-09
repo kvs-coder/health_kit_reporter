@@ -5,6 +5,7 @@ on:
     branches: [ master ]
 
 permissions:
+  actions: write # starts publish.yml
   contents: write
   pull-requests: write
 
@@ -13,8 +14,8 @@ jobs:
     name: release-please
     runs-on: ubuntu-latest
     steps:
-      # A PAT / GitHub App token lets the release PR trigger CI and its tag trigger publish.yml;
-      # with the default GITHUB_TOKEN neither runs, so publish by pushing the tag by hand.
+      # A PAT / GitHub App token (RELEASE_PLEASE_TOKEN) lets the release PR trigger CI;
+      # publishing doesn't need it, see the last step.
       - id: release
         uses: googleapis/release-please-action@v4
         with:
@@ -44,3 +45,11 @@ jobs:
             git commit -m "chore: format changelog" CHANGELOG.md
             git push
           fi
+
+      # Merging the release PR creates the tag with GITHUB_TOKEN, which doesn't trigger publish.yml's push event;
+      # a workflow_dispatch on the tag does, and pub.dev accepts it for tags matching v{{version}}
+      - name: Publish to pub.dev
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run publish.yml --repo "$GITHUB_REPOSITORY" --ref "${{ steps.release.outputs.tag_name }}"

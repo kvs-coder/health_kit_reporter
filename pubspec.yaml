@@ -1,6 +1,6 @@
 name: health_kit_reporter
 description: Reads, writes and observes Apple Health data on iOS through HealthKit, wrapping the Swift library HealthKitReporter.
-version: 3.0.0
+version: 2.3.1
 homepage: https://github.com/kvs-coder/health_kit_reporter
 repository: https://github.com/kvs-coder/health_kit_reporter
 issue_tracker: https://github.com/kvs-coder/health_kit_reporter/issues

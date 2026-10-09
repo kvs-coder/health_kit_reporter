@@ -2,10 +2,13 @@ name: Publish
 
 # Publishes a release tag to pub.dev. Requires automated publishing on pub.dev
 # (package admin > Automated publishing: GitHub Actions, repository kvs-coder/health_kit_reporter,
-# tag pattern v{{version}}).
+# tag pattern v{{version}}, push and workflow_dispatch events).
 on:
   push:
     tags: [ 'v[0-9]+.[0-9]+.[0-9]+*' ]
+  # release.yml starts it on the tag release-please created: tags created with GITHUB_TOKEN
+  # don't trigger push workflows, workflow_dispatch does (pub.dev: allow workflow_dispatch events)
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,7 +31,7 @@ jobs:
       - name: Tag matches pubspec.yaml
         run: |
           version=$(sed -n 's/^version: //p' pubspec.yaml)
-          [ "v$version" = "$GITHUB_REF_NAME" ] || {
+          [ "$GITHUB_REF_TYPE" = "tag" ] && [ "v$version" = "$GITHUB_REF_NAME" ] || {
             echo "::error::Tag $GITHUB_REF_NAME doesn't match pubspec.yaml version $version"
             exit 1
           }
