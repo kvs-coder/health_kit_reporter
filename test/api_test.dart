@@ -155,6 +155,62 @@ void main() {
     });
   });
 
+  test('queries_send_limit_and_query_option_only_when_given', () async {
+    await HealthKitReporter.quantityQuery(
+        QuantityType.stepCount, 'count', predicate,
+        limit: 5, queryOption: SampleQueryOption.notStrict);
+    expect(calls['quantityQuery'], {
+      'identifier': QuantityType.stepCount.identifier,
+      'unit': 'count',
+      ...predicate.map,
+      'limit': 5,
+      'predicateOptions': 'notStrict',
+    });
+    await HealthKitReporter.categoryQuery(CategoryType.sleepAnalysis, predicate,
+        queryOption: SampleQueryOption.notStrict);
+    expect(calls['categoryQuery']['predicateOptions'], 'notStrict');
+    expect(calls['categoryQuery'].containsKey('limit'), isFalse);
+    await HealthKitReporter.sampleQuery(
+        QuantityType.stepCount.identifier, predicate,
+        limit: 1, queryOption: SampleQueryOption.strictStartDate);
+    expect(calls['sampleQuery']['limit'], 1);
+    expect(calls['sampleQuery']['predicateOptions'], 'strictStartDate');
+    await HealthKitReporter.workoutQuery(predicate, limit: 2);
+    await HealthKitReporter.electrocardiogramQuery(predicate, limit: 3);
+    await HealthKitReporter.heartbeatSeriesQuery(predicate, limit: 4);
+    await HealthKitReporter.workoutRouteQuery(predicate, limit: 5);
+    await HealthKitReporter.sampleQueryWithDescriptors(
+        [QueryDescriptor(QuantityType.stepCount.identifier)],
+        limit: 6);
+    await HealthKitReporter.clinicalRecordQuery(ClinicalType.immunizationRecord,
+        limit: 7);
+    await HealthKitReporter.visionPrescriptionQuery(limit: 8);
+    await HealthKitReporter.cdaDocumentQuery(limit: 9);
+    await HealthKitReporter.audiogramQuery(limit: 10);
+    await HealthKitReporter.stateOfMindQuery(limit: 11);
+    await HealthKitReporter.scoredAssessmentQuery(ScoredAssessmentType.phq9,
+        limit: 12);
+    await HealthKitReporter.medicationDoseEventQuery(limit: 13);
+    await HealthKitReporter.userAnnotatedMedicationQuery(limit: 14);
+    expect(
+        [
+          'workoutQuery',
+          'electrocardiogramQuery',
+          'heartbeatSeriesQuery',
+          'workoutRouteQuery',
+          'sampleQueryWithDescriptors',
+          'clinicalRecordQuery',
+          'visionPrescriptionQuery',
+          'cdaDocumentQuery',
+          'audiogramQuery',
+          'stateOfMindQuery',
+          'scoredAssessmentQuery',
+          'medicationDoseEventQuery',
+          'userAnnotatedMedicationQuery',
+        ].map((method) => calls[method]['limit']),
+        [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]);
+  });
+
   test('manager', () async {
     expect((await HealthKitReporter.earliestPermittedSampleDate()).toUtc(),
         DateTime.utc(2020, 9, 25, 20, 29, 15, 500));

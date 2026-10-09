@@ -168,6 +168,17 @@ class HealthKitReporter {
   static const MethodChannel _methodChannel =
       MethodChannel('health_kit_reporter_method_channel');
 
+  /// Adds the optional [limit] (the most samples to return, newest first)
+  /// and [queryOption] (whether samples must start and/or end inside the
+  /// predicate's interval) to [arguments].
+  ///
+  static Map<String, dynamic> _queryArguments(Map<String, dynamic> arguments,
+      {int? limit, SampleQueryOption? queryOption}) {
+    if (limit != null) arguments['limit'] = limit;
+    if (queryOption != null) arguments['predicateOptions'] = queryOption.value;
+    return arguments;
+  }
+
   /// Starts a live query: the native side plans the queries of [method]
   /// and replies with the name of an [EventChannel] of their own,
   /// so every subscription runs and stops independently.
@@ -437,21 +448,23 @@ class HealthKitReporter {
   }
 
   /// Returns [HeartbeatSeries] sample for the provided time interval predicate [predicate].
+  /// [limit] returns at most that many series, newest first.
   ///
-  static Future<List<HeartbeatSeries>> heartbeatSeriesQuery(
-      Predicate predicate) async {
-    final result = await _methodChannel.invokeMethod(
-        'heartbeatSeriesQuery', predicate.map);
+  static Future<List<HeartbeatSeries>> heartbeatSeriesQuery(Predicate predicate,
+      {int? limit}) async {
+    final result = await _methodChannel.invokeMethod('heartbeatSeriesQuery',
+        _queryArguments({...predicate.map}, limit: limit));
     final List<dynamic> list = jsonDecode(result);
     return list.map((e) => HeartbeatSeries.fromJson(e)).toList();
   }
 
   /// Returns [WorkoutRoute] sample for the provided time interval predicate [predicate].
+  /// [limit] returns at most that many routes, newest first.
   ///
-  static Future<List<WorkoutRoute>> workoutRouteQuery(
-      Predicate predicate) async {
-    final result =
-        await _methodChannel.invokeMethod('workoutRouteQuery', predicate.map);
+  static Future<List<WorkoutRoute>> workoutRouteQuery(Predicate predicate,
+      {int? limit}) async {
+    final result = await _methodChannel.invokeMethod(
+        'workoutRouteQuery', _queryArguments({...predicate.map}, limit: limit));
     final List<dynamic> list = jsonDecode(result);
     return list.map((e) => WorkoutRoute.fromJson(e)).toList();
   }
@@ -459,32 +472,42 @@ class HealthKitReporter {
   /// Returns [Quantity] samples for the provided [type],
   /// the preferred [unit] and the time interval predicate [predicate].
   ///
+  /// [limit] returns at most that many samples, newest first;
+  /// [queryOption] tells whether the samples must start and/or end inside
+  /// the interval, both by default.
+  ///
   /// Warning: The [unit] should be valid. See [preferredUnits].
   ///
   static Future<List<Quantity>> quantityQuery(
-      QuantityType type, String unit, Predicate predicate) async {
+      QuantityType type, String unit, Predicate predicate,
+      {int? limit, SampleQueryOption? queryOption}) async {
     final arguments = <String, dynamic>{
       'identifier': type.identifier,
       'unit': unit,
+      ...predicate.map,
     };
-    arguments.addAll(predicate.map);
-    final result =
-        await _methodChannel.invokeMethod('quantityQuery', arguments);
+    final result = await _methodChannel.invokeMethod('quantityQuery',
+        _queryArguments(arguments, limit: limit, queryOption: queryOption));
     final List<dynamic> list = jsonDecode(result);
     return list.map((e) => Quantity.fromJson(e)).toList();
   }
 
   /// Returns [Category] samples for the provided [type]
   /// and the time interval predicate [predicate].
+  /// [limit] returns at most that many samples, newest first;
+  /// [queryOption] tells whether the samples must start and/or end inside
+  /// the interval, both by default. [SampleQueryOption.notStrict] also returns
+  /// samples crossing its bounds, e.g. sleep that started the evening before.
   ///
   static Future<List<Category>> categoryQuery(
-      CategoryType type, Predicate predicate) async {
+      CategoryType type, Predicate predicate,
+      {int? limit, SampleQueryOption? queryOption}) async {
     final arguments = <String, dynamic>{
       'identifier': type.identifier,
+      ...predicate.map,
     };
-    arguments.addAll(predicate.map);
-    final result =
-        await _methodChannel.invokeMethod('categoryQuery', arguments);
+    final result = await _methodChannel.invokeMethod('categoryQuery',
+        _queryArguments(arguments, limit: limit, queryOption: queryOption));
     final List<dynamic> list = jsonDecode(result);
     return list.map((e) => Category.fromJson(e)).toList();
   }
@@ -492,32 +515,33 @@ class HealthKitReporter {
   /// Returns [Workout] samples for the provided
   /// time interval predicate [predicate].
   /// [queryOption] tells whether the workouts must start and/or end inside
-  /// the interval; both by default.
+  /// the interval; both by default. [limit] returns at most that many workouts,
+  /// newest first.
   ///
   static Future<List<Workout>> workoutQuery(Predicate predicate,
-      {SampleQueryOption? queryOption}) async {
-    final arguments = <String, dynamic>{};
-    arguments.addAll(predicate.map);
-    if (queryOption != null) {
-      arguments['predicateOptions'] = queryOption.value;
-    }
-    final result = await _methodChannel.invokeMethod('workoutQuery', arguments);
+      {int? limit, SampleQueryOption? queryOption}) async {
+    final result = await _methodChannel.invokeMethod(
+        'workoutQuery',
+        _queryArguments({...predicate.map},
+            limit: limit, queryOption: queryOption));
     final List<dynamic> list = jsonDecode(result);
     return list.map((e) => Workout.fromJson(e)).toList();
   }
 
   /// Returns [Electrocardiogram] samples for the provided
   /// time interval predicate [predicate].
+  /// [limit] returns at most that many ECGs, newest first.
   ///
   static Future<List<Electrocardiogram>> electrocardiogramQuery(
       Predicate predicate,
-      {bool withVoltageMeasurements = false}) async {
+      {bool withVoltageMeasurements = false,
+      int? limit}) async {
     final arguments = <String, dynamic>{
       'withVoltageMeasurements': withVoltageMeasurements,
+      ...predicate.map,
     };
-    arguments.addAll(predicate.map);
-    final result =
-        await _methodChannel.invokeMethod('electrocardiogramQuery', arguments);
+    final result = await _methodChannel.invokeMethod(
+        'electrocardiogramQuery', _queryArguments(arguments, limit: limit));
     final List<dynamic> list = jsonDecode(result);
     return list.map((e) => Electrocardiogram.fromJson(e)).toList();
   }
@@ -532,27 +556,34 @@ class HealthKitReporter {
   /// measurements, which their own queries deliver.
   /// A sample of a kind the plugin can't read fails the query
   /// with an [InvalidValueException] instead of being skipped.
+  /// [limit] returns at most that many samples, newest first;
+  /// [queryOption] tells whether the samples must start and/or end inside
+  /// the interval, both by default.
   ///
   static Future<List<Sample>> sampleQuery(
-      String identifier, Predicate predicate) async {
+      String identifier, Predicate predicate,
+      {int? limit, SampleQueryOption? queryOption}) async {
     final arguments = <String, dynamic>{
       'identifier': identifier,
+      ...predicate.map,
     };
-    arguments.addAll(predicate.map);
-    final result = await _methodChannel.invokeMethod('sampleQuery', arguments);
+    final result = await _methodChannel.invokeMethod('sampleQuery',
+        _queryArguments(arguments, limit: limit, queryOption: queryOption));
     return Sample.collect(result);
   }
 
   /// Returns the samples of several types at once, newest first:
   /// every [QueryDescriptor] names a type and narrows it with its own predicate.
+  /// [limit] returns at most that many samples in all.
   ///
   static Future<List<Sample>> sampleQueryWithDescriptors(
-      List<QueryDescriptor> descriptors) async {
-    final arguments = {
+      List<QueryDescriptor> descriptors,
+      {int? limit}) async {
+    final arguments = <String, dynamic>{
       'descriptors': descriptors.map((e) => e.map).toList(),
     };
     final result = await _methodChannel.invokeMethod(
-        'sampleQueryWithDescriptors', arguments);
+        'sampleQueryWithDescriptors', _queryArguments(arguments, limit: limit));
     return Sample.collect(result);
   }
 
@@ -589,33 +620,35 @@ class HealthKitReporter {
   }
 
   /// Returns [ClinicalRecord] samples of [type],
-  /// optionally narrowed by the time interval predicate [predicate].
+  /// optionally narrowed by the time interval predicate [predicate];
+  /// [limit] returns at most that many records, newest first.
   ///
   /// Requires the Clinical Health Records entitlement,
   /// [supportsHealthRecords] and [requestClinicalRecordsAuthorization].
   ///
   static Future<List<ClinicalRecord>> clinicalRecordQuery(ClinicalType type,
-      {Predicate? predicate}) async {
+      {Predicate? predicate, int? limit}) async {
     final arguments = <String, dynamic>{
       'identifier': type.identifier,
+      ...?predicate?.map,
     };
-    if (predicate != null) arguments.addAll(predicate.map);
-    final result =
-        await _methodChannel.invokeMethod('clinicalRecordQuery', arguments);
+    final result = await _methodChannel.invokeMethod(
+        'clinicalRecordQuery', _queryArguments(arguments, limit: limit));
     final List<dynamic> list = jsonDecode(result);
     return list.map((e) => ClinicalRecord.fromJson(e)).toList();
   }
 
   /// Returns [VisionPrescription] samples,
-  /// optionally narrowed by the time interval predicate [predicate]. Requires iOS 16.
+  /// optionally narrowed by the time interval predicate [predicate]; [limit]
+  /// returns at most that many, newest first. Requires iOS 16.
   ///
   /// Requires per-object read authorization, see [requestPerObjectReadAuthorization]
   /// with [VisionPrescriptionType.visionPrescription].
   ///
   static Future<List<VisionPrescription>> visionPrescriptionQuery(
-      {Predicate? predicate}) async {
-    final result = await _methodChannel.invokeMethod(
-        'visionPrescriptionQuery', predicate?.map ?? <String, dynamic>{});
+      {Predicate? predicate, int? limit}) async {
+    final result = await _methodChannel.invokeMethod('visionPrescriptionQuery',
+        _queryArguments({...?predicate?.map}, limit: limit));
     return VisionPrescription.collect(jsonDecode(result));
   }
 
@@ -989,81 +1022,91 @@ class HealthKitReporter {
   }
 
   /// Returns CDA documents, optionally narrowed by [predicate].
-  /// [includeDocumentData] includes the CDA XML.
+  /// [includeDocumentData] includes the CDA XML; [limit] returns at most that many.
   /// The user authorizes each document the first time it matches.
   ///
   static Future<List<CDADocument>> cdaDocumentQuery(
-      {Predicate? predicate, bool includeDocumentData = true}) async {
+      {Predicate? predicate,
+      bool includeDocumentData = true,
+      int? limit}) async {
     final arguments = <String, dynamic>{
       'includeDocumentData': includeDocumentData,
+      ...?predicate?.map,
     };
-    if (predicate != null) arguments.addAll(predicate.map);
-    final result =
-        await _methodChannel.invokeMethod('cdaDocumentQuery', arguments);
+    final result = await _methodChannel.invokeMethod(
+        'cdaDocumentQuery', _queryArguments(arguments, limit: limit));
     return CDADocument.collect(jsonDecode(result));
   }
 
-  /// Returns [Audiogram] samples, optionally narrowed by [predicate].
+  /// Returns [Audiogram] samples, optionally narrowed by [predicate];
+  /// [limit] returns at most that many, newest first.
   ///
-  static Future<List<Audiogram>> audiogramQuery({Predicate? predicate}) async {
+  static Future<List<Audiogram>> audiogramQuery(
+      {Predicate? predicate, int? limit}) async {
     final result = await _methodChannel.invokeMethod(
-        'audiogramQuery', predicate?.map ?? <String, dynamic>{});
+        'audiogramQuery', _queryArguments({...?predicate?.map}, limit: limit));
     return Audiogram.collect(jsonDecode(result));
   }
 
-  /// Returns logged emotions and moods, optionally narrowed by [predicate].
+  /// Returns logged emotions and moods, optionally narrowed by [predicate];
+  /// [limit] returns at most that many, newest first.
   /// Requires iOS 18.
   ///
   static Future<List<StateOfMind>> stateOfMindQuery(
-      {Predicate? predicate}) async {
-    final result = await _methodChannel.invokeMethod(
-        'stateOfMindQuery', predicate?.map ?? <String, dynamic>{});
+      {Predicate? predicate, int? limit}) async {
+    final result = await _methodChannel.invokeMethod('stateOfMindQuery',
+        _queryArguments({...?predicate?.map}, limit: limit));
     return StateOfMind.collect(jsonDecode(result));
   }
 
   /// Returns GAD-7 or PHQ-9 assessments of [type],
-  /// optionally narrowed by [predicate]. Requires iOS 18.
+  /// optionally narrowed by [predicate]; [limit] returns at most that many,
+  /// newest first. Requires iOS 18.
   ///
   static Future<List<ScoredAssessment>> scoredAssessmentQuery(
       ScoredAssessmentType type,
-      {Predicate? predicate}) async {
+      {Predicate? predicate,
+      int? limit}) async {
     final arguments = <String, dynamic>{
       'identifier': type.identifier,
+      ...?predicate?.map,
     };
-    if (predicate != null) arguments.addAll(predicate.map);
-    final result =
-        await _methodChannel.invokeMethod('scoredAssessmentQuery', arguments);
+    final result = await _methodChannel.invokeMethod(
+        'scoredAssessmentQuery', _queryArguments(arguments, limit: limit));
     return ScoredAssessment.collect(jsonDecode(result));
   }
 
   /// Returns logged medication doses, optionally of the medication with
   /// [medicationConceptIdentifier] (see [UserAnnotatedMedicationConcept.identifier])
-  /// and narrowed by [predicate]. Requires iOS 26.
+  /// and narrowed by [predicate]; [limit] returns at most that many, newest first.
+  /// Requires iOS 26.
   ///
   /// Requires per-object read authorization, see [requestPerObjectReadAuthorization]
   /// with [MedicationType.userAnnotatedMedication].
   ///
   static Future<List<MedicationDoseEvent>> medicationDoseEventQuery(
-      {String? medicationConceptIdentifier, Predicate? predicate}) async {
-    final arguments = <String, dynamic>{};
+      {String? medicationConceptIdentifier,
+      Predicate? predicate,
+      int? limit}) async {
+    final arguments = <String, dynamic>{...?predicate?.map};
     if (medicationConceptIdentifier != null) {
       arguments['medicationConceptIdentifier'] = medicationConceptIdentifier;
     }
-    if (predicate != null) arguments.addAll(predicate.map);
     final result = await _methodChannel.invokeMethod(
-        'medicationDoseEventQuery', arguments);
+        'medicationDoseEventQuery', _queryArguments(arguments, limit: limit));
     return MedicationDoseEvent.collect(jsonDecode(result));
   }
 
-  /// Returns the medications the user tracks. Requires iOS 26.
+  /// Returns the medications the user tracks, at most [limit] of them.
+  /// Requires iOS 26.
   ///
   /// Requires per-object read authorization, see [requestPerObjectReadAuthorization]
   /// with [MedicationType.userAnnotatedMedication].
   ///
-  static Future<List<UserAnnotatedMedication>>
-      userAnnotatedMedicationQuery() async {
-    final result =
-        await _methodChannel.invokeMethod('userAnnotatedMedicationQuery');
+  static Future<List<UserAnnotatedMedication>> userAnnotatedMedicationQuery(
+      {int? limit}) async {
+    final result = await _methodChannel.invokeMethod(
+        'userAnnotatedMedicationQuery', _queryArguments({}, limit: limit));
     return UserAnnotatedMedication.collect(jsonDecode(result));
   }
 

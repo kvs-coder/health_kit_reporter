@@ -179,7 +179,7 @@ class WorkoutRouteLocation with Payload {
         altitude = parseNum(json['altitude']),
         course = parseNum(json['course']),
         courseAccuracy = tryParseNum(json['courseAccuracy']),
-        floor = json['floor'],
+        floor = tryParseNum(json['floor']),
         horizontalAccuracy = parseNum(json['horizontalAccuracy']),
         speed = parseNum(json['speed']),
         speedAccuracy = tryParseNum(json['speedAccuracy']),

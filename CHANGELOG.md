@@ -26,6 +26,7 @@ Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitRepor
 * New optional fields: statistics `min`, `duration` and `sourceStatistics` (`separateBySource`), activity summary move time and `paused`, workout `statistics` and `activities`.
 * 17 quantity types and 4 category types the library supports; coverage and clinical note records.
 * `onError` callbacks for the stream queries.
+* `limit` on every sample query the library limits; `queryOption` on `quantityQuery`, `categoryQuery` and `sampleQuery`, so samples crossing the predicate's bounds (e.g. sleep) can be read.
 * Manager: `authorizationRequestStatus`, `earliestPermittedSampleDate`, `recalibrateEstimates`; attachments (iOS 16): `attachments`, `attachmentData`, `addAttachment`, `removeAttachment`.
 * Reader: `sampleQueryWithDescriptors`, `quantitySeriesQuery`, `verifiableClinicalRecordQuery`, `cdaDocumentQuery`, `audiogramQuery`, `stateOfMindQuery` and `scoredAssessmentQuery` (iOS 18), `medicationDoseEventQuery` and `userAnnotatedMedicationQuery` (iOS 26).
 * Writer: `saveWorkout` (workout builder with samples, activities and route), `saveQuantitySeries`, `saveHeartbeatSeries`; `save` / `saveSamples` store audiograms, CDA documents, states of mind and scored assessments.
@@ -39,6 +40,7 @@ Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitRepor
 * `correlationQuery` sends its `typePredicates`; they couldn't be encoded before.
 * `environmentalAudioExposureEvent` uses HealthKit's identifier.
 * Results and events are delivered on the platform thread.
+* `WorkoutRouteLocation.floor` is read through `tryParseNum`.
 * Samples or deleted objects that fail to encode fail the reply or the event instead of disappearing.
 * README: setup of capabilities, entitlements and Info.plist keys; testing apps by mocking the channels.
 * Live queries work when Health data is unavailable: they report `HealthKitError.notAvailable` instead of a `MissingPluginException`.

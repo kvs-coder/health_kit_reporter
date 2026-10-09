@@ -144,6 +144,7 @@ extension SwiftHealthKitReporterPlugin {
                 type: try QuantityType.make(from: try arguments.string("identifier")),
                 unit: try arguments.string("unit"),
                 predicate: try arguments.requiredSamplesPredicate(),
+                limit: try arguments.limit(),
                 resultsHandler: encoded(code, result)
             )
             reporter.manager.executeQuery(query)
@@ -151,18 +152,21 @@ extension SwiftHealthKitReporterPlugin {
             let query = try reporter.reader.categoryQuery(
                 type: try CategoryType.make(from: try arguments.string("identifier")),
                 predicate: try arguments.requiredSamplesPredicate(),
+                limit: try arguments.limit(),
                 resultsHandler: encoded(code, result)
             )
             reporter.manager.executeQuery(query)
         case .workoutQuery:
             let query = try reporter.reader.workoutQuery(
                 predicate: try arguments.requiredSamplesPredicate(),
+                limit: try arguments.limit(),
                 resultsHandler: encoded(code, result)
             )
             reporter.manager.executeQuery(query)
         case .electrocardiogramQuery:
             let query = try reporter.reader.electrocardiogramQuery(
                 predicate: try arguments.requiredSamplesPredicate(),
+                limit: try arguments.limit(),
                 withVoltageMeasurements: arguments["withVoltageMeasurements"] as? Bool ?? false,
                 resultsHandler: encoded(code, result)
             )
@@ -170,7 +174,8 @@ extension SwiftHealthKitReporterPlugin {
         case .sampleQuery:
             let query = try reporter.reader.sampleQuery(
                 type: try arguments.string("identifier").asSampleType(),
-                predicate: try arguments.requiredSamplesPredicate()
+                predicate: try arguments.requiredSamplesPredicate(),
+                limit: try arguments.limit()
             ) { (_, samples, error) in
                 self.send(samples, error: error, code: code, to: result)
             }
@@ -197,12 +202,14 @@ extension SwiftHealthKitReporterPlugin {
         case .heartbeatSeriesQuery:
             let query = try reporter.reader.heartbeatSeriesQuery(
                 predicate: try arguments.requiredSamplesPredicate(),
+                limit: try arguments.limit(),
                 resultsHandler: encoded(code, result)
             )
             reporter.manager.executeQuery(query)
         case .workoutRouteQuery:
             let query = try reporter.reader.workoutRouteQuery(
                 predicate: try arguments.requiredSamplesPredicate(),
+                limit: try arguments.limit(),
                 resultsHandler: encoded(code, result)
             )
             reporter.manager.executeQuery(query)
@@ -244,6 +251,7 @@ extension SwiftHealthKitReporterPlugin {
             let query = try reporter.reader.clinicalRecordQuery(
                 type: type,
                 predicate: try arguments.samplesPredicate() ?? .allSamples,
+                limit: try arguments.limit(),
                 resultsHandler: encoded(code, result)
             )
             reporter.manager.executeQuery(query)
@@ -253,6 +261,7 @@ extension SwiftHealthKitReporterPlugin {
             }
             let query = try reporter.reader.visionPrescriptionQuery(
                 predicate: try arguments.samplesPredicate() ?? .allSamples,
+                limit: try arguments.limit(),
                 resultsHandler: encoded(code, result)
             )
             reporter.manager.executeQuery(query)
@@ -407,7 +416,8 @@ extension SwiftHealthKitReporterPlugin {
                         type: try $0.string("identifier").asSampleType(),
                         predicate: try $0.samplesPredicate()
                     )
-                }
+                },
+                limit: try arguments.limit()
             ) { (_, samples, error) in
                 self.send(samples, error: error, code: code, to: result)
             }
@@ -432,6 +442,7 @@ extension SwiftHealthKitReporterPlugin {
             var documents = [CDADocument]()
             let query = try reporter.reader.cdaDocumentQuery(
                 predicate: try arguments.samplesPredicate() ?? .allSamples,
+                limit: try arguments.limit(),
                 includeDocumentData: arguments["includeDocumentData"] as? Bool ?? true
             ) { (batch, done, error) in
                 if let error = error {
@@ -447,6 +458,7 @@ extension SwiftHealthKitReporterPlugin {
         case .audiogramQuery:
             let query = try reporter.reader.audiogramQuery(
                 predicate: try arguments.samplesPredicate() ?? .allSamples,
+                limit: try arguments.limit(),
                 resultsHandler: encoded(code, result)
             )
             reporter.manager.executeQuery(query)
@@ -456,6 +468,7 @@ extension SwiftHealthKitReporterPlugin {
             }
             let query = try reporter.reader.stateOfMindQuery(
                 predicate: try arguments.samplesPredicate() ?? .allSamples,
+                limit: try arguments.limit(),
                 resultsHandler: encoded(code, result)
             )
             reporter.manager.executeQuery(query)
@@ -470,6 +483,7 @@ extension SwiftHealthKitReporterPlugin {
             let query = try reporter.reader.scoredAssessmentQuery(
                 type: type,
                 predicate: try arguments.samplesPredicate() ?? .allSamples,
+                limit: try arguments.limit(),
                 resultsHandler: encoded(code, result)
             )
             reporter.manager.executeQuery(query)
@@ -480,6 +494,7 @@ extension SwiftHealthKitReporterPlugin {
             let query = try reporter.reader.medicationDoseEventQuery(
                 medicationConceptIdentifier: arguments["medicationConceptIdentifier"] as? String,
                 predicate: try arguments.samplesPredicate() ?? .allSamples,
+                limit: try arguments.limit(),
                 resultsHandler: encoded(code, result)
             )
             reporter.manager.executeQuery(query)
@@ -487,7 +502,10 @@ extension SwiftHealthKitReporterPlugin {
             guard #available(iOS 26.0, *) else {
                 throw HealthKitError.notAvailable("Medications are available from iOS 26")
             }
-            let query = reporter.reader.userAnnotatedMedicationQuery(resultsHandler: encoded(code, result))
+            let query = reporter.reader.userAnnotatedMedicationQuery(
+                limit: try arguments.limit(),
+                resultsHandler: encoded(code, result)
+            )
             reporter.manager.executeQuery(query)
         case .saveWorkout:
             reporter.writer.saveWorkout(

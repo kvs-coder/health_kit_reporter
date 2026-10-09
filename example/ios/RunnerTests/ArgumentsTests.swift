@@ -48,6 +48,13 @@ final class ArgumentsTests: XCTestCase {
         }
     }
 
+    func testLimitDefaultsToNoLimitAndMustBePositive() throws {
+        XCTAssertEqual(try [String: Any]().limit(), 0)
+        XCTAssertEqual(try ["limit": 5].limit(), 5)
+        XCTAssertThrowsError(try ["limit": 0].limit())
+        XCTAssertThrowsError(try ["limit": "5"].limit())
+    }
+
     func testAnchorIsABase64String() throws {
         XCTAssertNil(try [String: Any]().anchor())
         XCTAssertThrowsError(try ["anchor": "not base64!"].anchor())

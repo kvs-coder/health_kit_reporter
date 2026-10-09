@@ -83,6 +83,16 @@ extension Dictionary where Key == String, Value == Any {
         end.calendar = calendar
         return NSPredicate.activitySummaryPredicateBetween(start: start, end: end)
     }
+    /// The most samples a query returns, newest first; 0 (HKObjectQueryNoLimit) when Dart sends none
+    func limit() throws -> Int {
+        guard let value = self["limit"] else {
+            return 0
+        }
+        guard let limit = value as? Int, limit > 0 else {
+            throw HealthKitError.invalidValue("The limit must be a positive integer: \(value)")
+        }
+        return limit
+    }
     /// The anchor Dart persisted, as the base64 string an earlier event carried; nil starts from the beginning
     func anchor() throws -> Anchor? {
         guard let string = self["anchor"] as? String else {

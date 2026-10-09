@@ -186,6 +186,17 @@ final bloodPressure = await HealthKitReporter.correlationQuery(
     CorrelationType.bloodPressure.identifier, predicate);
 ```
 
+Every sample query takes an optional **limit** (the most samples to return, newest first). The quantity, category, workout and sample queries also take a **queryOption**: `SampleQueryOption.notStrict` returns samples that cross the predicate's bounds too, e.g. sleep that started the evening before.
+
+```dart
+final lastNight = await HealthKitReporter.categoryQuery(
+    CategoryType.sleepAnalysis, predicate,
+    queryOption: SampleQueryOption.notStrict);
+final latest = await HealthKitReporter.quantityQuery(
+    QuantityType.heartRate, 'count/min', predicate,
+    limit: 1);
+```
+
 **preferredUnits** returns the units of the current locale for quantity types. A unit that doesn't fit the type fails the query. **sampleQuery** returns quantities in SI units and every sample kind (heartbeat series, workout routes, audiograms, ... without their measurements); a sample of a kind the plugin can't read fails the query with an `InvalidValueException` instead of being dropped. **sampleQueryWithDescriptors** reads several types at once, each with its own predicate.
 
 ```dart
