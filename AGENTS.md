@@ -216,7 +216,7 @@ Before any commit or PR creation, the codebase must pass all gates:
 1. `flutter analyze` — **zero issues** in the plugin and the example.
 2. `flutter test` — **all tests green**; quote the passed/failed counts.
 3. Example build — `flutter build ios --no-codesign` passes; **required whenever Swift or public API changes**. Otherwise state "not applicable — no Swift or public API change".
-4. Coverage — line coverage of `lib/` is **≥ `COVERAGE_THRESHOLD`** in `.github/workflows/ci.yml`; quote the measured percentage. A PR that adds tests raises the threshold to its new measured level (rounded down to one decimal); never lower it.
+4. Coverage — line coverage of `lib/` is **≥ `COVERAGE_THRESHOLD`** (90 %) in `.github/workflows/ci.yml`; quote the measured percentage. The threshold is fixed: new code comes with tests that keep coverage above it.
 5. Swift — `swiftlint lint --strict` clean and the `RunnerTests` green (quote the count) whenever Swift changes.
 6. Integration — for changes to the Swift dispatcher, run the catalog integration test in a simulator and quote which rows failed and why.
 

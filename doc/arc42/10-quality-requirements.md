@@ -29,7 +29,7 @@ Quality
 | S6 | HealthKit never answers the authorization request in the example. | The setup card reports it after 60 s with a retry hint instead of spinning forever. |
 | S7 | HealthKitReporter adds an optional payload field. | Older JSON still parses; the new field is a nullable Dart field. |
 | S8 | HealthKitReporter adds a public method. | The plugin adds a Dart method, dispatcher case, API test, demo row and README snippet (AGENTS.md §5C). |
-| S9 | A PR changes Dart code. | Analyze is clean and line coverage of `lib/` stays ≥ `COVERAGE_THRESHOLD` (95.0 %; measured 95.09 % with 115 tests). |
+| S9 | A PR changes Dart code. | Analyze is clean and line coverage of `lib/` stays ≥ `COVERAGE_THRESHOLD` (90 %; measured about 95 % with 116 tests). |
 | S10 | A PR changes the Swift bridge. | SwiftLint passes, `RunnerTests` pass (20 tests), and the catalog integration run passes (55 rows, 5 skipped for system sheets). |
 | S11 | A new HealthKit sample kind appears. | One type enum, one payload model, one `Sample.factory` case and one `parseSample` key; until then the kind fails loudly. |
 | S12 | A Flutter developer wants last week's step counts. | A README snippet and the example's catalog row show it: `requestAuthorization`, then `quantityQuery`. |
