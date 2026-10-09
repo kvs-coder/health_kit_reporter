@@ -39,7 +39,14 @@ class Seeding {
     final skipped = <String>[];
     final units = await _units(writable);
     for (final identifier in _seedableTypes(writable)) {
-      final seededDays = await _seededDays(identifier);
+      final Set<String> seededDays;
+      try {
+        seededDays = await _seededDays(identifier);
+      } catch (_) {
+        // not authorized to read the type, so seeding can't tell what exists
+        failed.add(identifier);
+        continue;
+      }
       final samples = <Sample>[];
       for (var offset = 1; offset <= 7; offset++) {
         final day = _startOfToday.subtract(Duration(days: offset));

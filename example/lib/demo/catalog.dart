@@ -144,10 +144,11 @@ class Catalog {
                 '${workout.activities?.length ?? 0} activities',
         ].join('\n');
       }),
-      DemoRow('statisticsQuery', 'Steps of today, separated by source',
+      DemoRow(
+          'statisticsQuery', 'Steps of the last 7 days, separated by source',
           run: () async {
         final statistics = await HealthKitReporter.statisticsQuery(
-            _steps, 'count', _today,
+            _steps, 'count', _lastWeek,
             separateBySource: true);
         return [
           'sum: ${statistics.harmonized.summary}, duration: ${statistics.harmonized.duration}',
