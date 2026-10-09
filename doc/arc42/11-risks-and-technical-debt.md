@@ -1,0 +1,14 @@
+# 11. Risks and Technical Debt
+
+| # | Risk / debt | Impact | Mitigation |
+| :--- | :--- | :--- | :--- |
+| R1 | **Cross-repo contract.** The JSON shape is an untyped contract with HealthKitReporter. | A library change in key or meaning breaks plugin users at runtime. | Fixtures shaped like the library's output, round-trip tests, coordinated majors (library ADR 0004). |
+| R2 | **Missing library features block issues.** Routes of a workout (#78, #61, PR #79) and the 12-hour-clock date formatting (#82) need HealthKitReporter 4.1.0. | Users work around them, or contributors add HealthKit code to the plugin. | Fix in the library first, then expose; AGENTS.md bans `import HealthKit` in the plugin. |
+| R3 | **Integration runs need a human.** HealthKit's authorization sheet can't be answered in CI. | Regressions in authorized paths surface only in a manual run. | CI runs the rows that need no authorization; the full catalog is a gate for dispatcher changes (AGENTS.md §6D). |
+| R4 | **Simulator authorization can hang.** A sheet left open by a killed test queues further requests in `healthd`. | Requests and the example's setup never complete until the simulator restarts. | Setup timeout with a retry hint; restart the simulator. |
+| R5 | **Unknown sample kinds stop syncs** (ADR 0005). | A new HealthKit kind fails `anchoredObjectQuery` updates until the plugin knows it. | Parity rule; the error names the identifier; apps can narrow their identifiers. |
+| R6 | **Flutter 3.44 minimum.** The `FlutterFramework` dependency requires it. | Apps on older Flutter can't upgrade to 3.x. | Documented in README, CHANGELOG and ADR 0002. |
+| R7 | **Large dispatcher.** `Extensions+SwiftHealthKitReporterPlugin.swift` holds 58 cases (~720 lines; SwiftLint's file length is raised to 800). | Harder to navigate as the library grows. | Exhaustive `Method` switch keeps it mechanical; split by area (manager / reader / writer) when it reaches the limit. |
+| R8 | **Live channels outlive a hot restart.** Subscription channels close on cancel; a Dart hot restart drops subscriptions without cancelling them. | Native queries keep running in debug sessions until the app restarts. | Debug-only; release apps don't hot restart. |
+| R9 | **Release setup not yet exercised.** release-please and automated publishing run for the first time with 3.0.0. | A misconfigured token or pub.dev setting blocks the release. | One-time steps in AGENTS.md §7; `publish.yml` checks the tag against `pubspec.yaml` before publishing. |
+| R10 | **Health records need an Apple Account and a paid team.** | Clinical rows fail in a fresh simulator and with free teams. | Requested separately (`requestClinicalRecordsAuthorization`), gated by `supportsHealthRecords()`; expected failures in the integration test. |
