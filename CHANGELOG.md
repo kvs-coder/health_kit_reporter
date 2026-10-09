@@ -1,5 +1,45 @@
 # Changelog
 
+## [3.0.0] - 09.10.2026
+
+
+### BREAKING CHANGES
+
+* the plugin's version is 3.0.0 instead of 4.0.0; depend on health_kit_reporter ^3.0.0.
+* sample timestamps built in Dart are seconds since 1970 (use DateTime.secondsSinceEpoch instead of millisecondsSinceEpoch); Sample.factory returns non-null and throws for unknown identifiers; live query error codes are the Dart method names.
+* metadata fields are Metadata instead of Map<String, dynamic>; save returns Future<String?> (the uuid); anchoredObjectQuery's onUpdate takes a third anchor argument; delete needs the uuid of the stored sample; model/SampleQueryOptions.dart moved.
+* save replies with {status, uuid}, preferredUnits takes {identifiers}, the anchored object query event carries an anchor, and unknown identifiers fail instead of being ignored.
+* the plugin builds only with Swift Package Manager enabled (flutter config --enable-swift-package-manager) and requires iOS 15.
+
+### Features
+
+* adapt the iOS plugin to the HealthKitReporter 4.0.0 API ([95cddd7](https://github.com/kvs-coder/health_kit_reporter/commit/95cddd7537f43d594c947ae7136fa032b5022693))
+* **example:** BLoC on plain streams and a redesigned catalog ([05e79de](https://github.com/kvs-coder/health_kit_reporter/commit/05e79dec3d75d2da256d59c9a0949b3c93baa654))
+* **example:** list every plugin method, grouped by area ([c2cbc0d](https://github.com/kvs-coder/health_kit_reporter/commit/c2cbc0dc3deed473b9e29036d8fbba590befd7c3))
+* limit and query options for the sample queries ([44e3e44](https://github.com/kvs-coder/health_kit_reporter/commit/44e3e44b80032ae4da3c2f27dc8af4be7310da72))
+* match the HealthKitReporter 4.0.0 JSON contract in Dart ([9065782](https://github.com/kvs-coder/health_kit_reporter/commit/9065782e1fe41a954cfaf786a4d9bdf674cd6f55))
+* resolve the 4.0.0 audit findings and reach HealthKitReporter parity ([b2b8830](https://github.com/kvs-coder/health_kit_reporter/commit/b2b8830fb65809275a24124945a51c10e9e603fd))
+* Swift tests, SwiftLint, privacy manifest, model equality and architecture docs ([378f1bd](https://github.com/kvs-coder/health_kit_reporter/commit/378f1bd492c2475feaaebae9193ad23fbc91d115))
+* workout routes of a stored workout ([1d8287b](https://github.com/kvs-coder/health_kit_reporter/commit/1d8287b90d64409b81cf0e3daf279e9372c42f74))
+
+
+### Fixes
+
+* depend on FlutterFramework, time out the demo setup, attach a PNG ([4e788e6](https://github.com/kvs-coder/health_kit_reporter/commit/4e788e6418464958550a873a606127f62f6247b8))
+* **example:** delete only the seeded samples this app wrote ([ec82c7e](https://github.com/kvs-coder/health_kit_reporter/commit/ec82c7eadd2044972be88df8f4de5da052c651a6))
+* require HealthKitReporter 4.1.1 ([0c6944b](https://github.com/kvs-coder/health_kit_reporter/commit/0c6944bd2eb8acb6c145a53ff01f555b1330bd08))
+* sync quantity and category types with HealthKitReporter 4.0.0 ([65bfe44](https://github.com/kvs-coder/health_kit_reporter/commit/65bfe44b949cf102d37760da3416c99e6265b8da))
+
+
+### CI
+
+* release with release-please as 3.0.0 ([ab074ef](https://github.com/kvs-coder/health_kit_reporter/commit/ab074efacf224ec3ab058ce845ae8961c6b59865))
+
+
+### Build
+
+* move the iOS plugin to Swift Package Manager ([318fd73](https://github.com/kvs-coder/health_kit_reporter/commit/318fd73fc60c2b793bd7c8d73e3b93ef81dabda9))
+
 ## [2.3.1] - 12.12.2024
 
 * Add missing Workout types 

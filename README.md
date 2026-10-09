@@ -26,7 +26,7 @@ flutter config --enable-swift-package-manager
 
 ```yaml
 dependencies:
-  health_kit_reporter: ^2.3.1 # x-release-please-version
+  health_kit_reporter: ^3.0.0 # x-release-please-version
 ```
 
 3. Get the dependencies and run the app. `flutter run` migrates the `Runner` project to Swift Package Manager the first time:
