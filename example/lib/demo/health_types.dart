@@ -40,7 +40,7 @@ class HealthTypes {
     ];
     final write = <String>[];
     final unavailable = <String>[];
-    for (final identifier in sampleTypes) {
+    for (final identifier in sampleTypes.toSet()) {
       try {
         if (await HealthKitReporter.isWritable(identifier)) {
           write.add(identifier);

@@ -2,6 +2,7 @@ import 'package:health_kit_reporter/model/payload/category.dart';
 import 'package:health_kit_reporter/model/payload/device.dart';
 import 'package:health_kit_reporter/model/payload/metadata.dart';
 import 'package:health_kit_reporter/model/payload/quantity.dart';
+import 'package:health_kit_reporter/model/payload/sample.dart';
 import 'package:health_kit_reporter/model/payload/source.dart';
 import 'package:health_kit_reporter/model/payload/source_revision.dart';
 import 'package:health_kit_reporter/model/payload/workout.dart';
@@ -81,9 +82,14 @@ class DemoSamples {
         const [],
       );
 
-  /// Whether [metadata] carries this demo's marker
-  bool marks(Metadata? metadata) {
+  /// Whether this app wrote [sample] with this demo's marker.
+  /// Other apps (e.g. the HealthKitReporter example) may use the same marker,
+  /// and HealthKit doesn't let an app delete their samples.
+  bool marks(Sample sample, Metadata? metadata) {
     final value = metadata?[externalUUIDKey];
-    return value is MetadataString && value.value.startsWith(marker);
+    return sample.sourceRevision.source.bundleIdentifier ==
+            sourceRevision.source.bundleIdentifier &&
+        value is MetadataString &&
+        value.value.startsWith(marker);
   }
 }

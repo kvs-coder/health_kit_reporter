@@ -79,9 +79,13 @@ class Seeding {
     final types = await HealthTypes.load();
     final own = <Sample>[];
     for (final identifier in _seedableTypes(types.write.toSet())) {
-      own.addAll((await HealthKitReporter.sampleQuery(identifier, _lastWeek))
-          .where(
-              (sample) => const DemoSamples(marker).marks(_metadata(sample))));
+      try {
+        own.addAll((await HealthKitReporter.sampleQuery(identifier, _lastWeek))
+            .where((sample) =>
+                const DemoSamples(marker).marks(sample, _metadata(sample))));
+      } catch (_) {
+        // not authorized to read the type
+      }
     }
     if (own.isEmpty) return 'No seeded data to delete';
     // looked up by the uuids the query returned
@@ -93,7 +97,8 @@ class Seeding {
         ...QuantityType.values.map((e) => e.identifier),
         ...CategoryType.values.map((e) => e.identifier),
         WorkoutType.workoutType.identifier,
-      ].where(writable.contains);
+        // two enum cases may name the same HealthKit type
+      ].where(writable.contains).toSet();
 
   static Future<Map<String, String>> _units(Set<String> writable) async {
     final quantityTypes =
@@ -113,6 +118,8 @@ class Seeding {
   static Future<Set<String>> _seededDays(String identifier) async {
     final samples = await HealthKitReporter.sampleQuery(identifier, _lastWeek);
     return samples
+        .where((sample) =>
+            const DemoSamples(marker).marks(sample, _metadata(sample)))
         .map((sample) => _metadata(sample)?[externalUUIDKey])
         .whereType<MetadataString>()
         .where((value) => value.value.startsWith(marker))
