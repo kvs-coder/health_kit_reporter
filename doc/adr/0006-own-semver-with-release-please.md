@@ -29,4 +29,5 @@ point, and the breaking commits since make the next version 3.0.0, as HealthKitR
 - Plugin and library majors are independent; the README and `Package.swift` state the library version the plugin needs.
 - Commit messages carry the release notes, so `feat` / `fix` / `!` must be accurate; versions are never bumped by hand.
 - Publishing needs automated publishing on pub.dev for push and `workflow_dispatch` events; CI on release PRs needs a `RELEASE_PLEASE_TOKEN`.
-- Generated notes list commit subjects; the 3.0.0 notes were curated in its release PR, later releases use the generated ones.
+- Release notes are generated from commit subjects and `BREAKING CHANGE:` footers, never edited by hand; detailed
+  migration steps live in the README.
