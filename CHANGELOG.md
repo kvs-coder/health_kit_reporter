@@ -32,7 +32,7 @@ Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitRepor
 * Types `AudiogramType`, `StateOfMindType`, `ScoredAssessmentType`, `MedicationType`, factories for `DocumentType` and `SeriesType`; models `Audiogram`, `CDADocument`, `StateOfMind`, `ScoredAssessment`, `MedicationDoseEvent`, `UserAnnotatedMedication`, `VerifiableClinicalRecord`, `Attachment`, `QuantitySeriesValue`, `AuthorizationRequestStatus`, `QueryDescriptor`.
 * Payload models compare by value: `==`, `hashCode` and `toString` from their `map` (`Payload` mixin); samples compare their uuid and contents.
 * The plugin ships a privacy manifest (`PrivacyInfo.xcprivacy`): no tracking, no collected data.
-* The example app lists every method grouped by area and seeds simulator data.
+* The example app lists every method grouped by area, with search, section filters and live-query badges, seeds simulator data, and follows the BLoC pattern on plain streams.
 
 ### Fixes
 

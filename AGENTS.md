@@ -83,7 +83,9 @@ doc/
 
 example/
 ├── lib/main.dart
-├── lib/demo/                         (DemoRow / DemoSection, Catalog of rows, DemoPage, HealthTypes, Seeding, DemoSamples)
+├── lib/bloc/                         (Bloc base on plain streams, BlocBuilder; no state management packages)
+├── lib/demo/                         (DemoRow / DemoSection, Catalog of rows, CatalogBloc, SetupBloc, DemoPage + demo_widgets, HealthTypes, Seeding, DemoSamples)
+├── test/                             (bloc tests, catalog shape)
 ├── integration_test/catalog_test.dart (runs every row against HealthKit in the simulator)
 ├── ios/RunnerTests/                  (XCTest of the plugin's Swift: argument helpers, dispatcher, stream handlers)
 └── ios/                              (Runner, migrated to SPM; no Podfile)
@@ -158,7 +160,8 @@ example/
 5. A usage snippet in `README.md` and an entry in `CHANGELOG.md`.
 
 ### D. Example App (`example/`)
-* `Catalog` builds `DemoSection`s of `DemoRow`s; a row either `run`s once (returns a `String`) or `listen`s (a live query reporting until stopped). `DemoPage` only renders rows and their results.
+* `Catalog` builds `DemoSection`s (title, icon, rows) of `DemoRow`s; a row either `run`s once (returns a `String`) or `listen`s (a live query reporting until stopped).
+* **BLoC without packages**: `lib/bloc/bloc.dart` takes events through `add` (a `StreamController`) and publishes states on a broadcast stream; `onEvent` handles each event as it arrives and calls `emit`. `CatalogBloc` runs rows, keeps their results and live subscriptions, search and section filter; `SetupBloc` checks Apple Health and, in the simulator, authorizes and seeds. Events are `sealed` classes, states immutable. `DemoPage` and `demo_widgets.dart` only render states through `BlocBuilder` and send events; they never call the plugin. Don't add `flutter_bloc`, `provider` or similar packages.
 * Authorization reads every sample type, characteristic and activity summary, and writes the types whose `isWritable` is true (`HealthTypes`); clinical records and vision prescriptions have their own rows.
 * Samples the demo writes hold seconds (`secondsSinceEpoch`) and carry an `HKExternalUUID` starting with `hkr-demo-` or `hkr-seed-`, so only the demo's own data is deleted.
 * Every public plugin method has a row.

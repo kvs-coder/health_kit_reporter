@@ -405,7 +405,7 @@ The plugin's own `test/api_test.dart` mocks every method this way. To mock at th
 
 ## Example
 
-`example/` lists every method of the plugin, grouped by area. Tap a row to run it; its result, live updates or error appear in the row. Live queries keep updating until **Stop live queries**.
+`example/` lists every method of the plugin, grouped by area, with search and section filters. Tap a row to run it; its result, live updates or error appear below it (long-press copies it). Live queries keep updating until you tap them again or **Stop live queries**. The app follows the BLoC pattern on plain Dart streams, without packages: `SetupBloc` prepares Apple Health, `CatalogBloc` runs the rows, and the widgets only render their states.
 
 In the simulator the app authorizes and seeds 7 days of plausible samples for every writable type on launch (once per day and type, marked with an `HKExternalUUID` starting with `hkr-seed-`); **Delete seeded data** removes only that data. Read-only data (ECGs, characteristics, activity summaries, clinical records) comes from Apple Watch or the Health app.
 
