@@ -8,7 +8,7 @@ flowchart LR
         pkg["health_kit_reporter X.Y.Z<br/><i>Dart + Swift sources, published from tag vX.Y.Z</i>"]
     end
     subgraph gh["GitHub: kvs-coder/HealthKitReporter"]
-        lib["HealthKitReporter 4.x<br/><i>SwiftPM package, from: 4.1.0</i>"]
+        lib["HealthKitReporter 4.x<br/><i>SwiftPM package, from: 4.1.1</i>"]
     end
     subgraph build["Consumer build: flutter build ios, Xcode 26 SDK"]
         app["Flutter app<br/><i>iOS 15+</i>"]

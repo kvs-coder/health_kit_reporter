@@ -30,7 +30,7 @@ flowchart LR
 | :--- | :--- | :--- |
 | Dart ⇄ Swift, one-shot | `MethodChannel('health_kit_reporter_method_channel')`, standard message codec | Arguments are maps of primitives and model `map`s; replies are JSON strings, maps, bools, numbers or `FlutterStandardTypedData`. |
 | Dart ⇄ Swift, live | `EventChannel('health_kit_reporter_event_channel_<method>_<uuid>')`, one per subscription | Opened by the method call of the live query (ADR 0003). |
-| Swift ⇄ HealthKitReporter | Swift API, SwiftPM dependency `from: "4.1.0"` | Callbacks arrive on HealthKit's queues; the plugin hops to the main queue. |
+| Swift ⇄ HealthKitReporter | Swift API, SwiftPM dependency `from: "4.1.1"` | Callbacks arrive on HealthKit's queues; the plugin hops to the main queue. |
 
 ## 3.3 Scope
 

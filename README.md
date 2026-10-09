@@ -12,7 +12,7 @@ A Flutter wrapper for [HealthKitReporter](https://github.com/kvs-coder/HealthKit
 
 - iOS 15 or newer (vision prescriptions and attachments need iOS 16, workout effort, state of mind and scored assessments iOS 18, medications iOS 26).
 - Flutter 3.44 / Dart 3.5 or newer.
-- **Swift Package Manager.** The plugin resolves HealthKitReporter `from: "4.1.0"` through SwiftPM; it is not available through CocoaPods (CocoaPods trunk becomes read-only on 2 December 2026, and HealthKitReporter stays on CocoaPods at 3.1.0).
+- **Swift Package Manager.** The plugin resolves HealthKitReporter `from: "4.1.1"` through SwiftPM; it is not available through CocoaPods (CocoaPods trunk becomes read-only on 2 December 2026, and HealthKitReporter stays on CocoaPods at 3.1.0).
 
 ## Getting Started
 
@@ -406,7 +406,7 @@ The plugin's own `test/api_test.dart` mocks every method this way. To mock at th
 
 ## Migrating to 3.0.0
 
-3.0.0 depends on HealthKitReporter 4.1.0; its 4.0.0 changed its API and its JSON contract ([ADR 0004](https://github.com/kvs-coder/HealthKitReporter/blob/master/doc/adr/0004-contract-changes-for-the-next-major-release.md)):
+3.0.0 depends on HealthKitReporter 4.1.1; its 4.0.0 changed its API and its JSON contract ([ADR 0004](https://github.com/kvs-coder/HealthKitReporter/blob/master/doc/adr/0004-contract-changes-for-the-next-major-release.md)):
 
 - **Swift Package Manager only, iOS 15.** Enable SPM (`flutter config --enable-swift-package-manager`), raise the deployment target, and drop the `HealthKitReporter` pod from your `Podfile`.
 - **Anchors are strings.** `anchoredObjectQuery`'s `onUpdate` receives a third argument, the anchor as a base64 string; pass it back as `anchor:` to continue from it.

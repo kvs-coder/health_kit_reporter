@@ -1,6 +1,6 @@
 ## [3.0.0] - 09.10.2026
 
-Depends on [HealthKitReporter 4.1.0](https://github.com/kvs-coder/HealthKitReporter) through Swift Package Manager. See "Migrating to 3.0.0" in the README.
+Depends on [HealthKitReporter 4.1.1](https://github.com/kvs-coder/HealthKitReporter) through Swift Package Manager. See "Migrating to 3.0.0" in the README.
 
 ### BREAKING CHANGES
 
@@ -42,6 +42,9 @@ Depends on [HealthKitReporter 4.1.0](https://github.com/kvs-coder/HealthKitRepor
 * `environmentalAudioExposureEvent` uses HealthKit's identifier.
 * Results and events are delivered on the platform thread.
 * `WorkoutRouteLocation.floor` is read through `tryParseNum`.
+* With HealthKitReporter 4.1.1 no data is dropped silently on the native side either: a sample, statistics entry, ECG voltage or nested member that fails to convert fails the query with the method's code instead of shortening the result, and malformed input to save fails instead of being skipped.
+* Activity summary dates, birthdays and verifiable records' dates of birth parse on devices set to the 12-hour clock (#82).
+* Metadata quantities in mg/dL, mmol/L, IU and other clinical and vision units are read instead of left out.
 * Samples or deleted objects that fail to encode fail the reply or the event instead of disappearing.
 * README: setup of capabilities, entitlements and Info.plist keys; testing apps by mocking the channels.
 * Live queries work when Health data is unavailable: they report `HealthKitError.notAvailable` instead of a `MissingPluginException`.
