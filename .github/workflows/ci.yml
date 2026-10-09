@@ -5,6 +5,10 @@ on:
     branches: [master]
   pull_request:
 
+env:
+  # Dart line coverage of lib/; raise it when tests add coverage, never lower it
+  COVERAGE_THRESHOLD: "93.0"
+
 jobs:
   build:
     runs-on: macos-15
@@ -17,7 +21,12 @@ jobs:
       - run: flutter config --enable-swift-package-manager
       - run: flutter pub get
       - run: flutter analyze
-      - run: flutter test
+      - run: flutter test --coverage
+      - name: Check coverage
+        run: |
+          coverage=$(awk -F'[:,]' '/^DA:/ { total++; if ($3 > 0) hit++ } END { printf "%.1f", 100 * hit / total }' coverage/lcov.info)
+          echo "Line coverage: $coverage% (threshold $COVERAGE_THRESHOLD%)"
+          awk -v c="$coverage" -v t="$COVERAGE_THRESHOLD" 'BEGIN { exit !(c >= t) }'
       - name: Test the example
         working-directory: example
         run: flutter test
