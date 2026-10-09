@@ -104,6 +104,21 @@ void main() {
       await bloc.close();
     });
 
+    test('an_unanswered_authorization_times_out', () async {
+      final bloc = SetupBloc(
+        authorize: () => Completer<String>().future,
+        seed: () async => fail('no seeding'),
+        isAvailable: () async => true,
+        isSimulator: true,
+        authorizationTimeout: const Duration(milliseconds: 10),
+      );
+      bloc.add(const SetupStarted());
+      final failed =
+          await bloc.states.firstWhere((e) => e.status == SetupStatus.failed);
+      expect(failed.message, contains("didn't answer"));
+      await bloc.close();
+    });
+
     test('a_failing_seed_is_reported', () async {
       final bloc = SetupBloc(
         authorize: () async => 'authorized',

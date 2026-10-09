@@ -11,7 +11,7 @@ A Flutter wrapper for [HealthKitReporter](https://github.com/kvs-coder/HealthKit
 ## Requirements
 
 - iOS 15 or newer (vision prescriptions and attachments need iOS 16, workout effort, state of mind and scored assessments iOS 18, medications iOS 26).
-- Flutter 3.24 / Dart 3.5 or newer.
+- Flutter 3.44 / Dart 3.5 or newer.
 - **Swift Package Manager.** The plugin resolves HealthKitReporter `from: "4.0.0"` through SwiftPM; it is not available through CocoaPods (CocoaPods trunk becomes read-only on 2 December 2026, and HealthKitReporter stays on CocoaPods at 3.1.0).
 
 ## Getting Started

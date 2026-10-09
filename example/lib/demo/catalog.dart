@@ -636,15 +636,20 @@ class Catalog {
         '${reported.first.contains(uuid)}, running one: true';
   }
 
+  /// A 1×1 PNG
+  static const _pixel =
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==';
+
   Future<String> _attachmentsRoundTrip() async {
     final prescription = VisionPrescriptionType.visionPrescription.identifier;
     final uuid =
         await HealthKitReporter.save(_demo.visionPrescription(_startOfToday));
     if (uuid == null) return 'prescription not saved';
-    final file = File('${Directory.systemTemp.path}/hkr-demo-attachment.txt')
-      ..writeAsStringSync('health_kit_reporter attachment');
+    // HealthKit attaches images and PDFs only
+    final file = File('${Directory.systemTemp.path}/hkr-demo-attachment.png')
+      ..writeAsBytesSync(base64Decode(_pixel));
     final added = await HealthKitReporter.addAttachment(
-        prescription, uuid, 'note.txt', 'public.plain-text', file.path,
+        prescription, uuid, 'scan.png', 'public.png', file.path,
         metadata: const Metadata({'source': MetadataString('demo')}));
     final listed = await HealthKitReporter.attachments(prescription, uuid);
     final data = await HealthKitReporter.attachmentData(
@@ -652,7 +657,7 @@ class Catalog {
     final removed = await HealthKitReporter.removeAttachment(
         prescription, uuid, added.identifier);
     return 'attached ${added.name} (${added.size} bytes) to $uuid\n'
-        'listed ${listed.length}, read "${utf8.decode(data)}", removed: $removed';
+        'listed ${listed.length}, read ${data.length} bytes, removed: $removed';
   }
 
   /// Saves a 30 minute walk and reads the stored workout back by its uuid

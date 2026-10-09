@@ -19,6 +19,8 @@ void main() {
     'requestPerObjectReadAuthorization',
     'requestPerObjectReadAuthorization for medications',
     'verifiableClinicalRecordQuery',
+    // the user authorizes each CDA document on a sheet when it first matches
+    'cdaDocumentQuery',
   };
 
   // Rows that need hardware, an Apple Account or a watch app

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:health_kit_reporter/health_kit_reporter.dart';
@@ -30,6 +31,7 @@ class SetupBloc extends Bloc<SetupEvent, SetupState> {
     required this.seed,
     Future<bool> Function()? isAvailable,
     bool? isSimulator,
+    this.authorizationTimeout = const Duration(seconds: 60),
   })  : _isAvailable = isAvailable ?? HealthKitReporter.isAvailable,
         _isSimulator = isSimulator ?? _runsInSimulator,
         super(const SetupState(SetupStatus.checking, 'Checking Apple Health…'));
@@ -39,6 +41,10 @@ class SetupBloc extends Bloc<SetupEvent, SetupState> {
 
   /// Writes the simulator data
   final Future<String> Function() seed;
+
+  /// How long to wait for the user to answer the authorization sheet.
+  /// HealthKit may never answer, e.g. while an older request it queued hangs
+  final Duration authorizationTimeout;
   final Future<bool> Function() _isAvailable;
   final bool _isSimulator;
 
@@ -63,8 +69,14 @@ class SetupBloc extends Bloc<SetupEvent, SetupState> {
       }
       emit(const SetupState(
           SetupStatus.preparing, 'Authorizing and seeding demo data…'));
-      await authorize();
+      await authorize().timeout(authorizationTimeout);
       emit(SetupState(SetupStatus.ready, await seed()));
+    } on TimeoutException {
+      emit(const SetupState(
+          SetupStatus.failed,
+          "Apple Health didn't answer the authorization request. "
+          'Answer the Health sheet, or restart the simulator if none shows, '
+          'then retry.'));
     } catch (error) {
       emit(SetupState(SetupStatus.failed, CatalogBloc.describe(error)));
     }

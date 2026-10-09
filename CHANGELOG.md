@@ -4,7 +4,7 @@ Depends on [HealthKitReporter 4.0.0](https://github.com/kvs-coder/HealthKitRepor
 
 ### BREAKING CHANGES
 
-* Swift Package Manager only: the podspec and the Objective-C registration are gone, the plugin registers from Swift (`SwiftHealthKitReporterPlugin`). Requires iOS 15, Flutter 3.24 and Dart 3.5.
+* Swift Package Manager only: the podspec and the Objective-C registration are gone, the plugin registers from Swift (`SwiftHealthKitReporterPlugin`). Requires iOS 15, Flutter 3.44 (the plugin depends on the `FlutterFramework` package it generates) and Dart 3.5.
 * `save` returns the uuid of the stored sample (`Future<String?>`).
 * `delete`, `addQuantity` / `addCategory` and `unrelateWorkoutEffort` act on the stored sample with the payload's uuid.
 * `anchoredObjectQuery` takes an optional `anchor` string and passes the new anchor to `onUpdate` as a third argument.
